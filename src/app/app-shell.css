@@ -1,0 +1,275 @@
+/* ==========================================================================
+   TK Orchid — area setelah login (admin, staf, guru, orang tua)
+   Referensi pola: shadcn/ui "dashboard shell" (sidebar bergrup + site header +
+   kartu statistik + tabel data), portal orang tua mobile-first dengan tab bawah.
+   Token hanya ditimpa di dalam .app-shell agar website publik tidak berubah.
+   ========================================================================== */
+
+.app-shell {
+  --background: #f6f5f9;
+  --muted: #f3f1f7;
+  --muted-foreground: #68647a;
+  --border: #e8e5ef;
+  --input: #dcd8e5;
+  --sidebar: #ffffff;
+  --shadow-card: 0 1px 2px rgb(31 24 48 / 0.04), 0 1px 1px rgb(31 24 48 / 0.02);
+  --shadow-raised: 0 10px 30px -12px rgb(76 29 88 / 0.18), 0 2px 6px rgb(31 24 48 / 0.05);
+  --brand-gradient: linear-gradient(135deg, #b14fb0 0%, #8f3f9f 55%, #6d3aa8 100%);
+  --tone-info: #2563eb;
+  --tone-success: #059669;
+  --tone-warning: #d97706;
+  --tone-danger: var(--destructive);
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+.dark .app-shell {
+  --background: #0c0c0f;
+  --muted: #18181c;
+  --muted-foreground: #a09cab;
+  --border: rgba(255, 255, 255, 0.08);
+  --input: rgba(255, 255, 255, 0.14);
+  --sidebar: #111114;
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-raised: 0 12px 32px -12px rgb(0 0 0 / 0.7);
+  --brand-gradient: linear-gradient(135deg, #7a2f7a 0%, #5b2a76 60%, #3c2468 100%);
+  --tone-info: #60a5fa;
+  --tone-success: #34d399;
+  --tone-warning: #fbbf24;
+}
+
+@layer components {
+  /* ----- Kartu & panel ----- */
+  .app-card {
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    background: var(--card);
+    box-shadow: var(--shadow-card);
+  }
+
+  .form-card {
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    background: var(--card);
+    box-shadow: var(--shadow-card);
+    padding: 1.25rem;
+  }
+  @media (min-width: 640px) {
+    .form-card { padding: 1.5rem; }
+  }
+  .form-card > h2:first-of-type,
+  .form-card > h3:first-of-type,
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-heading), var(--font-inter), system-ui, sans-serif;
+    font-size: 1rem;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+  }
+  .form-card > h2:first-of-type::before,
+  .form-card > h3:first-of-type::before {
+    content: '';
+    width: 0.25rem;
+    height: 1rem;
+    border-radius: 99px;
+    background: var(--primary);
+  }
+
+  /* ----- Tabel data ----- */
+  .table-card {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    background: var(--card);
+    box-shadow: var(--shadow-card);
+  }
+  .table-card table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.875rem;
+  }
+  .table-card thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    border-bottom: 1px solid var(--border);
+    background: color-mix(in srgb, var(--muted) 70%, var(--card));
+    color: var(--muted-foreground);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .table-card tbody tr { transition: background-color 0.15s ease; }
+  .table-card tbody tr:hover { background: color-mix(in srgb, var(--primary) 4%, transparent); }
+  .table-card tbody td { border-bottom: 1px solid var(--border); vertical-align: middle; white-space: nowrap; }
+  .table-card tbody tr:last-child td { border-bottom: 0; }
+  .table-card tfoot td { border-top: 1px solid var(--border); background: color-mix(in srgb, var(--muted) 60%, var(--card)); }
+  .table-card a:not([class*='inline-flex']) { font-weight: 500; }
+
+  /* ----- Kontrol form bawaan (select, textarea, input mini) ----- */
+  .field-select,
+  .field-textarea {
+    width: 100%;
+    border: 1px solid var(--input);
+    border-radius: 0.625rem;
+    background-color: var(--card);
+    font-size: 0.875rem;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .field-select { height: 2.25rem; padding: 0 0.75rem; }
+  .field-textarea { padding: 0.5rem 0.75rem; line-height: 1.55; }
+  .field-mini {
+    height: 1.875rem;
+    border: 1px solid var(--input);
+    border-radius: 0.5rem;
+    background: var(--card);
+    padding: 0 0.5rem;
+    font-size: 0.75rem;
+  }
+  .field-select:hover,
+  .field-textarea:hover,
+  .field-mini:hover { border-color: color-mix(in srgb, var(--primary) 35%, var(--input)); }
+
+  /* ----- Pesan status form ----- */
+  .alert-error,
+  .alert-success {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    border-radius: 0.75rem;
+    padding: 0.75rem 0.9rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+  .alert-error {
+    border: 1px solid color-mix(in srgb, var(--destructive) 30%, transparent);
+    background: color-mix(in srgb, var(--destructive) 8%, var(--card));
+    color: var(--destructive);
+  }
+  .alert-success {
+    border: 1px solid color-mix(in srgb, var(--tone-success) 28%, transparent);
+    background: color-mix(in srgb, var(--tone-success) 9%, var(--card));
+    color: color-mix(in srgb, var(--tone-success) 80%, var(--foreground));
+  }
+  .alert-error::before,
+  .alert-success::before {
+    flex: none;
+    width: 1.1rem;
+    height: 1.1rem;
+    margin-top: 0.1rem;
+    border-radius: 50%;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 800;
+    line-height: 1.1rem;
+    text-align: center;
+  }
+  .alert-error::before { content: '!'; background: var(--destructive); }
+  .alert-success::before { content: '✓'; background: var(--tone-success); }
+
+  /* ----- Empty state ----- */
+  .empty-state {
+    display: grid;
+    place-items: center;
+    gap: 0.5rem;
+    border: 1px dashed color-mix(in srgb, var(--foreground) 16%, transparent);
+    border-radius: 1rem;
+    background: color-mix(in srgb, var(--card) 55%, transparent);
+    padding: 2.5rem 1.5rem;
+    color: var(--muted-foreground);
+    font-size: 0.875rem;
+    text-align: center;
+  }
+
+  /* ----- Tautan aksi kecil di tabel ----- */
+  .link-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    border-radius: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    color: var(--primary);
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: background-color 0.15s ease;
+  }
+  .link-action:hover { background: color-mix(in srgb, var(--primary) 10%, transparent); }
+  .link-danger {
+    border-radius: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    color: var(--destructive);
+    font-size: 0.75rem;
+    font-weight: 600;
+    transition: background-color 0.15s ease;
+  }
+  .link-danger:hover { background: color-mix(in srgb, var(--destructive) 10%, transparent); }
+
+  /* ----- Banner sambutan (dashboard) ----- */
+  .welcome-banner {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    border-radius: 1.25rem;
+    background: var(--brand-gradient);
+    color: #fff;
+    box-shadow: var(--shadow-raised);
+  }
+  .welcome-banner::before,
+  .welcome-banner::after {
+    position: absolute;
+    z-index: -1;
+    border-radius: 50%;
+    content: '';
+    pointer-events: none;
+  }
+  .welcome-banner::before {
+    top: -6rem;
+    right: -4rem;
+    width: 18rem;
+    height: 18rem;
+    background: radial-gradient(circle, rgb(255 255 255 / 0.22), transparent 70%);
+  }
+  .welcome-banner::after {
+    bottom: -7rem;
+    left: 35%;
+    width: 14rem;
+    height: 14rem;
+    border: 2.5rem solid rgb(255 255 255 / 0.07);
+  }
+  .welcome-banner-dots {
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    background-image: radial-gradient(rgb(255 255 255 / 0.14) 1px, transparent 1px);
+    background-size: 18px 18px;
+    mask-image: linear-gradient(to left, black, transparent 60%);
+  }
+}
+
+/* Aksesibilitas fokus yang konsisten untuk semua kontrol di area aplikasi */
+.app-shell :is(select, textarea, input):focus-visible {
+  outline: none;
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 22%, transparent);
+}
+.app-shell :is(a, button):focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--ring) 70%, transparent);
+  outline-offset: 2px;
+}
+
+/* Scrollbar tipis untuk sidebar dan tabel */
+.app-scroll { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--foreground) 18%, transparent) transparent; }
+
+@keyframes app-fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+.app-page { animation: app-fade-up 0.35s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@media (prefers-reduced-motion: reduce) {
+  .app-page { animation: none; }
+}

@@ -9,10 +9,10 @@ export function AdmissionReviewForm({ id, status }: { id: number; status: string
   const [next, setNext] = useState(status === 'SUBMITTED' ? 'REVIEW' : status)
 
   return (
-    <form action={formAction} className="mt-4 space-y-2">
+    <form action={formAction} className="mt-4 space-y-2 border-t border-[var(--border)] pt-4">
       <input type="hidden" name="id" value={id} />
       <div className="grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
-        <select name="status" value={next} onChange={(event) => setNext(event.target.value)} aria-label="Status baru" className="h-9 rounded-lg border bg-[var(--background)] px-3 text-sm">
+        <select name="status" value={next} onChange={(event) => setNext(event.target.value)} aria-label="Status baru" className="field-select">
           <option value="REVIEW">Tinjau</option>
           <option value="REVISION_REQUIRED">Perlu revisi</option>
           <option value="ACCEPTED">Terima</option>
@@ -25,9 +25,9 @@ export function AdmissionReviewForm({ id, status }: { id: number; status: string
           minLength={next === 'REJECTED' ? 5 : undefined}
           maxLength={500}
           aria-label="Alasan"
-          className="h-9 rounded-lg border bg-[var(--background)] px-3 text-sm"
+          className="h-9 rounded-[10px] border border-[var(--input)] bg-[var(--card)] px-3 text-sm"
         />
-        <button type="submit" disabled={pending} className="h-9 rounded-lg bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] hover:brightness-110 disabled:opacity-60">
+        <button type="submit" disabled={pending} className="h-9 rounded-[10px] bg-[var(--primary)] px-4 text-sm font-semibold shadow-sm text-[var(--primary-foreground)] hover:brightness-110 disabled:opacity-60">
           {pending ? 'Menyimpan…' : 'Simpan'}
         </button>
       </div>

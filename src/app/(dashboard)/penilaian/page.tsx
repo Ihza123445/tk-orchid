@@ -1,6 +1,8 @@
 import { requireAdminStaff } from '@/lib/auth/guard'
 import { db } from '@/lib/db/db'
+import { BookOpenCheck } from 'lucide-react'
 import { PenilaianForm, RekapTable } from '@/components/assessments/penilaian-form'
+import { EmptyState, PageHeader, SectionHeader } from '@/components/dashboard/primitives'
 
 export const metadata = { title: 'Penilaian' }
 
@@ -9,7 +11,7 @@ export default async function PenilaianPage() {
 
   const ay = await db.academicYear.findFirst({ where: { status: 'ACTIVE' } })
   if (!ay) {
-    return <p className="text-sm text-[var(--muted-foreground)]">Tidak ada tahun ajaran aktif.</p>
+    return <EmptyState icon={BookOpenCheck} title="Tidak ada tahun ajaran aktif" description="Aktifkan tahun ajaran terlebih dahulu di menu Tahun Ajaran." />
   }
 
   const [classes, enrollments, domains, scales, assessments] = await Promise.all([
@@ -52,10 +54,7 @@ export default async function PenilaianPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold tracking-tight">Penilaian</h1>
-        <p className="text-sm text-[var(--muted-foreground)]">Capaian perkembangan per domain (STPPA) untuk tahun ajaran {ay.name}.</p>
-      </header>
+      <PageHeader icon={BookOpenCheck} eyebrow={`Akademik · ${ay.name}`} title="Penilaian" description="Capaian perkembangan per domain (STPPA) untuk setiap siswa." />
 
       <PenilaianForm
         classes={classes.map((c) => ({ id: c.id, label: `${c.name} (${c.code})` }))}
@@ -66,7 +65,7 @@ export default async function PenilaianPage() {
       />
 
       <section className="space-y-3">
-        <h2 className="text-base font-semibold">Rekap Periode</h2>
+        <SectionHeader title="Rekap periode" description="Ringkasan skala capaian per domain untuk setiap siswa." />
         <RekapTable rows={rows} domainLabels={Object.fromEntries(domains.map((d) => [d.id, d.name]))} />
       </section>
     </div>

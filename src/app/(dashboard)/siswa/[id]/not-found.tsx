@@ -1,13 +1,17 @@
-import Link from 'next/link'
+import { SearchX } from 'lucide-react'
+import { EmptyState, HeaderButton } from '@/components/dashboard/primitives'
 
 export default function NotFound() {
   return (
-    <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 text-center">
-      <h2 className="text-xl font-semibold">Data tidak ditemukan</h2>
-      <p className="text-sm text-[var(--muted-foreground)]">
-        Data yang Anda cari tidak ada atau sudah dihapus.
-      </p>
-      <Link href="/dashboard" className="text-sm underline underline-offset-4">Kembali ke Dashboard</Link>
+    <div className="flex min-h-[55vh] items-center justify-center">
+      <div className="w-full max-w-lg">
+        <EmptyState
+          icon={SearchX}
+          title="Data tidak ditemukan"
+          description="Data yang Anda cari tidak ada atau sudah dihapus."
+          action={<HeaderButton href="/dashboard" primary>Kembali ke Dashboard</HeaderButton>}
+        />
+      </div>
     </div>
   )
 }

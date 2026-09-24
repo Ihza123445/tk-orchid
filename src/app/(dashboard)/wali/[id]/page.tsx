@@ -1,11 +1,13 @@
 import { notFound } from 'next/navigation'
-import Link from 'next/link'
 import { requireAdminStaff } from '@/lib/auth/guard'
 import { db } from '@/lib/db/db'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { GraduationCap, KeyRound, Phone, UserRound } from 'lucide-react'
+import { Avatar, Empty, HeaderButton, InfoGrid, Panel, Pill, Row, RowList, STUDENT_STATUS, StatusPill } from '@/components/dashboard/primitives'
 import { formatTanggalSingkat } from '@/lib/formatting/format'
 
 const REL: Record<string, string> = { AYAH: 'Ayah', IBU: 'Ibu', WALI: 'Wali', LAINNYA: 'Lainnya' }
+
+export const metadata = { title: 'Detail Wali' }
 
 export default async function DetailWaliPage({ params }: { params: Promise<{ id: string }> }) {
   await requireAdminStaff()
@@ -23,58 +25,73 @@ export default async function DetailWaliPage({ params }: { params: Promise<{ id:
   if (!guardian) notFound()
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold tracking-tight">{guardian.fullName}</h1>
-        <p className="text-sm text-[var(--muted-foreground)]">{REL[guardian.relationship] ?? guardian.relationship} · {guardian.phone}</p>
-      </header>
+    <div className="mx-auto max-w-5xl space-y-6">
+      <section className="app-card flex flex-wrap items-center justify-between gap-4 p-5 sm:p-6">
+        <div className="flex min-w-0 items-center gap-4">
+          <Avatar name={guardian.fullName} size="xl" />
+          <div className="min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--primary)]">{REL[guardian.relationship] ?? guardian.relationship}</p>
+            <h1 className="truncate font-heading text-2xl font-bold tracking-tight">{guardian.fullName}</h1>
+            <p className="mt-1 inline-flex items-center gap-1.5 text-sm text-[var(--muted-foreground)]"><Phone className="size-3.5" /> {guardian.phone}</p>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <HeaderButton href="/wali">Kembali</HeaderButton>
+          <HeaderButton href={`https://wa.me/${guardian.phone.replace(/\D/g, '').replace(/^0/, '62')}`} external primary><Phone /> Hubungi via WhatsApp</HeaderButton>
+        </div>
+      </section>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader><CardTitle className="text-base">Informasi</CardTitle></CardHeader>
-          <CardContent className="space-y-3 text-sm">
-            <div><span className="text-[var(--muted-foreground)]">Email</span><p>{guardian.email ?? '-'}</p></div>
-            <div><span className="text-[var(--muted-foreground)]">Pekerjaan</span><p>{guardian.occupation ?? '-'}</p></div>
-            <div><span className="text-[var(--muted-foreground)]">Alamat</span><p>{guardian.address ?? '-'}</p></div>
-          </CardContent>
-        </Card>
+        <Panel title="Informasi" icon={UserRound}>
+          <InfoGrid
+            columns={1}
+            items={[
+              { label: 'Email', value: guardian.email },
+              { label: 'Pekerjaan', value: guardian.occupation },
+              { label: 'Alamat', value: guardian.address },
+            ]}
+          />
+        </Panel>
 
-        <Card>
-          <CardHeader><CardTitle className="text-base">Akun Portal</CardTitle></CardHeader>
-          <CardContent className="space-y-3 text-sm">
-            {guardian.user ? (
-              <>
-                <div><span className="text-[var(--muted-foreground)]">Email Akun</span><p>{guardian.user.email}</p></div>
-                <div><span className="text-[var(--muted-foreground)]">Status</span><p>{guardian.user.isActive ? 'Aktif' : 'Nonaktif'}</p></div>
-                <div><span className="text-[var(--muted-foreground)]">Login Terakhir</span><p>{formatTanggalSingkat(guardian.user.lastLoginAt)}</p></div>
-              </>
-            ) : (
-              <p className="text-[var(--muted-foreground)]">Belum memiliki akun portal.</p>
-            )}
-          </CardContent>
-        </Card>
+        <Panel title="Akun portal orang tua" icon={KeyRound}>
+          {guardian.user ? (
+            <InfoGrid
+              columns={1}
+              items={[
+                { label: 'Email akun', value: guardian.user.email },
+                { label: 'Status', value: guardian.user.isActive ? <Pill tone="success" dot>Aktif</Pill> : <Pill dot>Nonaktif</Pill> },
+                { label: 'Login terakhir', value: formatTanggalSingkat(guardian.user.lastLoginAt) },
+              ]}
+            />
+          ) : (
+            <Empty icon={KeyRound}>Belum memiliki akun portal.</Empty>
+          )}
+        </Panel>
       </div>
 
-      <Card>
-        <CardHeader><CardTitle className="text-base">Anak Terhubung ({guardian.studentGuardians.length})</CardTitle></CardHeader>
-        <CardContent>
-          {guardian.studentGuardians.length === 0 ? (
-            <p className="text-sm text-[var(--muted-foreground)]">Belum ada siswa terhubung.</p>
-          ) : (
-            <ul className="divide-y text-sm">
-              {guardian.studentGuardians.map((sg) => (
-                <li key={sg.student.id} className="flex items-center justify-between py-2">
-                  <Link href={`/siswa/${sg.student.id}`} className="underline-offset-4 hover:underline">{sg.student.fullName}</Link>
-                  <span className="flex items-center gap-2 text-xs">
-                    {sg.isPrimary && <span className="rounded-full bg-[var(--secondary)] px-2 py-0.5 text-[var(--primary)]">utama</span>}
-                    <span className="text-[var(--muted-foreground)]">{sg.student.studentCode}</span>
+      <Panel title={`Anak terhubung (${guardian.studentGuardians.length})`} icon={GraduationCap} flush>
+        {guardian.studentGuardians.length === 0 ? (
+          <Empty icon={GraduationCap}>Belum ada siswa terhubung.</Empty>
+        ) : (
+          <RowList>
+            {guardian.studentGuardians.map((sg) => (
+              <Row
+                key={sg.student.id}
+                href={`/siswa/${sg.student.id}`}
+                leading={<Avatar name={sg.student.fullName} />}
+                primary={sg.student.fullName}
+                secondary={sg.student.studentCode}
+                trailing={
+                  <span className="flex items-center gap-2">
+                    {sg.isPrimary && <Pill tone="brand">Wali utama</Pill>}
+                    <StatusPill map={STUDENT_STATUS} status={sg.student.status} />
                   </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </CardContent>
-      </Card>
+                }
+              />
+            ))}
+          </RowList>
+        )}
+      </Panel>
     </div>
   )
 }

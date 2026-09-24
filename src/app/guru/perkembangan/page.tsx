@@ -2,10 +2,10 @@ import { requireRole } from '@/lib/auth/guard'
 import { db } from '@/lib/db/db'
 import { submitReportAction } from '@/actions/reports'
 import { LaporanForm } from '@/components/reports/laporan-form'
+import { ChartNoAxesCombined, Send } from 'lucide-react'
+import { Avatar, EmptyState, PageHeader, REPORT_STATUS, SectionHeader, StatusPill } from '@/components/dashboard/primitives'
 
 export const metadata = { title: 'Perkembangan — Guru' }
-
-const STATUS_LABEL: Record<string, string> = { DRAFT: 'Draft', REVIEW: 'Review', PUBLISHED: 'Terbit' }
 
 export default async function GuruPerkembanganPage() {
   const user = await requireRole('TEACHER')
@@ -13,7 +13,7 @@ export default async function GuruPerkembanganPage() {
 
   const ay = await db.academicYear.findFirst({ where: { status: 'ACTIVE' } })
   if (!teacher || !ay) {
-    return <p className="text-sm text-[var(--muted-foreground)]">Data tidak tersedia.</p>
+    return <EmptyState icon={ChartNoAxesCombined} title="Data tidak tersedia" description="Belum ada tahun ajaran aktif atau profil guru belum terhubung." />
   }
 
   const classes = await db.class.findMany({ where: { teacherId: teacher.id, academicYearId: ay.id }, select: { id: true, name: true, code: true } })
@@ -40,10 +40,7 @@ export default async function GuruPerkembanganPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold tracking-tight">Laporan Perkembangan</h1>
-        <p className="text-sm text-[var(--muted-foreground)]">Rapor naratif per siswa per periode.</p>
-      </header>
+      <PageHeader icon={ChartNoAxesCombined} eyebrow={`Kelas saya · ${ay.name}`} title="Laporan Perkembangan" description="Susun rapor naratif per siswa per periode, lalu kirim ke admin untuk ditinjau." />
 
       <LaporanForm
         classes={classes.map((c) => ({ id: c.id, label: `${c.name} (${c.code})` }))}
@@ -63,37 +60,35 @@ export default async function GuruPerkembanganPage() {
       />
 
       <section className="space-y-3">
-        <h2 className="text-base font-semibold">Daftar Laporan</h2>
+        <SectionHeader title="Daftar laporan" description={`${reports.length} laporan`} />
         {reports.length === 0 ? (
-          <p className="rounded-lg border border-dashed p-8 text-center text-sm text-[var(--muted-foreground)]">Belum ada laporan.</p>
+          <EmptyState icon={ChartNoAxesCombined} title="Belum ada laporan" description="Gunakan formulir di atas untuk menyusun laporan pertama." />
         ) : (
-          <div className="overflow-x-auto rounded-lg border bg-[var(--card)]">
-            <table className="w-full min-w-[720px] text-sm">
+          <div className="table-card">
+            <table className="w-full min-w-[720px]">
               <thead>
-                <tr className="border-b bg-[var(--muted)] text-left">
-                  <th className="px-4 py-3 font-medium">Siswa</th>
-                  <th className="px-4 py-3 font-medium">Periode</th>
-                  <th className="px-4 py-3 font-medium">Status</th>
-                  <th className="px-4 py-3 font-medium">Domain terisi</th>
-                  <th className="px-4 py-3 font-medium">Aksi</th>
+                <tr className="text-left">
+                  <th className="px-4 py-3">Siswa</th>
+                  <th className="px-4 py-3">Periode</th>
+                  <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3">Domain terisi</th>
+                  <th className="px-4 py-3">Aksi</th>
                 </tr>
               </thead>
               <tbody>
                 {reports.map((r) => (
-                  <tr key={r.id} className="border-b last:border-0">
-                    <td className="px-4 py-3 font-medium">{r.student.fullName}</td>
+                  <tr key={r.id}>
+                    <td className="px-4 py-3"><span className="flex items-center gap-2.5 font-medium"><Avatar name={r.student.fullName} size="sm" /> {r.student.fullName}</span></td>
                     <td className="px-4 py-3">{r.period}</td>
                     <td className="px-4 py-3">
-                      <span className={`rounded-full px-2 py-0.5 text-xs ${r.status === 'PUBLISHED' ? 'bg-[var(--secondary)] text-[var(--primary)]' : 'bg-[var(--muted)] text-[var(--muted-foreground)]'}`}>
-                        {STATUS_LABEL[r.status] ?? r.status}
-                      </span>
+                      <StatusPill map={REPORT_STATUS} status={r.status} />
                     </td>
                     <td className="px-4 py-3 tabular-nums">{r.items.length}/{domains.length}</td>
                     <td className="px-4 py-3">
                       {r.status === 'DRAFT' && (
                         <form action={submitReportAction}>
                           <input type="hidden" name="id" value={r.id} />
-                          <button type="submit" className="text-sm underline underline-offset-4">Submit untuk review</button>
+                          <button type="submit" className="link-action"><Send className="size-3.5" /> Kirim untuk review</button>
                         </form>
                       )}
                       {r.status === 'REVIEW' && <span className="text-xs text-[var(--muted-foreground)]">Menunggu admin</span>}

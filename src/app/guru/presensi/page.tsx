@@ -1,6 +1,8 @@
 import { requireRole } from '@/lib/auth/guard'
 import { db } from '@/lib/db/db'
+import { ClipboardCheck } from 'lucide-react'
 import { PresensiForm } from '@/components/attendance/presensi-form'
+import { PageHeader } from '@/components/dashboard/primitives'
 
 export const metadata = { title: 'Presensi — Guru' }
 
@@ -20,10 +22,7 @@ export default async function GuruPresensiPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold tracking-tight">Presensi Kelas</h1>
-        <p className="text-sm text-[var(--muted-foreground)]">Isi presensi untuk kelas yang Anda ampu.</p>
-      </header>
+      <PageHeader icon={ClipboardCheck} eyebrow="Kelas saya" title="Presensi Kelas" description="Tandai kehadiran siswa di kelas yang Anda ampu, lalu simpan." />
       <PresensiForm classes={classes.map((c) => ({ id: c.id, label: `${c.name} (${c.code})` }))} />
     </div>
   )

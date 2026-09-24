@@ -25,6 +25,14 @@ const STATUSES = [
   ['ABSENT', 'Alpa'],
 ] as const
 
+// Warna tombol status saat terpilih
+const STATUS_ACTIVE: Record<string, string> = {
+  PRESENT: 'bg-emerald-600 text-white ring-emerald-600',
+  SICK: 'bg-amber-500 text-white ring-amber-500',
+  PERMISSION: 'bg-blue-600 text-white ring-blue-600',
+  ABSENT: 'bg-[var(--destructive)] text-white ring-[var(--destructive)]',
+}
+
 const initial: BulkResult = {}
 
 function todayISO(): string {
@@ -83,16 +91,16 @@ export function PresensiForm({ classes }: { classes: Option[] }) {
   }
 
   if (classes.length === 0) {
-    return <p className="rounded-lg border border-dashed p-8 text-center text-sm text-[var(--muted-foreground)]">Belum ada kelas yang ditugaskan.</p>
+    return <p className="empty-state">Belum ada kelas yang ditugaskan.</p>
   }
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-end gap-3">
+      <div className="app-card flex flex-wrap items-end gap-3 p-4">
         <div className="space-y-2">
           <Label htmlFor="classId">Kelas</Label>
           <select id="classId" value={classId} onChange={(e) => { startReload(); setClassId(e.target.value) }}
-            className="h-9 rounded-md border border-[var(--input)] bg-[var(--card)] px-3 text-sm">
+            className="field-select w-auto">
             {classes.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
           </select>
         </div>
@@ -106,13 +114,13 @@ export function PresensiForm({ classes }: { classes: Option[] }) {
       </div>
 
       {denied && (
-        <p className="rounded-md border border-[var(--danger)] bg-[var(--destructive)]/10 p-3 text-sm text-[var(--danger)]">
+        <p className="alert-error">
           Kelas ini bukan assignment Anda.
         </p>
       )}
 
       {loadError && (
-        <p className="rounded-md border border-[var(--danger)] bg-[var(--destructive)]/10 p-3 text-sm text-[var(--danger)]">
+        <p className="alert-error">
           {loadError}
         </p>
       )}
@@ -131,18 +139,18 @@ export function PresensiForm({ classes }: { classes: Option[] }) {
             date,
             entries: rows.map((r) => ({ studentId: r.studentId, status: r.status, note: r.note || undefined })),
           })} />
-          <div className="overflow-x-auto rounded-lg border bg-[var(--card)]">
-            <table className="w-full min-w-[560px] text-sm">
+          <div className="table-card">
+            <table className="w-full min-w-[560px]">
               <thead>
-                <tr className="border-b bg-[var(--muted)] text-left">
-                  <th className="px-4 py-3 font-medium">Siswa</th>
-                  <th className="px-4 py-3 font-medium">Status</th>
-                  <th className="px-4 py-3 font-medium">Catatan</th>
+                <tr className="text-left">
+                  <th className="px-4 py-3">Siswa</th>
+                  <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3">Catatan</th>
                 </tr>
               </thead>
               <tbody>
                 {rows.map((r) => (
-                  <tr key={r.studentId} className="border-b last:border-0">
+                  <tr key={r.studentId}>
                     <td className="px-4 py-3">
                       <span className="font-medium">{r.fullName}</span>
                       <span className="block text-xs text-[var(--muted-foreground)]">{r.studentCode} · {r.gender === 'L' ? 'Laki-laki' : 'Perempuan'}</span>
@@ -156,10 +164,10 @@ export function PresensiForm({ classes }: { classes: Option[] }) {
                             role="radio"
                             aria-checked={(r.status ?? null) === val}
                             onClick={() => setStatus(r.studentId, val)}
-                            className={`rounded-full px-3 py-1 text-xs transition-colors duration-150 ${
+                            className={`rounded-full px-3 py-1 text-xs font-medium ring-1 transition-all duration-150 ${
                               r.status === val
-                                ? 'bg-[var(--primary)] text-[var(--primary-foreground)]'
-                                : 'border hover:bg-[var(--muted)]'
+                                ? `${STATUS_ACTIVE[val]} shadow-sm`
+                                : 'bg-[var(--card)] ring-[var(--border)] hover:ring-[var(--primary)]/40'
                             }`}
                           >
                             {label}
@@ -184,15 +192,15 @@ export function PresensiForm({ classes }: { classes: Option[] }) {
           </div>
 
           {state.error && (
-            <p className="mt-3 rounded-md border border-[var(--danger)] bg-[var(--destructive)]/10 p-3 text-sm text-[var(--danger)]">{state.error}</p>
+            <p className="mt-3 alert-error">{state.error}</p>
           )}
           {state.success && (
-            <p className="mt-3 rounded-md bg-[var(--secondary)] p-3 text-sm text-[var(--primary)]">
+            <p className="mt-3 alert-success">
               Data presensi berhasil disimpan ({state.saved} siswa).
             </p>
           )}
 
-          <div className="sticky bottom-0 mt-4 flex justify-end border-t bg-[var(--background)] py-3">
+          <div className="sticky bottom-3 z-10 mt-4 flex items-center justify-end gap-3 rounded-2xl border border-[var(--border)] bg-[var(--card)]/95 px-4 py-3 shadow-[var(--shadow-raised)] backdrop-blur">
             <div className="mr-auto text-xs text-[var(--muted-foreground)]">
               {rows.filter((r) => r.status).length}/{rows.length} siswa sudah diberi status
             </div>
@@ -202,7 +210,7 @@ export function PresensiForm({ classes }: { classes: Option[] }) {
           </div>
         </form>
       ) : !denied ? (
-        <div className="rounded-lg border border-dashed p-10 text-center">
+        <div className="empty-state">
           <p className="text-sm text-[var(--muted-foreground)]">Belum ada siswa terdaftar di kelas ini.</p>
         </div>
       ) : null}

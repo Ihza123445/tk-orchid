@@ -1,10 +1,12 @@
 import { notFound } from 'next/navigation'
-import Link from 'next/link'
 import { requireAdminStaff } from '@/lib/auth/guard'
 import { db } from '@/lib/db/db'
 import { enrollStudentAction } from '@/actions/classes'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { CalendarDays, DoorOpen, School, UserRound, UsersRound } from 'lucide-react'
+import { Avatar, Empty, IconTile, PageHeader, Panel, Progress, Row, RowList, STUDENT_STATUS, StatusPill } from '@/components/dashboard/primitives'
 import { formatTanggalSingkat } from '@/lib/formatting/format'
+
+export const metadata = { title: 'Detail Kelas' }
 
 export default async function DetailKelasPage({ params }: { params: Promise<{ id: string }> }) {
   await requireAdminStaff()
@@ -40,82 +42,94 @@ export default async function DetailKelasPage({ params }: { params: Promise<{ id
   const full = klass.enrollments.length >= klass.capacity
   const DAY_NAMES = ['', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']
 
+  const filled = Math.round((klass.enrollments.length / Math.max(klass.capacity, 1)) * 100)
+  const scheduleDays = [...new Set(klass.schedules.map((s) => s.dayOfWeek))]
+
   return (
     <div className="space-y-6">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{klass.name}</h1>
-          <p className="text-sm text-[var(--muted-foreground)]">
-            {klass.code} · {klass.academicYear.name} · Wali: {klass.teacher?.fullName ?? '-'} · {klass.room ?? 'tanpa ruang'}
-          </p>
+      <PageHeader
+        icon={School}
+        back={{ href: '/kelas', label: 'Daftar kelas' }}
+        eyebrow={`${klass.code} · ${klass.academicYear.name}`}
+        title={klass.name}
+        description={`Jenjang ${klass.level}`}
+      />
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="app-card flex items-center gap-3 p-4"><IconTile icon={UserRound} /><div className="min-w-0"><p className="text-xs text-[var(--muted-foreground)]">Wali kelas</p><p className="truncate text-sm font-semibold">{klass.teacher?.fullName ?? 'Belum ditentukan'}</p></div></div>
+        <div className="app-card flex items-center gap-3 p-4"><IconTile icon={DoorOpen} tone="info" /><div className="min-w-0"><p className="text-xs text-[var(--muted-foreground)]">Ruang</p><p className="truncate text-sm font-semibold">{klass.room ?? 'Tanpa ruang'}</p></div></div>
+        <div className="app-card p-4">
+          <div className="flex items-center justify-between text-xs"><span className="text-[var(--muted-foreground)]">Kapasitas terisi</span><span className="font-semibold tabular-nums">{klass.enrollments.length}/{klass.capacity}</span></div>
+          <p className="mt-1 font-heading text-xl font-bold tabular-nums">{filled}%</p>
+          <div className="mt-2"><Progress value={filled} tone={full ? 'warning' : 'brand'} label="Kapasitas kelas" /></div>
         </div>
-        <form action={enrollStudentAction} className="flex items-end gap-2">
-          <input type="hidden" name="classId" value={klass.id} />
-          <select
-            name="studentId"
-            required
-            disabled={full}
-            aria-label="Pilih siswa untuk didaftarkan"
-            className="h-9 rounded-md border border-[var(--input)] bg-[var(--card)] px-3 text-sm"
-            defaultValue=""
-          >
-            <option value="" disabled>{full ? 'Kelas penuh' : 'Pilih siswa…'}</option>
-            {unenrolled.map((s) => (
-              <option key={s.id} value={s.id}>{s.fullName} ({s.studentCode})</option>
-            ))}
-          </select>
-          <button
-            type="submit"
-            disabled={full}
-            className="rounded-md bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--primary-foreground)] hover:opacity-90 disabled:opacity-50"
-          >
-            Daftarkan
-          </button>
-        </form>
-      </header>
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Daftar Siswa ({klass.enrollments.length}/{klass.capacity})</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-5">
+        <Panel className="lg:col-span-3" icon={UsersRound} title="Daftar siswa" description={`${klass.enrollments.length} dari ${klass.capacity} kursi terisi`} flush>
+          <form action={enrollStudentAction} className="flex flex-wrap items-center gap-2 border-b border-[var(--border)] bg-[var(--muted)]/40 px-5 py-3">
+            <input type="hidden" name="classId" value={klass.id} />
+            <select
+              name="studentId"
+              required
+              disabled={full}
+              aria-label="Pilih siswa untuk didaftarkan"
+              className="field-select min-w-0 flex-1"
+              defaultValue=""
+            >
+              <option value="" disabled>{full ? 'Kelas penuh' : unenrolled.length ? 'Pilih siswa untuk didaftarkan…' : 'Semua siswa aktif sudah punya kelas'}</option>
+              {unenrolled.map((s) => (
+                <option key={s.id} value={s.id}>{s.fullName} ({s.studentCode})</option>
+              ))}
+            </select>
+            <button
+              type="submit"
+              disabled={full}
+              className="inline-flex h-9 items-center rounded-[10px] bg-[var(--primary)] px-4 text-sm font-medium text-[var(--primary-foreground)] shadow-sm transition-opacity hover:opacity-90 disabled:opacity-50"
+            >
+              Daftarkan
+            </button>
+          </form>
           {klass.enrollments.length === 0 ? (
-            <p className="text-sm text-[var(--muted-foreground)]">Belum ada siswa di kelas ini.</p>
+            <Empty icon={UsersRound}>Belum ada siswa di kelas ini.</Empty>
           ) : (
-            <ul className="divide-y text-sm">
+            <RowList>
               {klass.enrollments.map((e) => (
-                <li key={e.id} className="flex items-center justify-between py-2">
-                  <Link href={`/siswa/${e.student.id}`} className="underline-offset-4 hover:underline">{e.student.fullName}</Link>
-                  <span className="flex gap-3 text-xs text-[var(--muted-foreground)]">
-                    <span>{e.student.gender === 'L' ? 'L' : 'P'}</span>
-                    <span>masuk {formatTanggalSingkat(e.enrollmentDate)}</span>
-                    <span className="rounded-full bg-[var(--secondary)] px-2 py-0.5 text-[var(--primary)]">{e.status}</span>
-                  </span>
-                </li>
+                <Row
+                  key={e.id}
+                  href={`/siswa/${e.student.id}`}
+                  leading={<Avatar name={e.student.fullName} />}
+                  primary={e.student.fullName}
+                  secondary={`${e.student.studentCode} · ${e.student.gender === 'L' ? 'Laki-laki' : 'Perempuan'} · masuk ${formatTanggalSingkat(e.enrollmentDate)}`}
+                  trailing={<StatusPill map={STUDENT_STATUS} status={e.status} />}
+                />
               ))}
-            </ul>
+            </RowList>
           )}
-        </CardContent>
-      </Card>
+        </Panel>
 
-      <Card>
-        <CardHeader><CardTitle className="text-base">Jadwal Mingguan</CardTitle></CardHeader>
-        <CardContent>
+        <Panel className="lg:col-span-2" icon={CalendarDays} title="Jadwal mingguan" flush>
           {klass.schedules.length === 0 ? (
-            <p className="text-sm text-[var(--muted-foreground)]">Belum ada jadwal.</p>
+            <Empty icon={CalendarDays}>Belum ada jadwal.</Empty>
           ) : (
-            <ul className="divide-y text-sm">
-              {klass.schedules.map((s) => (
-                <li key={s.id} className="flex justify-between py-2">
-                  <span className="w-20 font-medium">{DAY_NAMES[s.dayOfWeek]}</span>
-                  <span className="tabular-nums text-[var(--muted-foreground)]">{s.startTime}–{s.endTime}</span>
-                  <span className="flex-1 pl-4">{s.activity}</span>
-                </li>
+            <div className="divide-y divide-[var(--border)]">
+              {scheduleDays.map((day) => (
+                <div key={day} className="px-5 py-3">
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">{DAY_NAMES[day]}</p>
+                  <ul className="space-y-1.5">
+                    {klass.schedules.filter((s) => s.dayOfWeek === day).map((s) => (
+                      <li key={s.id} className="flex gap-3 text-sm">
+                        <span className="w-24 shrink-0 tabular-nums text-[var(--muted-foreground)]">{s.startTime}–{s.endTime}</span>
+                        <span className="min-w-0 truncate font-medium">{s.activity}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               ))}
-            </ul>
+            </div>
           )}
-        </CardContent>
-      </Card>
+        </Panel>
+      </div>
     </div>
   )
 }

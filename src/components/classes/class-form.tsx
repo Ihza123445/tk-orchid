@@ -21,13 +21,13 @@ export function KelasForm({ years, teachers }: { years: Option[]; teachers: Opti
   }, [state.success, router])
 
   return (
-    <form action={formAction} className="space-y-4 rounded-lg border bg-[var(--card)] p-6">
-      <h2 className="text-base font-semibold">Tambah Kelas</h2>
+    <form action={formAction} className="form-card space-y-4">
+      <h2>Tambah Kelas</h2>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="space-y-2">
           <Label htmlFor="academicYearId">Tahun Ajaran *</Label>
           <select id="academicYearId" name="academicYearId" required defaultValue=""
-            className="h-9 w-full rounded-md border border-[var(--input)] bg-transparent px-3 text-sm">
+            className="field-select">
             <option value="" disabled>Pilih…</option>
             {years.map((y) => <option key={y.id} value={y.id}>{y.label}</option>)}
           </select>
@@ -53,7 +53,7 @@ export function KelasForm({ years, teachers }: { years: Option[]; teachers: Opti
         <div className="space-y-2">
           <Label htmlFor="teacherId">Wali Kelas</Label>
           <select id="teacherId" name="teacherId" defaultValue=""
-            className="h-9 w-full rounded-md border border-[var(--input)] bg-transparent px-3 text-sm">
+            className="field-select">
             <option value="">—</option>
             {teachers.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
           </select>
@@ -64,7 +64,7 @@ export function KelasForm({ years, teachers }: { years: Option[]; teachers: Opti
           {state.fields?.capacity && <p className="text-sm text-[var(--danger)]">{state.fields.capacity}</p>}
         </div>
       </div>
-      {state.error && <p className="rounded-md border border-[var(--danger)] bg-[var(--destructive)]/10 p-3 text-sm text-[var(--danger)]">{state.error}</p>}
+      {state.error && <p className="alert-error">{state.error}</p>}
       <Button type="submit" disabled={pending}>{pending ? 'Menyimpan…' : 'Tambah Kelas'}</Button>
     </form>
   )

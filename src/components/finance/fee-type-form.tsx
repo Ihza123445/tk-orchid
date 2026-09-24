@@ -12,8 +12,8 @@ export function FeeTypeForm() {
   const [state, formAction, pending] = useActionState(createFeeTypeAction, initial)
 
   return (
-    <form action={formAction} className="space-y-4 rounded-lg border bg-[var(--card)] p-6">
-      <h2 className="text-base font-semibold">Tambah Jenis Biaya</h2>
+    <form action={formAction} className="form-card space-y-4">
+      <h2>Tambah Jenis Biaya</h2>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="space-y-2">
           <Label htmlFor="ft-code">Kode *</Label>
@@ -36,8 +36,8 @@ export function FeeTypeForm() {
           <Input id="ft-desc" name="description" maxLength={500} />
         </div>
       </div>
-      {state.error && <p className="rounded-md border border-[var(--danger)] bg-[var(--destructive)]/10 p-3 text-sm text-[var(--danger)]">{state.error}</p>}
-      {state.success && <p className="rounded-md bg-[var(--secondary)] p-3 text-sm text-[var(--primary)]">Jenis biaya tersimpan.</p>}
+      {state.error && <p className="alert-error">{state.error}</p>}
+      {state.success && <p className="alert-success">Jenis biaya tersimpan.</p>}
       <Button type="submit" disabled={pending}>{pending ? 'Menyimpan…' : 'Simpan'}</Button>
     </form>
   )
