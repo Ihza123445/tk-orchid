@@ -1,0 +1,594 @@
+// TK Orchid — Prisma schema (SQLite)
+// Semantik mengikuti DDL PRD §28. Money = INTEGER rupiah.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id            Int      @id @default(autoincrement())
+  name          String
+  email         String   @unique
+  username      String?  @unique
+  passwordHash  String
+  role          String // ADMIN | STAFF | TEACHER | PARENT
+  isActive      Boolean  @default(true)
+  lastLoginAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  guardian       Guardian?
+  teacher        Teacher?
+  attendances    Attendance[]     @relation("AttendanceRecorder")
+  assessments    Assessment[]     @relation("AssessmentCreator")
+  devReports     DevelopmentReport[] @relation("ReportCreator")
+  publishedReports DevelopmentReport[] @relation("ReportPublisher")
+  activities     Activity[]       @relation("ActivityCreator")
+  announcements  Announcement[]   @relation("AnnouncementCreator")
+  reviewedAdmissions Admission[]  @relation("AdmissionReviewer")
+  payments       Payment[]        @relation("PaymentRecorder")
+  expenses       Expense[]        @relation("ExpenseCreator")
+  documents      StudentDocument[] @relation("DocumentUploader")
+  invoices       Invoice[]
+  auditLogs      AuditLog[]
+  announcementReads AnnouncementRead[]
+  passwordResetTokens PasswordResetToken[]
+}
+
+model Guardian {
+  id           Int       @id @default(autoincrement())
+  userId       Int?      @unique
+  fullName     String
+  relationship String // AYAH | IBU | WALI | LAINNYA
+  nik          String?
+  occupation   String?
+  companyName  String?
+  education    String?
+  phone        String
+  email        String?
+  address      String?
+  notes        String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  user             User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  studentGuardians StudentGuardian[]
+}
+
+model Teacher {
+  id             Int       @id @default(autoincrement())
+  userId         Int       @unique
+  employeeCode   String?   @unique
+  fullName       String
+  phone          String?
+  email          String?
+  education      String?
+  specialization String?
+  joinDate       DateTime?
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  classes   Class[]  @relation("ClassHomeroom")
+  schedules Schedule[]
+  reports   DevelopmentReport[] @relation("ReportWriter")
+}
+
+model AcademicYear {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  startDate DateTime
+  endDate   DateTime
+  status    String // PLANNED | ACTIVE | CLOSED
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  classes    Class[]
+  enrollments Enrollment[]
+  assessments Assessment[]
+  devReports DevelopmentReport[]
+  invoices   Invoice[]
+}
+
+model Student {
+  id               Int       @id @default(autoincrement())
+  studentCode      String    @unique
+  nis              String?   @unique
+  nisn             String?   @unique
+  nik              String?
+  fullName         String
+  nickname         String?
+  gender           String // L | P
+  birthPlace       String?
+  birthDate        DateTime
+  religion         String?
+  address          String?
+  rt               String?
+  rw               String?
+  village          String?
+  district         String?
+  city             String?
+  province         String?
+  postalCode       String?
+  childOrder       Int?
+  siblingsCount    Int?
+  residenceStatus  String?
+  admissionDate    DateTime?
+  withdrawalDate   DateTime?
+  withdrawalReason String?
+  status           String    @default("ACTIVE") // CANDIDATE | ACTIVE | INACTIVE | GRADUATED | TRANSFERRED | WITHDRAWN
+  photoPath        String?
+  notes            String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  enrollments      Enrollment[]
+  studentGuardians StudentGuardian[]
+  attendances      Attendance[]
+  assessments      Assessment[]
+  devReports       DevelopmentReport[]
+  invoices         Invoice[]
+  payments         Payment[]
+  documents        StudentDocument[]
+  admissions       Admission[]  @relation("AdmissionConvertsTo")
+}
+
+model StudentGuardian {
+  studentId  Int
+  guardianId Int
+  isPrimary  Boolean  @default(false)
+  canPickup  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  student  Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  guardian Guardian @relation(fields: [guardianId], references: [id], onDelete: Cascade)
+
+  @@id([studentId, guardianId])
+}
+
+model Class {
+  id             Int      @id @default(autoincrement())
+  academicYearId Int
+  code           String
+  name           String
+  level          String
+  room           String?
+  teacherId      Int?
+  capacity       Int      @default(20)
+  status         String   @default("ACTIVE") // ACTIVE | INACTIVE
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  academicYear AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Restrict)
+  teacher      Teacher?     @relation("ClassHomeroom", fields: [teacherId], references: [id], onDelete: SetNull)
+  enrollments  Enrollment[]
+  attendances  Attendance[]
+  schedules    Schedule[]
+  assessments  Assessment[]
+  devReports   DevelopmentReport[]
+  announcements Announcement[]
+
+  @@unique([academicYearId, code])
+}
+
+model Enrollment {
+  id             Int      @id @default(autoincrement())
+  studentId      Int
+  academicYearId Int
+  classId        Int
+  enrollmentDate DateTime
+  status         String   @default("ACTIVE") // ACTIVE | INACTIVE | COMPLETED
+  notes          String?
+  createdAt      DateTime @default(now())
+  enrollmentUpdatedAt DateTime @updatedAt
+
+  student      Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  academicYear AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Restrict)
+  klass        Class        @relation(fields: [classId], references: [id], onDelete: Restrict)
+
+  @@unique([studentId, academicYearId])
+}
+
+model AdmissionPeriod {
+  id               Int      @id @default(autoincrement())
+  name             String
+  startDate        DateTime
+  endDate          DateTime
+  isActive         Boolean  @default(false)
+  requirementsText String?
+  notes            String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  admissions Admission[]
+}
+
+model Admission {
+  id                  Int       @id @default(autoincrement())
+  applicationNo       String    @unique
+  admissionPeriodId   Int
+  studentId           Int?      @unique
+  studentFullName     String
+  studentGender       String // L | P
+  studentBirthPlace   String?
+  studentBirthDate    DateTime
+  guardianName        String
+  guardianRelationship String
+  guardianPhone       String
+  guardianEmail       String?
+  guardianAddress     String?
+  preferredLevel      String?
+  previousSchool      String?
+  notes               String?
+  status              String    @default("SUBMITTED") // DRAFT|SUBMITTED|REVISION_REQUIRED|REVIEW|ACCEPTED|REJECTED|ENROLLED
+  rejectionReason     String?
+  reviewedBy          Int?
+  reviewedAt          DateTime?
+  submittedAt         DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  period    AdmissionPeriod @relation(fields: [admissionPeriodId], references: [id], onDelete: Restrict)
+  student   Student?        @relation("AdmissionConvertsTo", fields: [studentId], references: [id], onDelete: SetNull)
+  reviewer  User?           @relation("AdmissionReviewer", fields: [reviewedBy], references: [id], onDelete: SetNull)
+  documents AdmissionDocument[]
+}
+
+model AdmissionDocument {
+  id           Int      @id @default(autoincrement())
+  admissionId  Int
+  documentType String
+  originalName String
+  storagePath  String
+  mimeType     String
+  sizeBytes    Int
+  createdAt    DateTime @default(now())
+
+  admission Admission @relation(fields: [admissionId], references: [id], onDelete: Cascade)
+}
+
+model AssessmentDomain {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  assessments Assessment[]
+  items       DevelopmentItem[]
+}
+
+model AssessmentScale {
+  id          Int      @id @default(autoincrement())
+  code        String   @unique
+  label       String
+  description String?
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  assessments Assessment[]
+  items       DevelopmentItem[]
+}
+
+model Assessment {
+  id             Int      @id @default(autoincrement())
+  studentId      Int
+  academicYearId Int
+  classId        Int
+  domainId       Int
+  scaleId        Int
+  period         String
+  narrative      String?
+  teacherNote    String?
+  createdBy      Int
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  student      Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  academicYear AcademicYear     @relation(fields: [academicYearId], references: [id], onDelete: Restrict)
+  klass        Class            @relation(fields: [classId], references: [id], onDelete: Restrict)
+  domain       AssessmentDomain @relation(fields: [domainId], references: [id], onDelete: Restrict)
+  scale        AssessmentScale  @relation(fields: [scaleId], references: [id], onDelete: Restrict)
+  creator      User             @relation("AssessmentCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+
+  @@unique([studentId, academicYearId, period, domainId])
+}
+
+model DevelopmentReport {
+  id                 Int       @id @default(autoincrement())
+  reportNo           String    @unique
+  studentId          Int
+  academicYearId     Int
+  classId            Int
+  period             String
+  summary            String?
+  homeRecommendation String?
+  attendanceSummary  String?
+  status             String    @default("DRAFT") // DRAFT | REVIEW | PUBLISHED
+  createdBy          Int
+  teacherId          Int?
+  publishedBy        Int?
+  publishedAt        DateTime?
+  createdAt          DateTime  @default(now())
+  reportUpdatedAt    DateTime  @updatedAt
+
+  student      Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  academicYear AcademicYear     @relation(fields: [academicYearId], references: [id], onDelete: Restrict)
+  klass        Class            @relation(fields: [classId], references: [id], onDelete: Restrict)
+  creator      User             @relation("ReportCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  publisher    User?            @relation("ReportPublisher", fields: [publishedBy], references: [id], onDelete: SetNull)
+  writer       Teacher?         @relation("ReportWriter", fields: [teacherId], references: [id], onDelete: SetNull)
+
+  items DevelopmentItem[]
+
+  @@unique([studentId, academicYearId, period])
+}
+
+model DevelopmentItem {
+  id        Int      @id @default(autoincrement())
+  reportId  Int
+  domainId  Int
+  scaleId   Int
+  narrative String?
+  sortOrder Int      @default(0)
+
+  report DevelopmentReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  domain AssessmentDomain  @relation(fields: [domainId], references: [id], onDelete: Restrict)
+  scale  AssessmentScale   @relation(fields: [scaleId], references: [id], onDelete: Restrict)
+
+  @@unique([reportId, domainId])
+}
+
+model Attendance {
+  id             Int      @id @default(autoincrement())
+  studentId      Int
+  classId        Int
+  attendanceDate DateTime
+  status         String // PRESENT | SICK | PERMISSION | ABSENT
+  note           String?
+  recordedBy     Int
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  student    Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  klass      Class   @relation(fields: [classId], references: [id], onDelete: Restrict)
+  recorder   User    @relation("AttendanceRecorder", fields: [recordedBy], references: [id], onDelete: Restrict)
+
+  @@unique([studentId, attendanceDate])
+  @@index([attendanceDate])
+  @@index([studentId, attendanceDate])
+}
+
+model Schedule {
+  id         Int      @id @default(autoincrement())
+  classId    Int
+  teacherId  Int?
+  dayOfWeek  Int // 1=Senin ... 7=Minggu
+  startTime  String
+  endTime    String
+  activity   String
+  room       String?
+  notes      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  klass   Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  teacher Teacher? @relation(fields: [teacherId], references: [id], onDelete: SetNull)
+}
+
+model Activity {
+  id            Int       @id @default(autoincrement())
+  title         String
+  slug          String    @unique
+  description   String
+  startDatetime DateTime?
+  endDatetime   DateTime?
+  location      String?
+  coverImage    String?
+  visibility    String    @default("PUBLIC") // PUBLIC | PARENT_ONLY | INTERNAL
+  status        String    @default("DRAFT") // DRAFT | PUBLISHED | ARCHIVED
+  createdBy     Int
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  creator User            @relation("ActivityCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  media   ActivityMedia[]
+}
+
+model ActivityMedia {
+  id           Int      @id @default(autoincrement())
+  activityId   Int
+  filePath     String
+  originalName String
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+}
+
+model Announcement {
+  id             Int       @id @default(autoincrement())
+  title          String
+  slug           String    @unique
+  content        String
+  audience       String // PUBLIC | ALL_PARENTS | TEACHERS | STAFF | CLASS_SPECIFIC
+  classId        Int?
+  publishAt      DateTime?
+  expireAt       DateTime?
+  status         String    @default("DRAFT") // DRAFT | PUBLISHED | ARCHIVED
+  attachmentPath String?
+  createdBy      Int
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  klass Class?   @relation(fields: [classId], references: [id], onDelete: SetNull)
+  creator User   @relation("AnnouncementCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  reads AnnouncementRead[]
+}
+
+model AnnouncementRead {
+  announcementId Int
+  userId         Int
+  readAt         DateTime @default(now())
+
+  announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([announcementId, userId])
+}
+
+model FeeType {
+  id            Int      @id @default(autoincrement())
+  code          String   @unique
+  name          String
+  description   String?
+  defaultAmount Int      @default(0)
+  recurring     Boolean  @default(false)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  items InvoiceItem[]
+}
+
+model Invoice {
+  id             Int       @id @default(autoincrement())
+  invoiceNo      String    @unique
+  studentId      Int
+  academicYearId Int?
+  issueDate      DateTime
+  dueDate        DateTime
+  status         String    @default("ISSUED") // DRAFT | ISSUED | PARTIAL | PAID | VOID | OVERDUE
+  notes          String?
+  createdBy      Int
+  createdAt      DateTime  @default(now())
+  invoiceUpdatedAt DateTime @updatedAt
+
+  student      Student      @relation(fields: [studentId], references: [id], onDelete: Restrict)
+  academicYear AcademicYear? @relation(fields: [academicYearId], references: [id], onDelete: SetNull)
+  creator      User         @relation(fields: [createdBy], references: [id], onDelete: Restrict)
+  items        InvoiceItem[]
+  allocations  PaymentAllocation[]
+
+  @@index([studentId, status])
+  @@index([dueDate])
+}
+
+model InvoiceItem {
+  id         Int     @id @default(autoincrement())
+  invoiceId  Int
+  feeTypeId  Int
+  description String
+  quantity   Int     @default(1)
+  unitAmount Int
+  subtotal   Int
+
+  invoice  Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  feeType  FeeType  @relation(fields: [feeTypeId], references: [id], onDelete: Restrict)
+}
+
+model Payment {
+  id           Int       @id @default(autoincrement())
+  receiptNo    String    @unique
+  studentId    Int
+  paymentDate  DateTime
+  amount       Int
+  method       String // CASH | TRANSFER | QRIS | OTHER
+  referenceNo  String?
+  note         String?
+  proofPath    String?
+  status       String    @default("POSTED") // POSTED | VOID
+  voidReason   String?
+  recordedBy   Int
+  createdAt    DateTime  @default(now())
+  paymentUpdatedAt DateTime @updatedAt
+
+  student     Student             @relation(fields: [studentId], references: [id], onDelete: Restrict)
+  recorder    User                @relation("PaymentRecorder", fields: [recordedBy], references: [id], onDelete: Restrict)
+  allocations PaymentAllocation[]
+}
+
+model PaymentAllocation {
+  id        Int      @id @default(autoincrement())
+  paymentId Int
+  invoiceId Int
+  amount    Int
+  createdAt DateTime @default(now())
+
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Restrict)
+
+  @@unique([paymentId, invoiceId])
+}
+
+model Expense {
+  id            Int       @id @default(autoincrement())
+  expenseNo     String    @unique
+  expenseDate   DateTime
+  category      String
+  description   String
+  amount        Int
+  vendor        String?
+  paymentMethod String // CASH | TRANSFER | OTHER
+  proofPath     String?
+  status        String    @default("POSTED") // DRAFT | POSTED | VOID
+  voidReason    String?
+  createdBy     Int
+  createdAt     DateTime  @default(now())
+  expenseUpdatedAt DateTime @updatedAt
+
+  creator User @relation("ExpenseCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+}
+
+model StudentDocument {
+  id           Int      @id @default(autoincrement())
+  studentId    Int
+  documentType String
+  originalName String
+  storagePath  String
+  mimeType     String
+  sizeBytes    Int
+  visibility   String   @default("STAFF_ONLY") // STAFF_ONLY | TEACHER | PARENT
+  uploadedBy   Int
+  createdAt    DateTime @default(now())
+
+  student    Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  uploader   User    @relation("DocumentUploader", fields: [uploadedBy], references: [id], onDelete: Restrict)
+}
+
+model AuditLog {
+  id         Int      @id @default(autoincrement())
+  userId     Int?
+  action     String
+  entityType String
+  entityId   Int?
+  beforeJson String?
+  afterJson  String?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+model PasswordResetToken {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
