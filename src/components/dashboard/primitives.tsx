@@ -395,37 +395,6 @@ export function Progress({ value, tone = 'brand', label }: { value: number; tone
   )
 }
 
-/** Banner sambutan bergradasi untuk dashboard. */
-export function WelcomeBanner({ eyebrow, title, description, actions, aside }: { eyebrow?: ReactNode; title: ReactNode; description?: ReactNode; actions?: ReactNode; aside?: ReactNode }) {
-  return (
-    <section className="welcome-banner">
-      <div className="welcome-banner-dots" aria-hidden="true" />
-      <div className="flex flex-col gap-6 p-6 sm:p-8 lg:flex-row lg:items-center lg:justify-between">
-        <div className="min-w-0 max-w-xl">
-          {eyebrow && <p className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-medium backdrop-blur">{eyebrow}</p>}
-          <h1 className="mt-3 font-heading text-2xl font-bold tracking-tight sm:text-3xl">{title}</h1>
-          {description && <p className="mt-2 text-sm leading-relaxed text-white/80">{description}</p>}
-          {actions && <div className="mt-5 flex flex-wrap gap-2">{actions}</div>}
-        </div>
-        {aside}
-      </div>
-    </section>
-  )
-}
-
-export function BannerButton({ href, children, solid = false }: { href: string; children: ReactNode; solid?: boolean }) {
-  return (
-    <Link
-      href={href}
-      className={`inline-flex h-9 items-center gap-1.5 rounded-xl px-3.5 text-sm font-semibold transition-all hover:-translate-y-px [&_svg]:size-4 ${
-        solid ? 'bg-white text-[#7a2f86] shadow-lg shadow-black/10 hover:shadow-xl' : 'bg-white/15 text-white ring-1 ring-white/25 backdrop-blur hover:bg-white/25'
-      }`}
-    >
-      {children}
-    </Link>
-  )
-}
-
 /** Petak pintasan (quick actions). */
 export function QuickLinks({ items, columns = 4 }: { items: { href: string; label: string; description?: string; icon: LucideIcon; tone?: Tone }[]; columns?: 2 | 3 | 4 }) {
   const cols = { 2: 'grid-cols-2', 3: 'grid-cols-2 lg:grid-cols-3', 4: 'grid-cols-2 lg:grid-cols-4' }[columns]

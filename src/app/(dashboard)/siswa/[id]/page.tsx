@@ -45,7 +45,7 @@ export default async function DetailSiswaPage({ params }: { params: Promise<{ id
   return (
     <div className="space-y-6">
       <section className="app-card overflow-hidden">
-        <div className="h-20 sm:h-24" style={{ background: 'var(--brand-gradient)' }} />
+        <div className="cover-doodle h-20 sm:h-24" />
         <div className="flex flex-wrap items-start justify-between gap-4 px-5 pb-5 sm:px-6">
           <div className="flex min-w-0 items-start gap-4">
             <span className="-mt-10 shrink-0 rounded-full bg-[var(--card)] p-1 shadow-md"><Avatar name={student.fullName} size="xl" /></span>

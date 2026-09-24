@@ -36,7 +36,7 @@ export default async function GuruJadwalPage() {
             const isToday = day === todayDow
             return (
               <section key={day} className={`app-card flex flex-col overflow-hidden ${isToday ? 'ring-2 ring-[var(--primary)]/40' : ''}`}>
-                <div className={`flex items-center justify-between px-4 py-3 ${isToday ? 'text-white' : 'border-b border-[var(--border)]'}`} style={isToday ? { background: 'var(--brand-gradient)' } : undefined}>
+                <div className={`flex items-center justify-between px-4 py-3 ${isToday ? 'bg-[var(--primary)] text-[var(--primary-foreground)]' : 'border-b border-[var(--border)]'}`} >
                   <h2 className="font-heading text-sm font-bold">{DAY_NAMES[day]}</h2>
                   <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${isToday ? 'bg-white/20' : 'bg-[var(--muted)] text-[var(--muted-foreground)]'}`}>{isToday ? 'Hari ini' : `${daySchedules.length} kegiatan`}</span>
                 </div>

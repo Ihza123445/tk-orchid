@@ -1,9 +1,10 @@
 import { requireRole } from '@/lib/auth/guard'
 import { db } from '@/lib/db/db'
-import { BookOpenCheck, CalendarClock, CalendarDays, ChartNoAxesCombined, ClipboardCheck, Clock, FileText, Megaphone, School, UsersRound } from 'lucide-react'
-import { formatTanggal, formatTanggalSingkat } from '@/lib/formatting/format'
+import { BookOpenCheck, CalendarClock, CalendarDays, ChartNoAxesCombined, ClipboardCheck, FileText, Megaphone, School, UsersRound } from 'lucide-react'
+import { formatTanggalSingkat } from '@/lib/formatting/format'
 import Link from 'next/link'
-import { Avatar, BannerButton, Empty, EmptyState, IconTile, Panel, Progress, QuickLinks, REPORT_STATUS, Row, RowList, Stat, StatGroup, StatusPill, WelcomeBanner, firstName } from '@/components/dashboard/primitives'
+import { Avatar, Empty, EmptyState, IconTile, Panel, Progress, QuickLinks, REPORT_STATUS, Row, RowList, Stat, StatGroup, StatusPill, firstName } from '@/components/dashboard/primitives'
+import { HeroButton, TeacherHero } from '@/components/dashboard/hero'
 
 export default async function GuruDashboardPage() {
   const user = await requireRole('TEACHER')
@@ -50,32 +51,24 @@ export default async function GuruDashboardPage() {
   const drafts = recentReports.filter((report) => report.status === 'DRAFT').length
   const nowTime = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone: 'Asia/Jakarta' }).format(now)
   const current = todaySchedule.find((item) => item.startTime <= nowTime && item.endTime > nowTime)
-  const next = todaySchedule.find((item) => item.startTime > nowTime)
 
   return (
     <div className="space-y-6">
-      <WelcomeBanner
-        eyebrow={<><CalendarDays className="size-3.5" /> {formatTanggal(now)}</>}
-        title={`Selamat bertugas, ${firstName(user.name)}`}
-        description={todaySchedule.length ? `Hari ini ada ${todaySchedule.length} kegiatan terjadwal di kelas Anda.` : 'Tidak ada jadwal mengajar hari ini. Waktu yang pas untuk melengkapi laporan perkembangan.'}
+      <TeacherHero
+        now={now}
+        name={firstName(user.name)}
+        description={todaySchedule.length ? `Hari ini ada ${todaySchedule.length} kegiatan terjadwal di kelas Anda. Jangan lupa mengisi presensi pagi.` : 'Tidak ada jadwal mengajar hari ini. Waktu yang pas untuk melengkapi laporan perkembangan.'}
+        agenda={todaySchedule.map((item) => ({
+          id: item.id,
+          time: item.startTime,
+          activity: item.activity,
+          state: item.id === current?.id ? 'now' : item.endTime <= nowTime ? 'done' : 'next',
+        }))}
         actions={
           <>
-            <BannerButton href="/guru/presensi" solid><ClipboardCheck /> Isi presensi</BannerButton>
-            <BannerButton href="/guru/perkembangan"><FileText /> Tulis laporan</BannerButton>
+            <HeroButton href="/guru/presensi" variant="chalk"><ClipboardCheck /> Isi presensi</HeroButton>
+            <HeroButton href="/guru/perkembangan" variant="chalk-ghost"><FileText /> Tulis laporan</HeroButton>
           </>
-        }
-        aside={
-          <div className="w-full shrink-0 rounded-2xl bg-white/12 p-4 ring-1 ring-white/20 backdrop-blur sm:w-[320px]">
-            <p className="flex items-center gap-1.5 text-xs text-white/75"><Clock className="size-3.5" /> {current ? 'Sedang berlangsung' : next ? 'Kegiatan berikutnya' : 'Jadwal hari ini'}</p>
-            {current || next ? (
-              <>
-                <p className="mt-1.5 truncate font-heading text-lg font-bold">{(current ?? next)!.activity}</p>
-                <p className="mt-0.5 text-xs text-white/75">{(current ?? next)!.startTime}–{(current ?? next)!.endTime} · {(current ?? next)!.klass.name}</p>
-              </>
-            ) : (
-              <p className="mt-1.5 font-heading text-lg font-bold">{todaySchedule.length ? 'Semua kegiatan selesai' : 'Tidak ada jadwal'}</p>
-            )}
-          </div>
         }
       />
 

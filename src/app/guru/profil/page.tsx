@@ -28,7 +28,7 @@ export default async function GuruProfilPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <section className="app-card overflow-hidden">
-        <div className="h-24" style={{ background: 'var(--brand-gradient)' }} />
+        <div className="cover-doodle h-24" />
         <div className="flex flex-wrap items-start gap-4 px-6 pb-6">
           <span className="-mt-10 shrink-0 rounded-full bg-[var(--card)] p-1 shadow-md"><Avatar name={teacher.fullName} size="xl" /></span>
           <div className="min-w-0 pt-3">

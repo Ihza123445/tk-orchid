@@ -1,9 +1,10 @@
 import Link from 'next/link'
 import { requireRole } from '@/lib/auth/guard'
 import { db } from '@/lib/db/db'
-import { CalendarDays, ChartNoAxesCombined, CheckCircle2, ChevronRight, ClipboardCheck, MapPin, Megaphone, ReceiptText, Sparkles, UsersRound } from 'lucide-react'
-import { formatRupiah, formatTanggal, formatTanggalSingkat } from '@/lib/formatting/format'
-import { Avatar, BannerButton, Empty, EmptyState, IconTile, Panel, Progress, QuickLinks, Row, RowList, WelcomeBanner, firstName } from '@/components/dashboard/primitives'
+import { ChartNoAxesCombined, ChevronRight, ClipboardCheck, MapPin, Megaphone, ReceiptText, Sparkles, UsersRound } from 'lucide-react'
+import { formatRupiah, formatTanggalSingkat } from '@/lib/formatting/format'
+import { Avatar, Empty, EmptyState, IconTile, Panel, Progress, QuickLinks, Row, RowList, firstName } from '@/components/dashboard/primitives'
+import { HeroButton, ParentHero } from '@/components/dashboard/hero'
 
 /**
  * Scoping inti portal ortu: user GUARDIAN hanya boleh lihat anak yang
@@ -97,14 +98,25 @@ export default async function PortalOrtuPage() {
 
   return (
     <div className="space-y-6">
-      <WelcomeBanner
-        eyebrow={<><CalendarDays className="size-3.5" /> {formatTanggal(now)}</>}
-        title={`Halo, ${greetName}`}
-        description="Pantau kehadiran, rapor perkembangan, dan tagihan si kecil di TK Orchid dalam satu tempat."
+      <ParentHero
+        now={now}
+        greeting={`Halo, ${greetName}!`}
+        kids={students.map((student) => ({ id: student.id, name: student.fullName, className: student.enrollments[0]?.klass?.name }))}
+        notes={[
+          ...students.slice(0, 2).map((student) => {
+            const att = attendanceOf(student.id)
+            return att.total
+              ? `${firstName(student.fullName)} hadir ${att.present} dari ${att.total} hari di bulan ${monthName}.`
+              : `Presensi ${firstName(student.fullName)} bulan ${monthName} belum tercatat.`
+          }),
+          totalOutstanding > 0 ? `Ada tagihan ${formatRupiah(totalOutstanding)} yang belum lunas.` : 'Semua tagihan sudah lunas — terima kasih!',
+          ...(announcements[0] ? [`Info terbaru: ${announcements[0].title}`] : []),
+        ]}
+        sticker={totalOutstanding > 0 ? { text: 'Cek tagihan', tone: 'warning' } : { text: 'Lunas!', tone: 'success' }}
         actions={
           <>
-            <BannerButton href={`/portal/anak/${students[0].id}`} solid><Sparkles /> Lihat perkembangan</BannerButton>
-            <BannerButton href="/portal/pengumuman"><Megaphone /> Pengumuman</BannerButton>
+            <HeroButton href={`/portal/anak/${students[0].id}`}><Sparkles /> Lihat perkembangan</HeroButton>
+            <HeroButton href="/portal/pengumuman" variant="ghost"><Megaphone /> Pengumuman</HeroButton>
           </>
         }
       />
@@ -120,15 +132,7 @@ export default async function PortalOrtuPage() {
           </div>
           <span className="inline-flex items-center gap-1 text-sm font-semibold text-amber-700 dark:text-amber-300">Lihat rincian <ChevronRight className="size-4 transition-transform group-hover:translate-x-0.5" /></span>
         </Link>
-      ) : (
-        <div className="flex items-center gap-3 rounded-2xl border border-emerald-500/25 bg-emerald-500/[0.07] px-5 py-4">
-          <IconTile icon={CheckCircle2} tone="success" />
-          <div>
-            <p className="text-sm font-semibold">Semua tagihan sudah lunas</p>
-            <p className="text-xs text-[var(--muted-foreground)]">Terima kasih atas pembayaran tepat waktu.</p>
-          </div>
-        </div>
-      )}
+      ) : null}
 
       <section className="space-y-3">
         <h2 className="section-title">Anak saya</h2>

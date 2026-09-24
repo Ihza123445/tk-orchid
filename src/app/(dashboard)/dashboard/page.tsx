@@ -1,5 +1,4 @@
 import {
-  CalendarCheck2,
   CheckCircle2,
   ChevronRight,
   ClipboardCheck,
@@ -16,18 +15,11 @@ import {
 import Link from 'next/link'
 import { requireAdminStaff } from '@/lib/auth/guard'
 import { db } from '@/lib/db/db'
-import { formatRupiah, formatTanggal, formatTanggalSingkat } from '@/lib/formatting/format'
-import { ADMISSION_STATUS, Avatar, BannerButton, Empty, Panel, QuickLinks, Row, RowList, Stat, StatGroup, StatusPill, WelcomeBanner, firstName } from '@/components/dashboard/primitives'
+import { formatRupiah, formatTanggalSingkat } from '@/lib/formatting/format'
+import { ADMISSION_STATUS, Avatar, Empty, Panel, QuickLinks, Row, RowList, Stat, StatGroup, StatusPill, firstName } from '@/components/dashboard/primitives'
+import { AdminHero, HeroButton } from '@/components/dashboard/hero'
 
 const METHOD: Record<string, string> = { CASH: 'Tunai', TRANSFER: 'Transfer', QRIS: 'QRIS', OTHER: 'Lainnya' }
-
-function greeting(date: Date) {
-  const hour = Number(new Intl.DateTimeFormat('en-GB', { hour: 'numeric', hourCycle: 'h23', timeZone: 'Asia/Jakarta' }).format(date))
-  if (hour < 11) return 'Selamat pagi'
-  if (hour < 15) return 'Selamat siang'
-  if (hour < 18) return 'Selamat sore'
-  return 'Selamat malam'
-}
 
 export default async function DashboardPage() {
   const user = await requireAdminStaff()
@@ -117,30 +109,21 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <WelcomeBanner
-        eyebrow={<><CalendarCheck2 className="size-3.5" /> {formatTanggal(now)}</>}
-        title={`${greeting(now)}, ${firstName(user.name)}`}
-        description={tasks.length ? `Ada ${tasks.length} hal yang perlu ditindaklanjuti hari ini. Semangat mengelola TK Orchid!` : 'Semua beres untuk hari ini. Berikut ringkasan operasional sekolah.'}
+      <AdminHero
+        now={now}
+        name={firstName(user.name)}
+        description={tasks.length ? `Ada ${tasks.length} hal yang perlu ditindaklanjuti hari ini. Mari mulai dari daftar "Perlu tindakan" di bawah.` : 'Semua beres untuk hari ini. Berikut ringkasan operasional TK Orchid.'}
         actions={
           <>
-            <BannerButton href="/siswa/tambah" solid><UserPlus /> Tambah siswa</BannerButton>
-            <BannerButton href="/keuangan/pembayaran"><CreditCard /> Catat pembayaran</BannerButton>
+            <HeroButton href="/siswa/tambah"><UserPlus /> Tambah siswa</HeroButton>
+            <HeroButton href="/keuangan/pembayaran" variant="ghost"><CreditCard /> Catat pembayaran</HeroButton>
           </>
         }
-        aside={
-          <div className="grid shrink-0 grid-cols-2 gap-3 sm:w-[340px]">
-            <div className="rounded-2xl bg-white/12 p-4 ring-1 ring-white/20 backdrop-blur">
-              <p className="text-xs text-white/75">Perlu tindakan</p>
-              <p className="mt-1 font-heading text-2xl font-bold tabular-nums">{tasks.length}</p>
-              <p className="mt-0.5 text-[11px] text-white/70">{tasks.length ? 'hal menunggu Anda' : 'Semua beres'}</p>
-            </div>
-            <div className="rounded-2xl bg-white/12 p-4 ring-1 ring-white/20 backdrop-blur">
-              <p className="text-xs text-white/75">Kas bulan ini</p>
-              <p className="mt-1 truncate font-heading text-2xl font-bold tabular-nums">{formatRupiah(net)}</p>
-              <p className="mt-0.5 text-[11px] capitalize text-white/70">Selisih {monthName}</p>
-            </div>
-          </div>
-        }
+        facts={[
+          { label: 'Perlu tindakan', value: tasks.length, tone: tasks.length ? 'warning' : 'success' },
+          { label: 'Hadir hari ini', value: attendanceRatio === null ? 'belum diisi' : `${attendanceRatio}%`, tone: attendanceRatio === null ? 'warning' : 'success' },
+          { label: `Kas ${monthName}`, value: formatRupiah(net), tone: net < 0 ? 'danger' : 'default' },
+        ]}
       />
 
       <StatGroup>
