@@ -1,15 +1,15 @@
+import { CalendarDays, Camera, MapPin, Sparkles } from 'lucide-react'
 import { db } from '@/lib/db/db'
 import { formatTanggalSingkat } from '@/lib/formatting/format'
+import { IMG } from '@/lib/assets/public-images'
 import { SiteHeader } from '@/components/public/site-header'
 import { Reveal } from '@/components/public/reveal'
-import { IMG } from '@/lib/assets/public-images'
+import { AdmissionCta, PublicPage, PublicPageHero, SectionHeading, SiteFooter } from '@/components/public/public-chrome'
 
-export const metadata = { title: 'Kegiatan — TK Orchid' }
-
-// Selalu render fresh dari database (bukan cache statis)
+export const metadata = { title: 'Kegiatan' }
 export const revalidate = 0
 
-const KEGIATAN_IMAGES = [IMG.galeri1, IMG.galeri2, IMG.galeri3, IMG.programTematik, IMG.programSeni, IMG.berita]
+const IMAGES = [IMG.galeri1, IMG.galeri3, IMG.programSeni, IMG.programTematik, IMG.hero2, IMG.berita]
 
 export default async function KegiatanPublikPage() {
   const activities = await db.activity.findMany({
@@ -17,58 +17,88 @@ export default async function KegiatanPublikPage() {
     orderBy: { startDatetime: 'desc' },
   })
 
+  const [featured, ...others] = activities
+
   return (
-    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
+    <PublicPage>
       <SiteHeader />
+      <PublicPageHero
+        index="04"
+        eyebrow="Kegiatan sekolah"
+        title="Hari-hari yang"
+        accent="penuh cerita."
+        description="Dokumentasi pengalaman anak saat bermain, berkarya, bekerja sama, dan menemukan sesuatu untuk pertama kalinya."
+        image={IMG.programSeni}
+        imageAlt="Anak-anak berekspresi dalam kegiatan sekolah"
+      />
 
-      {/* HERO */}
-      <section className="relative overflow-hidden">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={IMG.galeri1} alt="Kegiatan anak TK Orchid" className="absolute inset-0 h-full w-full object-cover" />
-        <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/55 to-black/35" />
-        <div className="relative mx-auto max-w-[1100px] px-4 py-20 text-center sm:py-24">
-          <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-white backdrop-blur-md">
-            ✨ Dokumentasi
-          </span>
-          <h1 className="mt-5 font-heading text-3xl font-bold tracking-tight text-white drop-shadow sm:text-5xl">Kegiatan Sekolah</h1>
-          <p className="mx-auto mt-4 max-w-xl text-sm text-white/90 drop-shadow sm:text-lg">
-            Beragam aktivitas seru yang menumbuhkan karakter, kreativitas, dan kepercayaan diri anak.
-          </p>
-        </div>
-      </section>
+      <main id="main-content">
+        <section className="school-section">
+          <div className="public-container">
+            <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+              <SectionHeading
+                eyebrow="Cerita terbaru"
+                title="Belajar terlihat dari"
+                accent="hal-hal kecil."
+                description="Setiap foto menyimpan proses: keberanian mencoba, kesabaran mengulang, dan kegembiraan saat berhasil."
+              />
+              <p className="rounded-full bg-[var(--secondary)] px-4 py-2 text-xs font-bold text-[var(--primary)]">{activities.length} cerita diterbitkan</p>
+            </div>
 
-      {/* GRID KEGIATAN — foto cards masonry-feel */}
-      <main className="mx-auto max-w-[1100px] px-4 py-16">
-        {activities.length === 0 ? (
-          <p className="rounded-2xl border border-dashed p-12 text-center text-sm text-[var(--muted-foreground)]">Belum ada kegiatan.</p>
-        ) : (
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {activities.map((a, i) => (
-              <Reveal key={a.id} delay={(i % 3) * 110}>
-              <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)] shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl">
-                <div className="relative h-48 overflow-hidden">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={KEGIATAN_IMAGES[i % KEGIATAN_IMAGES.length]} alt={a.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                  <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                  <time className="absolute left-4 top-4 rounded-full bg-black/55 px-3 py-1 text-xs font-medium text-white backdrop-blur-md">
-                    {a.startDatetime ? formatTanggalSingkat(a.startDatetime) : ''}
-                  </time>
-                </div>
-                <div className="flex flex-1 flex-col p-6">
-                  <h2 className="line-clamp-2 font-semibold leading-snug group-hover:text-[var(--primary)]">{a.title}</h2>
-                  <p className="mt-2.5 line-clamp-3 flex-1 text-sm leading-relaxed text-[var(--muted-foreground)]">{a.description}</p>
-                  {a.location && (
-                    <p className="mt-4 inline-flex items-center gap-1.5 text-xs font-medium text-[var(--muted-foreground)]">
-                      📍 {a.location}
-                    </p>
-                  )}
-                </div>
-              </article>
-              </Reveal>
-            ))}
+            {!featured ? (
+              <div className="mt-12 rounded-[1.75rem] border border-dashed border-[var(--border)] bg-[var(--card)] p-10 text-center">
+                <Camera className="mx-auto size-8 text-[var(--primary)]" />
+                <h2 className="mt-4 text-xl font-bold">Belum ada cerita kegiatan.</h2>
+                <p className="mt-2 text-sm text-[var(--muted-foreground)]">Dokumentasi terbaru akan hadir di halaman ini.</p>
+              </div>
+            ) : (
+              <>
+                <Reveal className="mt-12" variant="scale">
+                  <article className="group grid overflow-hidden rounded-[2rem] bg-[var(--primary)] text-white shadow-[0_24px_60px_color-mix(in_srgb,var(--primary)_20%,transparent)] lg:grid-cols-[1.18fr_.82fr]">
+                    <figure className="min-h-[330px] overflow-hidden lg:min-h-[500px]">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={featured.coverImage || IMAGES[0]} alt={featured.title} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.035]" />
+                    </figure>
+                    <div className="flex flex-col justify-center p-7 sm:p-10 lg:p-12">
+                      <span className="inline-flex w-fit items-center gap-2 rounded-full bg-white/15 px-3 py-2 text-[11px] font-bold uppercase tracking-[.12em]"><Sparkles className="size-3.5" /> Pilihan terbaru</span>
+                      <h2 className="mt-6 text-3xl font-extrabold leading-tight tracking-[-.045em] sm:text-4xl">{featured.title}</h2>
+                      <p className="mt-4 whitespace-pre-line text-sm leading-7 text-white/75">{featured.description}</p>
+                      <div className="mt-7 flex flex-wrap gap-4 text-xs font-bold text-white/80">
+                        <time className="flex items-center gap-2"><CalendarDays className="size-4" /> {formatTanggalSingkat(featured.startDatetime)}</time>
+                        {featured.location && <span className="flex items-center gap-2"><MapPin className="size-4" /> {featured.location}</span>}
+                      </div>
+                    </div>
+                  </article>
+                </Reveal>
+
+                {others.length > 0 && (
+                  <div className="school-activity-grid">
+                    {others.map((activity, index) => (
+                      <Reveal key={activity.id} delay={(index % 3) * 80} variant="scale">
+                        <article className="school-activity-card h-full">
+                          <figure>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={activity.coverImage || IMAGES[(index + 1) % IMAGES.length]} alt={activity.title} loading="lazy" />
+                            <time>{formatTanggalSingkat(activity.startDatetime)}</time>
+                          </figure>
+                          <div className="school-activity-card-body">
+                            <h2>{activity.title}</h2>
+                            <p className="line-clamp-3 whitespace-pre-line">{activity.description}</p>
+                            {activity.location && <span className="school-activity-meta"><MapPin /> {activity.location}</span>}
+                          </div>
+                        </article>
+                      </Reveal>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
           </div>
-        )}
+        </section>
+
+        <AdmissionCta title="Ingin si kecil menjadi bagian dari cerita berikutnya?" description="Kenali lingkungan belajar TK Orchid dan lihat bagaimana kegiatan harian membantu anak tumbuh dengan bahagia." />
       </main>
-    </div>
+      <SiteFooter />
+    </PublicPage>
   )
 }

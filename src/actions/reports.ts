@@ -76,38 +76,51 @@ export async function saveDevelopmentReportAction(_prev: ReportState, formData: 
     // reportNo unik: RPT-<ay>-<student>-<period>
     const periodSlug = parsed.data.period.replace(/\s+/g, '').toUpperCase()
     const reportNo = `RPT-${ayId}-${parsed.data.studentId}-${periodSlug}`
-
-    const report = await db.developmentReport.upsert({
-      where: { studentId_academicYearId_period: { studentId: parsed.data.studentId, academicYearId: ayId, period: parsed.data.period } },
-      create: {
-        reportNo,
+    const uniqueWhere = {
+      studentId_academicYearId_period: {
         studentId: parsed.data.studentId,
         academicYearId: ayId,
-        classId: parsed.data.classId,
         period: parsed.data.period,
-        summary: parsed.data.summary ?? null,
-        homeRecommendation: parsed.data.homeRecommendation ?? null,
-        status: 'DRAFT',
-        createdBy: access.userId,
-        teacherId: access.teacherId,
       },
-      update: {
-        summary: parsed.data.summary ?? null,
-        homeRecommendation: parsed.data.homeRecommendation ?? null,
-        reportUpdatedAt: new Date(),
-      },
-    })
+    }
+    const existing = await db.developmentReport.findUnique({ where: uniqueWhere, select: { status: true } })
+    if (existing && existing.status !== 'DRAFT') {
+      return { error: 'Laporan yang sudah dikirim untuk review atau diterbitkan tidak dapat diubah.' }
+    }
 
-    // Replace items
-    await db.developmentItem.deleteMany({ where: { reportId: report.id } })
-    await db.developmentItem.createMany({
-      data: parsed.data.items.map((item, idx) => ({
-        reportId: report.id,
-        domainId: item.domainId,
-        scaleId: item.scaleId,
-        narrative: item.narrative ?? null,
-        sortOrder: idx,
-      })),
+    const report = await db.$transaction(async (tx) => {
+      const saved = await tx.developmentReport.upsert({
+        where: uniqueWhere,
+        create: {
+          reportNo,
+          studentId: parsed.data.studentId,
+          academicYearId: ayId,
+          classId: parsed.data.classId,
+          period: parsed.data.period,
+          summary: parsed.data.summary ?? null,
+          homeRecommendation: parsed.data.homeRecommendation ?? null,
+          status: 'DRAFT',
+          createdBy: access.userId,
+          teacherId: access.teacherId,
+        },
+        update: {
+          summary: parsed.data.summary ?? null,
+          homeRecommendation: parsed.data.homeRecommendation ?? null,
+          reportUpdatedAt: new Date(),
+        },
+      })
+
+      await tx.developmentItem.deleteMany({ where: { reportId: saved.id } })
+      await tx.developmentItem.createMany({
+        data: parsed.data.items.map((item, idx) => ({
+          reportId: saved.id,
+          domainId: item.domainId,
+          scaleId: item.scaleId,
+          narrative: item.narrative ?? null,
+          sortOrder: idx,
+        })),
+      })
+      return saved
     })
 
     await audit({

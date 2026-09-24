@@ -1,15 +1,22 @@
 import type { Metadata } from 'next'
-import { Plus_Jakarta_Sans, Inter } from 'next/font/google'
+import { Caveat, Plus_Jakarta_Sans, Inter } from 'next/font/google'
 import './globals.css'
+import './public-school.css'
 
 const jakarta = Plus_Jakarta_Sans({
-  variable: '--font-heading',
+  variable: '--font-jakarta',
   subsets: ['latin'],
 })
 
 const inter = Inter({
-  variable: '--font-sans',
+  variable: '--font-inter',
   subsets: ['latin'],
+})
+
+const playful = Caveat({
+  variable: '--font-playful',
+  subsets: ['latin'],
+  weight: ['500', '600', '700'],
 })
 
 export const metadata: Metadata = {
@@ -18,12 +25,12 @@ export const metadata: Metadata = {
     template: '%s — TK Orchid',
   },
   description:
-    'Sistem Informasi Administrasi Siswa Taman Kanak-Kanah Berbasis Web — Studi Kasus TK Orchid, Bekasi. Konten profil sekolah dapat diubah dari menu Pengaturan.',
+    'Sistem informasi administrasi siswa dan portal keluarga TK Orchid, Bekasi.',
 }
 
-// Anti-flash: default DARK (night) mode. Baca preferensi tersimpan sebelum paint pertama.
-// 'light' tersimpan → tidak menambahkan .dark. Kosong/error → dark.
-const themeScript = `(function(){try{var t=localStorage.getItem('orchid-theme');if(t!=='light'){document.documentElement.classList.add('dark');}}catch(e){document.documentElement.classList.add('dark');}})();`
+// Anti-flash: halaman publik ramah keluarga memakai light mode sebagai default.
+// Preferensi dark yang pernah dipilih tetap dihormati sebelum paint pertama.
+const themeScript = `(function(){try{var t=localStorage.getItem('orchid-theme');if(t==='dark'){document.documentElement.classList.add('dark');}}catch(e){}})();`
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -31,7 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className={`${jakarta.variable} ${inter.variable} antialiased`}>{children}</body>
+      <body className={`${jakarta.variable} ${inter.variable} ${playful.variable} antialiased`}>{children}</body>
     </html>
   )
 }

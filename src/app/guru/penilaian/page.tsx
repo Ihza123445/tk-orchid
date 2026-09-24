@@ -1,12 +1,10 @@
 import { requireRole } from '@/lib/auth/guard'
 import { db } from '@/lib/db/db'
-import { getAssessmentOptions } from '@/actions/assessments'
 import { PenilaianForm, RekapTable } from '@/components/assessments/penilaian-form'
 
 export const metadata = { title: 'Penilaian — Guru' }
 
 export default async function GuruPenilaianPage() {
-  await requireRole('TEACHER')
   const user = await requireRole('TEACHER')
   const teacher = await db.teacher.findUnique({ where: { userId: user.id } })
 

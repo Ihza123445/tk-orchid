@@ -1,17 +1,19 @@
 import type { Metadata } from 'next'
-import { ForgotPasswordForm } from '@/components/auth/forgot-password-form'
+import { ResetPasswordForm } from '@/components/auth/reset-password-form'
+import { AuthShell } from '@/components/auth/auth-shell'
 
-export const metadata: Metadata = { title: 'Lupa Password — TK Orchid' }
+export const metadata: Metadata = { title: 'Atur Ulang Password' }
 
-export default function ForgotPasswordPage() {
+export default async function ResetPasswordPage({ params }: { params: Promise<{ token: string }> }) {
+  const { token } = await params
+
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[var(--background)] px-4">
-      <div className="w-full max-w-sm space-y-6">
-        <div className="text-center">
-          <h1 className="text-2xl font-semibold tracking-tight text-[var(--primary)]">TK Orchid</h1>
-        </div>
-        <ForgotPasswordForm />
-      </div>
-    </main>
+    <AuthShell
+      eyebrow="Keamanan akun"
+      title="Buat password baru"
+      description="Gunakan minimal 8 karakter dan pilih kombinasi yang tidak mudah ditebak."
+    >
+      <ResetPasswordForm token={token} />
+    </AuthShell>
   )
 }

@@ -5,10 +5,10 @@ import { SESSION_COOKIE, verifySessionToken } from '@/lib/auth/session'
 // Catatan: /kegiatan, /pengumuman, /pendaftaran (public group) TIDAK dilindungi — versi publik.
 // Admin area: keuangan pakai prefix /tagihan /pembayaran /pengeluaran di bawah /keuangan.
 const ADMIN_STAFF_PREFIXES = [
-  '/dashboard', '/siswa', '/wali', '/tahun-ajaran', '/kelas',
+  '/dashboard', '/ppdb', '/siswa', '/wali', '/tahun-ajaran', '/kelas',
   '/presensi', '/penilaian', '/perkembangan',
   '/keuangan/tagihan', '/keuangan/pembayaran', '/keuangan/pengeluaran', '/keuangan/jenis-biaya',
-  '/dokumen', '/laporan', '/pengguna', '/audit-log', '/pengaturan',
+  '/dokumen', '/laporan', '/pengguna', '/audit-log', '/pengaturan', '/website',
 ]
 
 const TEACHER_PREFIXES = ['/guru']
@@ -60,7 +60,7 @@ export const config = {
   matcher: [
     // Protected areas saja — public & API statis dilewati
     '/login',
-    '/dashboard/:path*', '/siswa/:path*', '/wali/:path*',
+    '/dashboard/:path*', '/ppdb/:path*', '/siswa/:path*', '/wali/:path*',
     '/tahun-ajaran/:path*', '/kelas/:path*', '/presensi/:path*', '/penilaian/:path*',
     '/perkembangan/:path*',
     '/keuangan/:path*',

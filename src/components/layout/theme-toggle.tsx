@@ -1,6 +1,21 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useSyncExternalStore } from 'react'
+
+const THEME_EVENT = 'orchid-theme-change'
+
+function subscribe(callback: () => void) {
+  window.addEventListener(THEME_EVENT, callback)
+  window.addEventListener('storage', callback)
+  return () => {
+    window.removeEventListener(THEME_EVENT, callback)
+    window.removeEventListener('storage', callback)
+  }
+}
+
+function getThemeSnapshot() {
+  return document.documentElement.classList.contains('dark')
+}
 
 function SunIcon() {
   return (
@@ -20,15 +35,11 @@ function MoonIcon() {
 }
 
 /**
- * Toggle dark/light. Default aplikasi = DARK.
+ * Toggle dark/light. Default aplikasi = LIGHT.
  * Persist ke localStorage('orchid-theme') — dibaca anti-flash script di root layout.
  */
 export function ThemeToggle({ className = '' }: { className?: string }) {
-  const [isDark, setIsDark] = useState(true)
-
-  useEffect(() => {
-    setIsDark(document.documentElement.classList.contains('dark'))
-  }, [])
+  const isDark = useSyncExternalStore(subscribe, getThemeSnapshot, () => false)
 
   function toggle() {
     const next = !document.documentElement.classList.contains('dark')
@@ -38,7 +49,7 @@ export function ThemeToggle({ className = '' }: { className?: string }) {
     } catch {
       /* private mode */
     }
-    setIsDark(next)
+    window.dispatchEvent(new Event(THEME_EVENT))
   }
 
   return (

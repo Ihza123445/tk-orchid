@@ -1,17 +1,17 @@
 import type { Metadata } from 'next'
-import { ForgotPasswordForm } from '@/components/auth/forgot-password-form'
+import { LoginForm } from '@/components/auth/login-form'
+import { AuthShell } from '@/components/auth/auth-shell'
 
-export const metadata: Metadata = { title: 'Lupa Password — TK Orchid' }
+export const metadata: Metadata = { title: 'Masuk' }
 
-export default function ForgotPasswordPage() {
+export default function LoginPage() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[var(--background)] px-4">
-      <div className="w-full max-w-sm space-y-6">
-        <div className="text-center">
-          <h1 className="text-2xl font-semibold tracking-tight text-[var(--primary)]">TK Orchid</h1>
-        </div>
-        <ForgotPasswordForm />
-      </div>
-    </main>
+    <AuthShell
+      eyebrow="Selamat datang kembali"
+      title="Masuk ke portal"
+      description="Gunakan akun admin, staf, guru, atau orang tua yang sudah terdaftar."
+    >
+      <LoginForm />
+    </AuthShell>
   )
 }

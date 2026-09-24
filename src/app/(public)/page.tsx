@@ -1,299 +1,255 @@
 import Link from 'next/link'
+import { ArrowRight, ArrowUpRight, CheckCircle2, HeartHandshake, MapPin, ShieldCheck, Sparkles, UsersRound } from 'lucide-react'
 import { db } from '@/lib/db/db'
 import { formatTanggalSingkat } from '@/lib/formatting/format'
+import { IMG } from '@/lib/assets/public-images'
+import { getFacilities, getHeroSlides } from '@/lib/cms/content'
 import { SiteHeader } from '@/components/public/site-header'
 import { HeroSlider } from '@/components/public/hero-slider'
-import { Reveal, CountUp } from '@/components/public/reveal'
-import { IMG } from '@/lib/assets/public-images'
+import { Reveal } from '@/components/public/reveal'
+import { AdmissionCta, PublicPage, SchoolMarquee, SectionHeading, SiteFooter } from '@/components/public/public-chrome'
+import { FaqSection, LevelsSection, LocationSection, PrincipalMessage, QuickHub, TestimonialsSection } from '@/components/public/school-sections'
 
-export const metadata = { title: 'TK Orchid — Rumah Belajar Pertama Anak Hebat' }
-
-// Selalu render fresh dari database (bukan cache statis)
+export const metadata = { title: { absolute: 'TK Orchid — Tumbuh dengan Bahagia' } }
 export const revalidate = 0
 
-const SECTION_HEAD = 'text-center'
-const SECTION_TITLE = 'text-2xl font-bold tracking-tight sm:text-3xl'
-const SECTION_SUB = 'mt-2 text-sm text-[var(--muted-foreground)] sm:text-base'
-const ACCENT_LINE = 'mx-auto mt-4 block h-1 w-16 rounded-full bg-[var(--primary)]'
-
-function ProgramCard({
-  title,
-  icon,
-  desc,
-  points,
-  href,
-  image,
-  reverse,
-}: {
-  title: string
-  icon: string
-  desc: string
-  points: string[]
-  href: string
-  image: string
-  reverse?: boolean
-}) {
-  return (
-    <div className={`flex overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--card)] shadow-sm transition-shadow duration-300 hover:shadow-lg md:h-[340px] ${reverse ? 'md:flex-row-reverse' : 'md:flex-row'}`}>
-      {/* Gambar */}
-      <div className="relative hidden w-2/5 overflow-hidden md:block">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={image}
-          alt={title}
-          loading="lazy"
-          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 hover:scale-105"
-        />
-        <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
-        <span aria-hidden="true" className="absolute bottom-4 left-4 flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 text-xl backdrop-blur-md">
-          {icon}
-        </span>
-      </div>
-      {/* Konten */}
-      <div className="flex flex-1 flex-col justify-center p-7 sm:p-9">
-        <h3 className="text-lg font-bold sm:text-xl">{title}</h3>
-        <p className="mt-3 text-sm leading-relaxed text-[var(--muted-foreground)]">{desc}</p>
-        <ul className="mt-5 grid gap-2.5 text-sm sm:grid-cols-2">
-          {points.map((p) => (
-            <li key={p} className="flex items-center gap-2.5 rounded-lg border border-[var(--border)] bg-[var(--muted)] px-3 py-2">
-              <span aria-hidden="true" className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--primary)]/15 text-[10px] text-[var(--primary)]">✓</span>
-              {p}
-            </li>
-          ))}
-        </ul>
-        <Link href={href} className="group/link mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--primary)] hover:underline">
-          Lihat Detail
-          <span aria-hidden="true" className="transition-transform duration-300 group-hover/link:translate-x-1">→</span>
-        </Link>
-      </div>
-    </div>
-  )
-}
+const VALUES = [
+  { icon: HeartHandshake, title: 'Pendampingan hangat', body: 'Setiap anak dikenal, didengar, dan didampingi sesuai tahap tumbuhnya.' },
+  { icon: ShieldCheck, title: 'Lingkungan aman', body: 'Ruang belajar bersih dan rutinitas sekolah dirancang ramah anak.' },
+  { icon: Sparkles, title: 'Belajar bermakna', body: 'Konsep dikenalkan lewat pengalaman nyata, bukan sekadar lembar kerja.' },
+  { icon: UsersRound, title: 'Dekat dengan keluarga', body: 'Orang tua menjadi rekan dalam memahami perkembangan si kecil.' },
+]
 
 export default async function HomePage() {
-  const [announcements, activities] = await Promise.all([
-    db.announcement.findMany({ where: { status: 'PUBLISHED', audience: 'PUBLIC' }, orderBy: { publishAt: 'desc' }, take: 3 }),
+  const now = new Date()
+  const [announcements, activities, activeStudents, activeTeachers, activityCount, admissionPeriod, slides, facilities] = await Promise.all([
+    db.announcement.findMany({
+      where: {
+        status: 'PUBLISHED',
+        audience: 'PUBLIC',
+        AND: [
+          { OR: [{ publishAt: null }, { publishAt: { lte: now } }] },
+          { OR: [{ expireAt: null }, { expireAt: { gt: now } }] },
+        ],
+      },
+      orderBy: { publishAt: 'desc' },
+      take: 3,
+    }),
     db.activity.findMany({ where: { status: 'PUBLISHED', visibility: 'PUBLIC' }, orderBy: { startDatetime: 'desc' }, take: 3 }),
+    db.student.count({ where: { status: 'ACTIVE' } }),
+    db.teacher.count({ where: { isActive: true } }),
+    db.activity.count({ where: { status: 'PUBLISHED', visibility: 'PUBLIC' } }),
+    db.admissionPeriod.findFirst({ where: { isActive: true }, orderBy: { startDate: 'desc' } }),
+    getHeroSlides(),
+    getFacilities(),
   ])
-
-  const galeriImages = [IMG.galeri1, IMG.galeri2, IMG.galeri3]
+  const registrationOpen = Boolean(admissionPeriod && admissionPeriod.startDate <= now && admissionPeriod.endDate >= now)
+  const activityImages = [IMG.galeri1, IMG.galeri3, IMG.programSeni]
 
   return (
-    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
+    <PublicPage>
       <SiteHeader />
+      <HeroSlider slides={slides.map(({ id, eyebrow, title, accent, description, image, imageAlt }) => ({ id, eyebrow, title, accent, description, image, imageAlt }))} stats={{ students: activeStudents, teachers: activeTeachers, activities: activityCount }} />
+      <SchoolMarquee />
 
-      <HeroSlider />
-
-      {/* INFORMASI & ARTIKEL */}
-      <section className="mx-auto max-w-[1100px] px-4 py-16 sm:py-20">
-        <div className={SECTION_HEAD}>
-          <h2 className={SECTION_TITLE}>Informasi &amp; Artikel</h2>
-          <p className={SECTION_SUB}>Ikuti perkembangan terbaru dan berbagai kegiatan menarik di TK Orchid</p>
-          <span aria-hidden="true" className={ACCENT_LINE} />
-        </div>
-
-        <div className="mt-10 grid gap-7 md:grid-cols-3">
-          {announcements.length === 0 && (
-            <p className="col-span-3 text-center text-sm text-[var(--muted-foreground)]">Belum ada pengumuman.</p>
-          )}
-          {announcements.map((a, i) => (
-            <Reveal key={a.id} delay={i * 110}>
-            <article
-              className="group flex flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)] shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl"
-            >
-              <div className="relative h-44 overflow-hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={IMG.berita}
-                  alt={a.title}
-                  loading="lazy"
-                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-                <time className="absolute left-4 top-4 rounded-full bg-black/55 px-3 py-1 text-xs font-medium text-white backdrop-blur-md">
-                  {formatTanggalSingkat(a.publishAt ?? a.createdAt)}
-                </time>
-              </div>
-              <div className="flex flex-1 flex-col p-6">
-                <h3 className="line-clamp-2 font-semibold leading-snug transition-colors duration-200 group-hover:text-[var(--primary)]">{a.title}</h3>
-                <p className="mt-2.5 line-clamp-3 flex-1 text-sm leading-relaxed text-[var(--muted-foreground)]">{a.content}</p>
-                <Link href="/pengumuman" className="group/link mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--primary)] hover:underline">
-                  Baca selengkapnya
-                  <span aria-hidden="true" className="transition-transform duration-300 group-hover/link:translate-x-1">→</span>
-                </Link>
-              </div>
-            </article>
-            </Reveal>
-          ))}
-        </div>
-      </section>
-
-      {/* PROGRAM UNGGULAN — kartu foto alternating */}
-      <section className="border-y border-[var(--border)] bg-[var(--muted)] py-16 sm:py-20">
-        <div className="mx-auto max-w-[1100px] px-4">
-          <div className={SECTION_HEAD}>
-            <h2 className={SECTION_TITLE}>Program Unggulan &amp; Kegiatan Sekolah</h2>
-            <p className={SECTION_SUB}>Mewujudkan anak berkarakter, kreatif, dan percaya diri</p>
-            <span aria-hidden="true" className={ACCENT_LINE} />
-          </div>
-
-          <div className="mt-12 space-y-9">
-            <Reveal>
-            <ProgramCard
-              title="Pembelajaran Tematik Kurikulum Merdeka"
-              icon="📚"
-              desc="Belajar menyenangkan melalui tema dekat dengan dunia anak, membangun literasi, numerasi, dan karakter sejak dini."
-              points={['Literasi & numerasi dasar', 'Proyek seni & kreativitas', 'Pembiasaan karakter kristiani', 'Kelas inklusif penuh kasih']}
-              href="/profil"
-              image={IMG.programTematik}
-            />
-            </Reveal>
-            <Reveal>
-            <ProgramCard
-              title="Seni, Musik & Motorik"
-              icon="🎨"
-              desc="Melatih ekspresi, koordinasi, dan kepercayaan diri anak melalui lagu, tari, dan permainan gerak."
-              points={['Seni musik & tari', 'Motorik kasar & halus', 'Penampilan setiap semester', 'Festival seni tahunan']}
-              href="/kegiatan"
-              image={IMG.programSeni}
-              reverse
-            />
-            </Reveal>
-          </div>
-
-          <Reveal className="mt-11 text-center">
-            <Link
-              href="/kegiatan"
-              className="inline-flex items-center gap-2 rounded-full border border-[var(--primary)]/40 bg-[var(--card)] px-8 py-3 font-semibold text-[var(--primary)] shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-[var(--primary)] hover:text-[var(--primary-foreground)] hover:shadow-lg"
-            >
-              Lihat Semua Kegiatan <span aria-hidden="true">→</span>
-            </Link>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* GALERI KEGIATAN — masonry ala instagram */}
-      <section className="mx-auto max-w-[1100px] px-4 py-16 sm:py-20">
-        <div className={SECTION_HEAD}>
-          <h2 className={SECTION_TITLE}>Galeri Kegiatan</h2>
-          <p className={SECTION_SUB}>Momen berharga perjalanan belajar si kecil</p>
-          <span aria-hidden="true" className={ACCENT_LINE} />
-        </div>
-
-        <div className="mt-10 grid gap-7 sm:grid-cols-3">
-          {activities.length === 0 && (
-            <p className="col-span-3 text-center text-sm text-[var(--muted-foreground)]">Belum ada kegiatan.</p>
-          )}
-          {activities.map((g, i) => (
-            <Reveal key={g.id} delay={i * 120}>
-            <figure
-              className="group relative aspect-[4/5] overflow-hidden rounded-2xl shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl"
-            >
+      <main id="main-content">
+        <section className="school-section">
+          <div className="public-container school-intro-grid">
+            <Reveal variant="left" className="school-intro-collage">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={galeriImages[i % galeriImages.length]}
-                alt={g.title}
-                loading="lazy"
-                className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-              />
-              <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
-              <figcaption className="absolute inset-x-0 bottom-0 p-5">
-                <time className="text-xs font-medium uppercase tracking-wide text-white/70">{formatTanggalSingkat(g.startDatetime)}</time>
-                <p className="mt-1 line-clamp-2 text-sm font-semibold text-white">{g.title}</p>
-              </figcaption>
-            </figure>
+              <img src={IMG.programTematik} alt="Guru mendampingi kegiatan belajar anak" loading="lazy" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={IMG.galeri3} alt="Kegiatan seni anak" loading="lazy" />
             </Reveal>
-          ))}
-        </div>
-      </section>
+            <Reveal variant="right">
+              <SectionHeading
+                eyebrow="Sekilas TK Orchid"
+                title="Sekolah pertama yang"
+                accent="terasa seperti rumah."
+                description="Masa kanak-kanak adalah waktu untuk mencoba, bertanya, tertawa, dan membangun rasa percaya diri. TK Orchid hadir untuk menjaga proses itu tetap hangat dan bermakna."
+              />
+              <ul className="school-feature-list">
+                <li><CheckCircle2 /> Kurikulum Merdeka PAUD yang dekat dengan kehidupan anak</li>
+                <li><CheckCircle2 /> Kegiatan yang seimbang antara karakter, kreativitas, dan kesiapan akademik</li>
+                <li><CheckCircle2 /> Komunikasi rutin antara guru dan orang tua</li>
+              </ul>
+              <Link href="/profil" className="school-text-link">Kenali TK Orchid <ArrowRight /></Link>
+            </Reveal>
+          </div>
+        </section>
 
-      {/* CTA PPDB — gradasi orchid */}
-      <section className="relative overflow-hidden px-4 py-16 text-center sm:py-20">
-        <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-br from-[#A64CA6] via-[var(--primary)] to-[#7C3AED]" />
-        <div aria-hidden="true" className="absolute -left-16 -top-16 h-56 w-56 rounded-full bg-white/10 blur-2xl" />
-        <div aria-hidden="true" className="absolute -bottom-20 -right-10 h-64 w-64 rounded-full bg-black/15 blur-2xl" />
-        <div className="relative mx-auto max-w-3xl text-white">
-          <span className="mb-4 inline-block rounded-full border border-white/30 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest backdrop-blur-md">
-            🎒 PPDB 2026/2027 Dibuka
-          </span>
-          <h2 className="text-2xl font-bold sm:text-3xl">Siap Bergabung dengan Keluarga TK Orchid?</h2>
-          <p className="mx-auto mt-3 max-w-xl text-sm opacity-90 sm:text-base">
-            Kuota terbatas untuk setiap kelompok usia. Proses pendaftaran mudah, cepat, sepenuhnya online.
-          </p>
-          <Link
-            href="/pendaftaran"
-            className="mt-8 inline-flex items-center gap-2 rounded-full bg-white px-9 py-3.5 font-bold text-[#23071F] shadow-xl transition-all duration-300 hover:-translate-y-0.5 hover:shadow-2xl"
-          >
-            Daftar PPDB Online <span aria-hidden="true">→</span>
-          </Link>
-        </div>
-      </section>
+        <QuickHub />
 
-      {/* FOOTER */}
-      <footer className="border-t border-[var(--border)] bg-[var(--card)]">
-        <div className="mx-auto grid max-w-[1100px] gap-10 px-4 py-14 md:grid-cols-3">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--primary)] text-sm font-bold text-[var(--primary-foreground)]">🌸</span>
-              <div>
-                <p className="font-bold">TK Orchid</p>
-                <p className="text-xs text-[var(--muted-foreground)]">Taman Kanak-Kanak</p>
+        <section className="school-section soft">
+          <div className="public-container">
+            <SectionHeading
+              eyebrow="Mengapa keluarga memilih Orchid"
+              title="Kecil kelasnya,"
+              accent="besar perhatiannya."
+              description="Kami menjaga pengalaman belajar tetap personal, aman, dan mudah dipahami keluarga."
+              align="center"
+            />
+            <div className="school-values-grid">
+              {VALUES.map((value, index) => (
+                <Reveal key={value.title} delay={index * 90} variant="scale">
+                  <article className="school-value-card">
+                    <span><value.icon /></span>
+                    <h3>{value.title}</h3>
+                    <p>{value.body}</p>
+                    <i aria-hidden="true" />
+                  </article>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <LevelsSection />
+        <PrincipalMessage />
+
+        <section className="school-section soft">
+          <div className="public-container">
+            <SectionHeading
+              eyebrow="Program belajar"
+              title="Bermain adalah cara anak"
+              accent="memahami dunia."
+              description="Program kami memberi anak kesempatan untuk bergerak, berbahasa, berkarya, memecahkan masalah, dan belajar hidup bersama."
+            />
+
+            <div className="school-program-grid">
+              <Reveal variant="left">
+                <article className="school-program-card purple">
+                  <figure>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={IMG.programTematik} alt="Pembelajaran tematik TK Orchid" loading="lazy" />
+                  </figure>
+                  <div className="school-program-card-body">
+                    <h3>Pembelajaran Tematik</h3>
+                    <p>Literasi, numerasi, sains, dan karakter dipelajari melalui tema yang anak jumpai setiap hari.</p>
+                    <ul className="school-program-points">
+                      {['Kelompok Bermain · 3–4 th', 'TK A · 4–5 th', 'TK B · 5–6 th', 'Proyek sederhana'].map((point) => <li key={point}><CheckCircle2 /> {point}</li>)}
+                    </ul>
+                  </div>
+                </article>
+              </Reveal>
+              <Reveal variant="right" delay={100}>
+                <article className="school-program-card gold">
+                  <figure>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={IMG.programSeni} alt="Program seni musik dan gerak" loading="lazy" />
+                  </figure>
+                  <div className="school-program-card-body">
+                    <h3>Seni, Musik &amp; Gerak</h3>
+                    <p>Ruang aman bagi anak untuk mengolah rasa, melatih motorik, dan berani menampilkan ekspresi.</p>
+                    <ul className="school-program-points">
+                      {['Musik & ritme', 'Seni rupa', 'Tari & gerak', 'Pentas semester'].map((point) => <li key={point}><CheckCircle2 /> {point}</li>)}
+                    </ul>
+                  </div>
+                </article>
+              </Reveal>
+            </div>
+            <Link href="/program" className="school-text-link">Lihat seluruh program <ArrowRight /></Link>
+          </div>
+        </section>
+
+        <section className="school-section">
+          <div className="public-container">
+            <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+              <SectionHeading
+                eyebrow="Fasilitas sekolah"
+                title="Ruang yang ikut"
+                accent="membantu anak belajar."
+                description="Setiap sudut dibuat aman, mudah dijelajahi, dan punya tujuan perkembangan yang jelas."
+              />
+              <Link href="/fasilitas" className="school-text-link shrink-0">Jelajahi fasilitas <ArrowRight /></Link>
+            </div>
+            <div className="school-gallery-grid">
+              {facilities.slice(0, 5).map((facility, index) => (
+                <Reveal key={facility.id} delay={(index % 3) * 80} variant="scale" className={`min-h-0 ${index === 0 ? 'school-gallery-featured' : ''}`}>
+                  <figure className="school-gallery-card h-full">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={facility.image} alt={facility.title} loading="lazy" />
+                    <figcaption><div><h3>{facility.title}</h3><p>{facility.description}</p></div><span><ArrowUpRight className="size-4" /></span></figcaption>
+                  </figure>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <TestimonialsSection />
+
+        <section className="school-section">
+          <div className="public-container">
+            <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+              <SectionHeading
+                eyebrow="Kegiatan terbaru"
+                title="Hari-hari yang penuh"
+                accent="cerita baik."
+                description="Potret pengalaman anak saat mencoba, bekerja sama, dan menemukan hal baru."
+              />
+              <Link href="/kegiatan" className="school-text-link shrink-0">Semua kegiatan <ArrowRight /></Link>
+            </div>
+
+            {activities.length ? (
+              <div className="school-activity-grid">
+                {activities.map((activity, index) => (
+                  <Reveal key={activity.id} delay={index * 90}>
+                    <article className="school-activity-card">
+                      <figure>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={activity.coverImage || activityImages[index % activityImages.length]} alt={activity.title} loading="lazy" />
+                        <time>{formatTanggalSingkat(activity.startDatetime)}</time>
+                      </figure>
+                      <div className="school-activity-card-body">
+                        <h3>{activity.title}</h3>
+                        <p className="line-clamp-3">{activity.description}</p>
+                        {activity.location && <span className="school-activity-meta"><MapPin /> {activity.location}</span>}
+                      </div>
+                    </article>
+                  </Reveal>
+                ))}
               </div>
-            </div>
-            <div className="mt-5 rounded-2xl border border-[var(--border)] bg-[var(--muted)] p-4">
-              <p className="text-xs font-bold uppercase tracking-wide text-[var(--primary)]">Visi Kami</p>
-              <p className="mt-1.5 text-sm leading-relaxed text-[var(--muted-foreground)]">
-                Menjadi taman kanak-kanak unggulan yang menghasilkan anak berkarakter, kreatif, dan siap melangkah ke jenjang berikutnya.
-              </p>
-            </div>
-            <div className="mt-4 flex gap-2.5">
-              {['f', '◎', '▶', '✉'].map((s) => (
-                <a key={s} href="#" aria-label="Media sosial" className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] text-sm text-[var(--muted-foreground)] transition-all duration-200 hover:border-[var(--primary)] hover:text-[var(--primary)]">
-                  {s}
-                </a>
-              ))}
+            ) : <p className="mt-10 rounded-2xl border border-dashed border-[var(--border)] p-8 text-[var(--muted-foreground)]">Belum ada dokumentasi kegiatan.</p>}
+          </div>
+        </section>
+
+        <section className="school-section soft">
+          <div className="public-container grid gap-12 lg:grid-cols-[.8fr_1.2fr] lg:items-start">
+            <SectionHeading
+              eyebrow="Kabar sekolah"
+              title="Informasi penting,"
+              accent="tanpa perlu mencari jauh."
+              description="Agenda, pengingat, dan kabar terbaru untuk keluarga TK Orchid."
+            />
+            <div>
+              {announcements.length ? (
+                <div className="school-news-list">
+                  {announcements.map((announcement, index) => (
+                    <Reveal key={announcement.id} delay={index * 70}>
+                      <Link href="/pengumuman" className="school-news-item">
+                        <time>{formatTanggalSingkat(announcement.publishAt ?? announcement.createdAt)}</time>
+                        <div><h3>{announcement.title}</h3><p className="line-clamp-2">{announcement.content}</p></div>
+                        <ArrowUpRight />
+                      </Link>
+                    </Reveal>
+                  ))}
+                </div>
+              ) : <p className="rounded-2xl border border-dashed border-[var(--border)] p-8 text-[var(--muted-foreground)]">Belum ada pengumuman terbaru.</p>}
+              <Link href="/pengumuman" className="school-text-link">Buka papan pengumuman <ArrowRight /></Link>
             </div>
           </div>
+        </section>
 
-          <nav aria-label="Footer">
-            <p className="font-bold">Menu Utama</p>
-            <ul className="mt-4 space-y-2.5 text-sm">
-              {[
-                ['/', 'Beranda'],
-                ['/profil', 'Tentang Kami'],
-                ['/kegiatan', 'Kegiatan'],
-                ['/pengumuman', 'Pengumuman'],
-                ['/pendaftaran', 'PPDB Online'],
-                ['/login', 'Portal Orang Tua'],
-              ].map(([href, label]) => (
-                <li key={href}>
-                  <Link href={href} className="text-[var(--muted-foreground)] transition-colors duration-200 hover:text-[var(--primary)]">
-                    {label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
+        <FaqSection soft={false} />
+        <LocationSection />
 
-          <div>
-            <p className="font-bold">Kontak Kami</p>
-            <ul className="mt-4 space-y-3 text-sm text-[var(--muted-foreground)]">
-              <li>📍 Jl. Contoh Alamat No. 12, Bekasi, Jawa Barat</li>
-              <li>📞 (021) 000-0000</li>
-              <li>✉️ info@tk-orchid.sch.id</li>
-            </ul>
-            <div className="mt-5 space-y-1 border-t border-[var(--border)] pt-4 text-xs text-[var(--muted-foreground)]">
-              <p>Jam Operasional:</p>
-              <p>Senin – Jumat: 07.00 – 16.00 WIB</p>
-              <p>NPSN: — · Akreditasi: —</p>
-            </div>
-          </div>
-        </div>
-        <div className="border-t border-[var(--border)] py-4">
-          <p className="text-center text-xs text-[var(--muted-foreground)]">
-            © 2026 TK Orchid. Seluruh hak cipta dilindungi.
-          </p>
-        </div>
-      </footer>
-    </div>
+        <AdmissionCta
+          title={registrationOpen ? 'Pendaftaran sedang dibuka. Mari kenali Orchid lebih dekat.' : 'Siapkan langkah pertama si kecil bersama TK Orchid.'}
+          description={registrationOpen ? `${admissionPeriod!.name} tersedia sekarang. Formulir dapat diisi online dan tim sekolah akan menghubungi keluarga Anda.` : 'Pelajari alur, persyaratan, dan informasi penerimaan murid baru.'}
+        />
+      </main>
+      <SiteFooter />
+    </PublicPage>
   )
 }

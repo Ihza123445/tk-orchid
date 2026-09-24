@@ -1,5 +1,4 @@
 import { notFound } from 'next/navigation'
-import Link from 'next/link'
 import { requireRole } from '@/lib/auth/guard'
 import { db } from '@/lib/db/db'
 import { assertStudentAccess } from '../../page'

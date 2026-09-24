@@ -1,6 +1,6 @@
 import { requireRole } from '@/lib/auth/guard'
 import { db } from '@/lib/db/db'
-import { submitReportAction, publishReportAction } from '@/actions/reports'
+import { submitReportAction } from '@/actions/reports'
 import { LaporanForm } from '@/components/reports/laporan-form'
 
 export const metadata = { title: 'Perkembangan — Guru' }
@@ -8,7 +8,6 @@ export const metadata = { title: 'Perkembangan — Guru' }
 const STATUS_LABEL: Record<string, string> = { DRAFT: 'Draft', REVIEW: 'Review', PUBLISHED: 'Terbit' }
 
 export default async function GuruPerkembanganPage() {
-  await requireRole('TEACHER')
   const user = await requireRole('TEACHER')
   const teacher = await db.teacher.findUnique({ where: { userId: user.id } })
 
@@ -52,6 +51,15 @@ export default async function GuruPerkembanganPage() {
         domains={domains.map((d) => ({ id: d.id, label: d.name }))}
         scales={scales.map((s) => ({ id: s.id, label: s.label, description: s.description }))}
         periods={periods}
+        existingReports={Object.fromEntries(reports.map((report) => [
+          `${report.studentId}:${report.period}`,
+          {
+            status: report.status,
+            summary: report.summary ?? '',
+            homeRecommendation: report.homeRecommendation ?? '',
+            items: report.items.map((item) => ({ domainId: item.domainId, scaleId: item.scaleId, narrative: item.narrative ?? '' })),
+          },
+        ]))}
       />
 
       <section className="space-y-3">
@@ -98,36 +106,6 @@ export default async function GuruPerkembanganPage() {
           </div>
         )}
       </section>
-
-      {/* Admin bisa publish dari sini juga; guru hanya lihat */}
-      <AdminPublishHelper ayId={ay.id} publishAction={publishReportAction} />
     </div>
-  )
-}
-
-async function AdminPublishHelper({ ayId, publishAction }: { ayId: number; publishAction: (fd: FormData) => Promise<void> }) {
-  // Komponen server: hanya render tombol publish kalau user admin/staff (guru tak melihat)
-  const user = await requireRole('TEACHER')
-  if (user.role !== 'ADMIN' && user.role !== 'STAFF') return null
-  const pendingReports = await db.developmentReport.findMany({
-    where: { academicYearId: ayId, status: 'REVIEW' },
-    include: { student: { select: { fullName: true } } },
-  })
-  if (pendingReports.length === 0) return null
-  return (
-    <section className="rounded-lg border bg-amber-50 p-4">
-      <h3 className="mb-2 text-sm font-semibold">Menunggu publikasi (review)</h3>
-      <ul className="space-y-1">
-        {pendingReports.map((r) => (
-          <li key={r.id} className="flex items-center justify-between text-sm">
-            <span>{r.student.fullName} · {r.period}</span>
-            <form action={publishAction}>
-              <input type="hidden" name="id" value={r.id} />
-              <button type="submit" className="underline underline-offset-4">Publikasikan</button>
-            </form>
-          </li>
-        ))}
-      </ul>
-    </section>
   )
 }

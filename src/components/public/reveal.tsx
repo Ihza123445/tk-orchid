@@ -7,34 +7,33 @@ export function Reveal({
   children,
   delay = 0,
   className = '',
+  variant = 'up',
   as: Tag = 'div',
 }: {
   children: ReactNode
   delay?: number
   className?: string
+  variant?: 'up' | 'left' | 'right' | 'scale'
   as?: 'div' | 'section' | 'li' | 'article' | 'span'
 }) {
   const ref = useRef<HTMLElement | null>(null)
-  const [visible, setVisible] = useState(false)
-
   useEffect(() => {
     const el = ref.current
     if (!el) return
-    // hormati preferensi reduce-motion
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setVisible(true)
+    if (!('IntersectionObserver' in window)) {
+      el.classList.add('reveal-visible')
       return
     }
     const obs = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
           if (e.isIntersecting) {
-            setVisible(true)
+            el.classList.add('reveal-visible')
             obs.disconnect()
           }
         }
       },
-      { threshold: 0.12, rootMargin: '0px 0px -40px 0px' },
+      { threshold: 0.08, rootMargin: '0px 0px -8% 0px' },
     )
     obs.observe(el)
     return () => obs.disconnect()
@@ -45,7 +44,7 @@ export function Reveal({
       // @ts-expect-error polymorphic ref
       ref={ref}
       style={{ transitionDelay: `${delay}ms` }}
-      className={`reveal ${visible ? 'reveal-visible' : ''} ${className}`}
+      className={`reveal reveal-${variant} ${className}`}
     >
       {children}
     </Tag>
@@ -60,10 +59,9 @@ export function CountUp({ value, suffix = '', duration = 1600 }: { value: number
   useEffect(() => {
     const el = ref.current
     if (!el) return
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setDisplay(value)
-      return
-    }
+    const runDuration = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      ? Math.min(duration, 600)
+      : duration
     let raf = 0
     const obs = new IntersectionObserver(
       (entries) => {
@@ -71,7 +69,7 @@ export function CountUp({ value, suffix = '', duration = 1600 }: { value: number
         obs.disconnect()
         const start = performance.now()
         const tick = (now: number) => {
-          const t = Math.min(1, (now - start) / duration)
+          const t = Math.min(1, (now - start) / runDuration)
           const eased = 1 - Math.pow(1 - t, 3) // easeOutCubic
           setDisplay(Math.round(eased * value))
           if (t < 1) raf = requestAnimationFrame(tick)

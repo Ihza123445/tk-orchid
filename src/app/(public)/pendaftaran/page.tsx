@@ -1,117 +1,116 @@
 import Link from 'next/link'
+import { ArrowUpRight, Check, ClipboardPenLine, FileCheck2, Megaphone } from 'lucide-react'
 import { db } from '@/lib/db/db'
 import { PpdbForm } from '@/components/public/ppdb-form'
 import { SiteHeader } from '@/components/public/site-header'
+import { Reveal } from '@/components/public/reveal'
 import { IMG } from '@/lib/assets/public-images'
+import { PublicPage, PublicPageHero, SectionHeading, SiteFooter } from '@/components/public/public-chrome'
+import { FaqSection } from '@/components/public/school-sections'
+import { ageReferenceDate } from '@/lib/ppdb/levels'
 
-export const metadata = { title: 'PPDB Online — TK Orchid' }
+export const metadata = { title: 'PPDB Online' }
+// Status buka/tutup bergantung tanggal hari ini, jadi selalu dirender per request
+export const revalidate = 0
 
-export default async function PendaftaranPage() {
+const STEPS = [
+  { number: '01', icon: ClipboardPenLine, title: 'Isi formulir', description: 'Lengkapi data orang tua dan calon peserta didik secara online.' },
+  { number: '02', icon: FileCheck2, title: 'Siapkan berkas', description: 'Siapkan dokumen persyaratan sesuai petunjuk dari sekolah.' },
+  { number: '03', icon: Megaphone, title: 'Tunggu kabar', description: 'Tim sekolah menghubungi Anda melalui kontak yang didaftarkan.' },
+]
+
+export default async function PendaftaranPage({ searchParams }: PageProps<'/pendaftaran'>) {
+  const { jenjang } = await searchParams
   const period = await db.admissionPeriod.findFirst({ where: { isActive: true } })
   const now = new Date()
   const open = Boolean(period && period.startDate <= now && period.endDate >= now)
 
   return (
-    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
+    <PublicPage>
       <SiteHeader />
+      <PublicPageHero
+        index="05"
+        eyebrow={open ? `${period!.name} · dibuka` : 'Informasi pendaftaran'}
+        title="Langkah pertama"
+        accent="dimulai di sini."
+        description={open ? 'Prosesnya singkat dan jelas. Isi formulir dengan tenang, lalu tim sekolah akan mendampingi tahap berikutnya.' : 'Pendaftaran online belum tersedia untuk periode saat ini. Informasi dan persyaratan tetap dapat dipelajari di halaman ini.'}
+        image={IMG.galeri2}
+        imageAlt="Orang tua dan anak membaca buku bersama"
+      />
 
-      {/* HERO — ala beranda */}
-      <section className="relative overflow-hidden">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={IMG.hero2} alt="Anak bermain balok warna" className="absolute inset-0 h-full w-full object-cover" />
-        <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/35" />
-        <div className="relative mx-auto max-w-[1100px] px-4 py-20 text-center sm:py-24">
-          <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-white backdrop-blur-md">
-            🎒 PPDB 2026/2027 Dibuka
-          </span>
-          <h1 className="mx-auto mt-5 max-w-2xl font-heading text-3xl font-bold tracking-tight text-white drop-shadow sm:text-5xl">
-            Penerimaan Peserta Didik Baru
-          </h1>
-          <p className="mx-auto mt-4 max-w-xl text-sm text-white/90 drop-shadow sm:text-lg">
-            Proses pendaftaran mudah, cepat, dan sepenuhnya online.
-          </p>
-        </div>
-      </section>
-
-      {/* ALUR 3 LANGKAH */}
-      <main className="mx-auto max-w-[1100px] px-4 py-16">
-        <section className="grid gap-7 md:grid-cols-3">
-          {[
-            { n: '1', icon: '📝', title: 'Isi Formulir', desc: 'Lengkapi data orang tua dan calon peserta didik secara online.' },
-            { n: '2', icon: '📄', title: 'Siapkan Berkas', desc: 'Unggah atau bawa dokumen persyaratan sesuai petunjuk.' },
-            { n: '3', icon: '🎉', title: 'Diumumkan', desc: 'Hasil seleksi diumumkan melalui kontak yang Anda daftarkan.' },
-          ].map((s) => (
-            <div key={s.n} className="relative rounded-2xl border border-[var(--border)] bg-[var(--card)] p-7 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
-              <span aria-hidden="true" className="absolute -top-4 left-6 flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--primary)] font-heading text-base font-bold text-[var(--primary-foreground)] shadow-md">
-                {s.n}
-              </span>
-              <span aria-hidden="true" className="mt-2 block text-3xl">{s.icon}</span>
-              <h2 className="mt-3 font-bold">{s.title}</h2>
-              <p className="mt-2 text-sm leading-relaxed text-[var(--muted-foreground)]">{s.desc}</p>
-            </div>
-          ))}
+      <main id="main-content">
+        <section className="school-section">
+          <div className="public-container">
+            <SectionHeading
+              eyebrow="Alur pendaftaran"
+              title="Tiga langkah,"
+              accent="tanpa dibuat rumit."
+              description="Siapkan data dasar anak dan orang tua. Setelah formulir diterima, tim sekolah akan membantu tahap berikutnya."
+              align="center"
+            />
+          <div className="mt-12 grid gap-4 md:grid-cols-3">
+            {STEPS.map((step, index) => (
+              <Reveal key={step.number} delay={index * 90} variant="scale">
+              <article className="relative h-full rounded-[1.75rem] border border-[var(--border)] bg-[var(--card)] p-7 shadow-sm sm:p-8">
+                <div className="flex items-center justify-between">
+                  <span className="grid size-11 place-items-center rounded-xl bg-[var(--secondary)] text-[var(--primary)]"><step.icon className="size-5" /></span>
+                  <span className="font-mono text-[10px] tracking-[.17em] text-[var(--muted-foreground)]">{step.number} / 03</span>
+                </div>
+                <h2 className="mt-8 text-xl font-bold tracking-[-.025em]">{step.title}</h2>
+                <p className="mt-3 text-sm leading-7 text-[var(--muted-foreground)]">{step.description}</p>
+              </article>
+              </Reveal>
+            ))}
+          </div>
+          </div>
         </section>
 
-        {/* FORM AREA */}
-        <section className="mt-14 grid gap-10 lg:grid-cols-[1fr_380px]">
+        <section id="formulir" className="school-section soft scroll-mt-20">
+        <div className="public-container grid gap-12 lg:grid-cols-[minmax(0,1fr)_360px]">
           <div>
             {!open ? (
-              <div className="rounded-2xl border border-dashed p-12 text-center">
-                <span aria-hidden="true" className="text-4xl">⏳</span>
-                <h2 className="mt-4 font-bold">Pendaftaran Sedang Ditutup</h2>
-                <p className="mt-2 text-sm leading-relaxed text-[var(--muted-foreground)]">
-                  {period
-                    ? `Periode ${period.name} berlaku ${period.startDate.toLocaleDateString('id-ID')} s.d. ${period.endDate.toLocaleDateString('id-ID')}.`
-                    : 'Belum ada periode pendaftaran yang dibuka.'}
-                </p>
-                <p className="mt-1 text-sm text-[var(--muted-foreground)]">Silakan hubungi kantor sekolah untuk informasi lebih lanjut.</p>
-                <Link href="/" className="mt-6 inline-block text-sm font-semibold text-[var(--primary)] underline underline-offset-4">Kembali ke beranda</Link>
+              <div className="border-y border-dashed border-[var(--border)] py-14">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[.2em] text-[var(--primary)]">Status periode</p>
+                <h2 className="mt-4 text-3xl font-bold tracking-[-.04em]">Pendaftaran sedang ditutup.</h2>
+                <p className="mt-4 max-w-xl text-sm leading-7 text-[var(--muted-foreground)]">{period ? `Periode ${period.name} berlaku ${period.startDate.toLocaleDateString('id-ID')} sampai ${period.endDate.toLocaleDateString('id-ID')}.` : 'Belum ada periode pendaftaran yang dibuka.'}</p>
+                <Link href="/kontak" className="mt-7 inline-flex min-h-12 items-center gap-2 border-b border-[var(--primary)] text-sm font-bold text-[var(--primary)]">Hubungi sekolah <ArrowUpRight className="size-4" /></Link>
               </div>
             ) : (
               <>
                 {period!.requirementsText && (
-                  <aside className="mb-7 flex gap-4 rounded-2xl border border-[var(--primary)]/30 bg-[var(--primary)]/10 p-5">
-                    <span aria-hidden="true" className="text-2xl">📋</span>
-                    <div>
-                      <h2 className="font-bold">Persyaratan</h2>
-                      <p className="mt-1.5 whitespace-pre-line text-sm leading-relaxed text-[var(--muted-foreground)]">{period!.requirementsText}</p>
-                    </div>
+                  <aside className="mb-7 border-l-2 border-[var(--primary)] bg-[var(--secondary)] p-6">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-[.2em] text-[var(--primary)]">Persyaratan</p>
+                    <p className="mt-3 whitespace-pre-line text-sm leading-7 text-[var(--muted-foreground)]">{period!.requirementsText}</p>
                   </aside>
                 )}
-                <PpdbForm periodName={period!.name} />
+                <PpdbForm periodName={period!.name} referenceDate={ageReferenceDate(period!.endDate).toISOString()} defaultLevel={typeof jenjang === 'string' ? jenjang : undefined} />
               </>
             )}
           </div>
 
-          {/* SIDEBAR INFO — sticky ala landing page */}
-          <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
-            <div className="overflow-hidden rounded-2xl border border-[var(--border)] shadow-sm">
+          <aside className="space-y-6 lg:sticky lg:top-28 lg:self-start">
+            <figure className="overflow-hidden rounded-[1.75rem] border border-[var(--border)] bg-[var(--card)]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={IMG.galeri2} alt="Ibu dan anak membaca buku" loading="lazy" className="h-44 w-full object-cover" />
-              <div className="p-6">
-                <h2 className="font-bold">Kenapa TK Orchid?</h2>
-                <ul className="mt-3 space-y-2.5 text-sm text-[var(--muted-foreground)]">
-                  {['Guru hangat & terlatih STPPA', 'Kelas inklusif penuh kasih', 'Fasilitas aman & bersih', 'Komunikasi erat dengan orang tua'].map((x) => (
-                    <li key={x} className="flex items-start gap-2">
-                      <span aria-hidden="true" className="mt-0.5 text-[var(--primary)]">✓</span> {x}
-                    </li>
-                  ))}
+              <img src={IMG.programSeni} alt="Anak-anak berekspresi dalam kegiatan sekolah" loading="lazy" className="h-56 w-full object-cover" />
+              <figcaption className="p-7">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[.18em] text-[var(--primary)]">Kenapa Orchid</p>
+                <ul className="mt-5 space-y-4 text-sm text-[var(--muted-foreground)]">
+                  {['Guru hangat & terlatih STPPA', 'Kelas inklusif penuh kasih', 'Fasilitas aman & bersih', 'Komunikasi erat dengan orang tua'].map((item) => <li key={item} className="flex items-start gap-3"><Check className="mt-0.5 size-4 shrink-0 text-[var(--primary)]" /> {item}</li>)}
                 </ul>
-              </div>
-            </div>
-
-            <div className="rounded-2xl bg-gradient-to-br from-[#A64CA6] to-[#7C3AED] p-6 text-white shadow-lg">
-              <h2 className="font-bold">Butuh bantuan?</h2>
-              <p className="mt-2 text-sm leading-relaxed opacity-90">
-                Hubungi kantor kami Senin–Jumat, 07.30–15.00 WIB. Kami dengan senang hati menjawab pertanyaan Anda.
-              </p>
-              <Link href="/kontak" className="mt-4 inline-block rounded-full bg-white px-5 py-2 text-sm font-bold text-[#23071F] transition-transform duration-300 hover:-translate-y-0.5">
-                Hubungi Kami →
-              </Link>
+              </figcaption>
+            </figure>
+            <div className="rounded-[1.75rem] bg-[var(--primary)] p-7 text-[var(--primary-foreground)]">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[.18em] opacity-70">Butuh bantuan?</p>
+              <h2 className="mt-4 text-2xl font-bold tracking-[-.03em]">Kami siap menjawab.</h2>
+              <p className="mt-3 text-sm leading-7 opacity-80">Hubungi kantor sekolah Senin–Jumat, 07.30–15.00 WIB.</p>
+              <Link href="/kontak" className="mt-6 inline-flex items-center gap-2 border-b border-current pb-1 text-sm font-bold">Hubungi kami <ArrowUpRight className="size-4" /></Link>
             </div>
           </aside>
+        </div>
         </section>
+        <FaqSection soft={false} />
       </main>
-    </div>
+      <SiteFooter />
+    </PublicPage>
   )
 }

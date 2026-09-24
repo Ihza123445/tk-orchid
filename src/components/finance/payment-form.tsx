@@ -39,7 +39,7 @@ export function PaymentForm({ students, openInvoicesByStudent }: { students: Stu
   return (
     <form action={formAction} className="space-y-4 rounded-lg border bg-[var(--card)] p-6">
       <h2 className="text-base font-semibold">Catat Pembayaran</h2>
-      <p className="text-xs text-[var(--muted-foreground)]">Pembayaran dialokasikan ke tagihan. Total alokasi harus sama dengan jumlah bayar.</p>
+      <p className="text-xs text-[var(--muted-foreground)]">Jumlah pembayaran dihitung otomatis dari total alokasi ke tagihan.</p>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
         <div className="space-y-2 sm:col-span-2">

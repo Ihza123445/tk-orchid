@@ -3,7 +3,6 @@ import { requireAdminStaff } from '@/lib/auth/guard'
 import { listStudents } from '@/actions/students'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { formatTanggalSingkat } from '@/lib/formatting/format'
 
 const STATUS_LABEL: Record<string, string> = {
   ACTIVE: 'Aktif',

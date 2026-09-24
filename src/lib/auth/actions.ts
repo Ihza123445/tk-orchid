@@ -16,7 +16,7 @@ const loginSchema = z.object({
 
 function dashboardFor(role: string): string {
   if (role === 'TEACHER') return '/guru/dashboard'
-  if (role === 'PARENT') return '/ortu/dashboard'
+  if (role === 'PARENT') return '/portal'
   return '/dashboard'
 }
 

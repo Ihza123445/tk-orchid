@@ -1,7 +1,6 @@
 import 'server-only'
 import crypto from 'node:crypto'
 
-const SECRET = process.env.AUTH_SECRET ?? 'dev-secret-tk-orchid-change-me'
 export const SESSION_COOKIE = 'orchid_session'
 export const SESSION_TTL_S = 60 * 60 * 8 // 8 jam
 
@@ -16,7 +15,11 @@ function b64url(buf: Buffer | string): string {
 }
 
 function sign(data: string): string {
-  return crypto.createHmac('sha256', SECRET).update(data).digest('base64url')
+  const secret = process.env.AUTH_SECRET
+  if (!secret && process.env.NODE_ENV === 'production') {
+    throw new Error('AUTH_SECRET wajib diatur pada environment production.')
+  }
+  return crypto.createHmac('sha256', secret ?? 'dev-secret-tk-orchid-change-me').update(data).digest('base64url')
 }
 
 export function createSessionToken(userId: number, role: string): string {

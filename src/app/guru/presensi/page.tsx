@@ -5,7 +5,6 @@ import { PresensiForm } from '@/components/attendance/presensi-form'
 export const metadata = { title: 'Presensi — Guru' }
 
 export default async function GuruPresensiPage() {
-  await requireRole('TEACHER')
   const user = await requireRole('TEACHER')
   const teacher = await db.teacher.findUnique({ where: { userId: user.id } })
 

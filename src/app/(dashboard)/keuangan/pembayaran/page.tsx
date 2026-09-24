@@ -83,7 +83,9 @@ export default async function PembayaranPage() {
                     <span className={`rounded-full px-2 py-0.5 text-xs ${p.status === 'POSTED' ? 'bg-[var(--secondary)] text-[var(--primary)]' : 'bg-[var(--destructive)]/15 text-[var(--destructive)]'}`}>
                       {p.status === 'POSTED' ? 'Tercatat' : 'Void'}
                     </span>
-                    {user?.role === 'ADMIN' && p.status === 'POSTED' && (
+                  </td>
+                  {user?.role === 'ADMIN' && <td className="px-4 py-3">
+                    {p.status === 'POSTED' && (
                       <form action={voidPaymentAction} className="mt-1 flex items-center gap-1">
                         <input type="hidden" name="id" value={p.id} />
                         <input name="reason" required minLength={5} placeholder="Alasan" aria-label={`Alasan void kwitansi ${p.receiptNo}`}
@@ -91,12 +93,11 @@ export default async function PembayaranPage() {
                         <button type="submit" className="text-xs underline underline-offset-4 opacity-70 hover:opacity-100">Void</button>
                       </form>
                     )}
-                  </td>
-                  {user?.role === 'ADMIN' && <td />}
+                  </td>}
                 </tr>
               ))}
               {payments.length === 0 && (
-                <tr><td colSpan={7} className="px-4 py-10 text-center text-sm text-[var(--muted-foreground)]">Belum ada pembayaran.</td></tr>
+                <tr><td colSpan={user?.role === 'ADMIN' ? 8 : 7} className="px-4 py-10 text-center text-sm text-[var(--muted-foreground)]">Belum ada pembayaran.</td></tr>
               )}
             </tbody>
           </table>

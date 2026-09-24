@@ -1,22 +1,69 @@
-import { PrismaClient } from '@prisma/client'
+import { Prisma, PrismaClient } from '@prisma/client'
 import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3'
 
+const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: 'file:./prisma/dev.db' }) })
+
 async function main() {
-  const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: 'file:./prisma/dev.db' }) })
-  const r = await db.student.findFirst({ include: { studentGuardians: { include: { guardian: true } }, enrollments: { include: { klass: true } } } })
-  console.log('SAMPLE:', r?.fullName, '| wali:', r?.studentGuardians[0]?.guardian.fullName, '| kelas:', r?.enrollments[0]?.klass.name)
-  const inv = await db.invoice.findMany({ include: { items: true, allocations: true }, orderBy: { id: 'asc' } })
-  for (const i of inv) console.log(i.invoiceNo, i.status, '| total:', i.items.reduce((a, b) => a + b.subtotal, 0), '| dibayar:', i.allocations.reduce((a, b) => a + b.amount, 0))
-  // test unique constraint
-  try {
-    await db.attendance.create({ data: { studentId: r!.id, classId: 1, attendanceDate: new Date(), status: 'PRESENT', recordedBy: 1 } })
-    console.log('UNIQUE-TEST: no error (BAD if duplicate)')
-  } catch (e: any) {
-    console.log('UNIQUE-TEST: blocked duplicate ->', e.code)
+  const student = await db.student.findFirst({
+    include: {
+      studentGuardians: { include: { guardian: true } },
+      enrollments: { include: { klass: true } },
+    },
+  })
+  if (!student) throw new Error('Database belum memiliki data siswa. Jalankan npm run db:seed.')
+
+  console.log(
+    'SAMPLE:',
+    student.fullName,
+    '| wali:',
+    student.studentGuardians[0]?.guardian.fullName ?? '-',
+    '| kelas:',
+    student.enrollments[0]?.klass.name ?? '-',
+  )
+
+  const invoices = await db.invoice.findMany({
+    include: { items: true, allocations: { include: { payment: true } } },
+    orderBy: { id: 'asc' },
+  })
+  for (const invoice of invoices) {
+    const total = invoice.items.reduce((sum, item) => sum + item.subtotal, 0)
+    const paid = invoice.allocations
+      .filter((item) => item.payment.status === 'POSTED')
+      .reduce((sum, item) => sum + item.amount, 0)
+    if (paid > total) throw new Error(`Alokasi ${invoice.invoiceNo} melebihi total tagihan.`)
+    console.log(invoice.invoiceNo, invoice.status, '| total:', total, '| dibayar:', paid)
   }
-  // guardian auth check: orangtua hanya lihat anaknya
-  const ortu = await db.guardian.findFirst({ where: { user: { email: 'orangtua@orchid.local' } }, include: { studentGuardians: true } })
-  console.log('PARENT-ACCESS: anak terhubung =', ortu?.studentGuardians.length)
-  await db.$disconnect()
+
+  const existingAttendance = await db.attendance.findFirst()
+  if (existingAttendance) {
+    try {
+      const unexpected = await db.attendance.create({
+        data: {
+          studentId: existingAttendance.studentId,
+          classId: existingAttendance.classId,
+          attendanceDate: existingAttendance.attendanceDate,
+          status: 'PRESENT',
+          recordedBy: existingAttendance.recordedBy,
+        },
+      })
+      await db.attendance.delete({ where: { id: unexpected.id } })
+      throw new Error('Constraint unik presensi tidak bekerja.')
+    } catch (error: unknown) {
+      if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== 'P2002') throw error
+      console.log('UNIQUE-TEST: duplikat presensi berhasil ditolak (P2002)')
+    }
+  }
+
+  const parent = await db.guardian.findFirst({
+    where: { user: { email: 'orangtua@orchid.local' } },
+    include: { studentGuardians: true },
+  })
+  console.log('PARENT-ACCESS: anak terhubung =', parent?.studentGuardians.length ?? 0)
 }
+
 main()
+  .catch((error: unknown) => {
+    console.error(error)
+    process.exitCode = 1
+  })
+  .finally(() => db.$disconnect())

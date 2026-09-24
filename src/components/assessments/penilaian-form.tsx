@@ -4,7 +4,6 @@ import { useActionState, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { saveAssessmentAction, type AssessmentState } from '@/actions/assessments'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
 interface Option { id: number; label: string }
@@ -112,7 +111,7 @@ export function RekapTable({ rows, domainLabels }: { rows: { studentName: string
   if (rows.length === 0) {
     return <p className="rounded-lg border border-dashed p-8 text-center text-sm text-[var(--muted-foreground)]">Belum ada penilaian.</p>
   }
-  const domainIds = Object.keys(rows[0]?.cells ?? {}).map(Number).sort((a, b) => a - b)
+  const domainIds = Object.keys(domainLabels).map(Number).sort((a, b) => a - b)
   return (
     <div className="overflow-x-auto rounded-lg border bg-[var(--card)]">
       <table className="w-full min-w-[720px] text-sm">
@@ -127,7 +126,7 @@ export function RekapTable({ rows, domainLabels }: { rows: { studentName: string
           </tr>
         </thead>
         <tbody>
-          {rows.map((r, i) => (
+          {rows.map((r) => (
             <tr key={`${r.studentName}-${r.period}`} className="border-b last:border-0">
               <td className="px-4 py-3 font-medium">{r.studentName}</td>
               <td className="px-4 py-3">{r.period}</td>

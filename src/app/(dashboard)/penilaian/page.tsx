@@ -1,6 +1,5 @@
 import { requireAdminStaff } from '@/lib/auth/guard'
 import { db } from '@/lib/db/db'
-import { getAssessmentOptions } from '@/actions/assessments'
 import { PenilaianForm, RekapTable } from '@/components/assessments/penilaian-form'
 
 export const metadata = { title: 'Penilaian' }

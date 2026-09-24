@@ -2,153 +2,91 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { ArrowLeft, ArrowRight, ArrowUpRight, BookOpen, Flower2, Heart, ShieldCheck, Sparkles } from 'lucide-react'
 import { CountUp } from '@/components/public/reveal'
-import { IMG } from '@/lib/assets/public-images'
 
-export interface HeroSlide {
+export type HeroSlideData = {
+  id: number
+  eyebrow: string
   title: string
-  subtitle: string
+  accent: string | null
   description: string
+  image: string
+  imageAlt: string | null
 }
 
-const SLIDES: HeroSlide[] = [
-  {
-    title: 'TK Orchid',
-    subtitle: 'Rumah Belajar Pertama untuk Anak Hebat',
-    description:
-      'Membangun fondasi karakter, kreativitas, dan kepercayaan diri anak melalui bermain, tumbuh, dan mengenal Tuhan.',
-  },
-  {
-    title: 'Bermain Sambil Belajar',
-    subtitle: 'Kurikulum Merdeka untuk Masa Depan Ceria',
-    description:
-      'Pembelajaran tematik yang menyenangkan: seni, musik, motorik, literasi, dan numerasi dalam suasana penuh kasih.',
-  },
-  {
-    title: 'PPDB Telah Dibuka',
-    subtitle: 'Tahun Ajaran 2026/2027',
-    description:
-      'Daftarkan putra-putri Anda dan jadilah bagian dari keluarga besar TK Orchid Bekasi.',
-  },
-]
-
-const SLIDE_IMAGES = [IMG.hero1, IMG.hero2, IMG.hero3]
-
-export function HeroSlider() {
+// Hero beranda: foto selebar layar yang berganti dengan crossfade, teks di atas lapisan gelap.
+export function HeroSlider({ slides, stats }: { slides: HeroSlideData[]; stats: { students: number; teachers: number; activities: number } }) {
   const [current, setCurrent] = useState(0)
-  const [animating, setAnimating] = useState(false)
+  const count = slides.length
 
-  const go = (idx: number) => {
-    setAnimating(true)
-    window.setTimeout(() => {
-      setCurrent(idx)
-      setAnimating(false)
-    }, 350)
-  }
-
+  // Ganti slide tiap 7 detik; timer diulang setiap kali slide berganti (termasuk saat diklik manual)
   useEffect(() => {
-    const t = window.setInterval(() => {
-      go((current + 1) % SLIDES.length)
-    }, 7000)
-    return () => window.clearInterval(t)
-  }, [current])
+    if (count < 2 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const timer = window.setTimeout(() => setCurrent((value) => (value + 1) % count), 7000)
+    return () => window.clearTimeout(timer)
+  }, [current, count])
 
-  const slide = SLIDES[current]
+  const go = (value: number) => setCurrent((value + count) % count)
+  const slide = slides[Math.min(current, count - 1)]
+  if (!slide) return null
 
   return (
-    <section className="relative h-[92vh] min-h-[560px] w-full overflow-hidden" aria-label="Sorotan">
-      {SLIDE_IMAGES.map((img, i) => (
-        <div
-          key={img}
-          aria-hidden="true"
-          className={`absolute inset-0 scale-105 bg-cover bg-center transition-all duration-[1200ms] ease-out ${i === current ? 'scale-100 opacity-100' : 'scale-105 opacity-0'}`}
-          style={{ backgroundImage: `url(${img})` }}
-        />
-      ))}
-      {/* Overlay gradasi: gelap kuat di bawah utk teks + statistik */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/45 to-black/75" aria-hidden="true" />
+    <>
+      <section className="school-home-hero" aria-roledescription="carousel" aria-label="Sorotan TK Orchid">
+        <div className="school-home-slides" aria-hidden="true">
+          {slides.map((item, index) => (
+            <div key={item.id} className={`school-home-slide ${index === current ? 'active' : ''}`}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={item.image} alt="" fetchPriority={index === 0 ? 'high' : 'low'} loading={index === 0 ? 'eager' : 'lazy'} />
+            </div>
+          ))}
+        </div>
+        <div className="school-home-shade" aria-hidden="true" />
 
-      <div
-        className={`relative z-10 flex h-full flex-col items-center justify-center px-4 pb-24 text-center transition-all duration-500 ${
-          animating ? 'translate-y-5 opacity-0' : 'translate-y-0 opacity-100'
-        }`}
-      >
-        <span className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-white backdrop-blur-md">
-          🌸 Taman Kanak-Kanak Favorit · Bekasi
-        </span>
-        <h1 className="max-w-3xl font-heading text-4xl font-bold tracking-tight text-white drop-shadow-lg sm:text-6xl">
-          {slide.title}
-        </h1>
-        <p className="mt-3 max-w-2xl text-base font-semibold text-white drop-shadow sm:text-xl">
-          {slide.subtitle}
-        </p>
-        <p className="mt-2 max-w-2xl text-sm text-white/85 drop-shadow sm:text-base">
-          {slide.description}
-        </p>
-        <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <Link
-            href="/pendaftaran"
-            className="inline-flex items-center gap-2 rounded-full bg-[var(--primary)] px-7 py-3 font-semibold text-[var(--primary-foreground)] shadow-lg shadow-black/30 transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 hover:shadow-xl"
-          >
-            Daftar Sekarang <span aria-hidden="true">→</span>
-          </Link>
-          <Link
-            href="/profil"
-            className="rounded-full border border-white/60 bg-white/10 px-7 py-3 font-semibold text-white backdrop-blur-md transition-all duration-300 hover:bg-white/20"
-          >
-            Pelajari Lebih Lanjut
-          </Link>
+        <div className="public-container school-home-inner">
+          <div className="school-home-copy" key={slide.id} aria-live="polite">
+            <span className="school-home-eyebrow"><Sparkles className="size-4" /> {slide.eyebrow}</span>
+            <h1>{slide.title}{slide.accent ? <> <span>{slide.accent}</span></> : null}</h1>
+            <p>{slide.description}</p>
+            {slide.imageAlt && <span className="sr-only">Foto: {slide.imageAlt}</span>}
+            <div className="school-home-actions">
+              <Link href="/pendaftaran#formulir">Daftar PPDB <ArrowUpRight className="size-4" /></Link>
+              <Link href="/program" className="secondary">Lihat program <BookOpen className="size-4" /></Link>
+            </div>
+          </div>
+
+          {count > 1 && (
+            <div className="school-home-nav">
+              <div className="school-home-dots" role="tablist" aria-label="Pilih sorotan">
+                {slides.map((item, index) => (
+                  <button key={item.id} type="button" role="tab" aria-selected={current === index} aria-label={`Tampilkan sorotan ${index + 1}`} onClick={() => setCurrent(index)}>
+                    <span className={current === index ? 'active' : ''} />
+                  </button>
+                ))}
+              </div>
+              <span className="school-home-count">{String(current + 1).padStart(2, '0')} / {String(count).padStart(2, '0')}</span>
+              <div className="school-home-arrows">
+                <button type="button" onClick={() => go(current - 1)} aria-label="Sorotan sebelumnya"><ArrowLeft /></button>
+                <button type="button" onClick={() => go(current + 1)} aria-label="Sorotan berikutnya"><ArrowRight /></button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <svg className="school-banner-wave" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M0 60V32c160 22 360 30 560 14S980 2 1180 8c110 3 190 12 260 22v30z" />
+        </svg>
+      </section>
+
+      <div className="public-container school-home-stats-wrap">
+        <div className="school-stats" aria-label="Ringkasan sekolah">
+          <div><span className="school-stat-icon"><Flower2 /></span><p><strong><CountUp value={stats.students} suffix="+" /></strong><small>Siswa aktif</small></p></div>
+          <div><span className="school-stat-icon gold"><Heart /></span><p><strong><CountUp value={stats.teachers} suffix="+" /></strong><small>Guru &amp; staf</small></p></div>
+          <div><span className="school-stat-icon"><Sparkles /></span><p><strong><CountUp value={stats.activities} suffix="+" /></strong><small>Cerita kegiatan</small></p></div>
+          <div><span className="school-stat-icon gold"><ShieldCheck /></span><p><strong>Aman</strong><small>Lingkungan belajar</small></p></div>
         </div>
       </div>
-
-      <button
-        type="button"
-        aria-label="Slide sebelumnya"
-        onClick={() => go((current - 1 + SLIDES.length) % SLIDES.length)}
-        className="absolute left-4 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/25 bg-white/15 text-xl text-white backdrop-blur-md transition-all duration-300 hover:bg-white/30"
-      >
-        ‹
-      </button>
-      <button
-        type="button"
-        aria-label="Slide berikutnya"
-        onClick={() => go((current + 1) % SLIDES.length)}
-        className="absolute right-4 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/25 bg-white/15 text-xl text-white backdrop-blur-md transition-all duration-300 hover:bg-white/30"
-      >
-        ›
-      </button>
-
-      <div className="absolute bottom-20 left-1/2 z-10 flex -translate-x-1/2 gap-2">
-        {SLIDES.map((_, i) => (
-          <button
-            key={i}
-            type="button"
-            aria-label={`Ke slide ${i + 1}`}
-            onClick={() => go(i)}
-            className={`h-2.5 rounded-full transition-all duration-300 ${
-              i === current ? 'w-8 bg-[var(--primary)]' : 'w-2.5 bg-white/50 hover:bg-white/80'
-            }`}
-          />
-        ))}
-      </div>
-
-      {/* Statistik strip — glassmorphism + count-up */}
-      <div className="absolute inset-x-0 bottom-0 z-10 border-t border-white/15 bg-black/40 backdrop-blur-xl">
-        <dl className="mx-auto grid max-w-[1100px] grid-cols-3 divide-x divide-white/10 px-4 py-6 text-center text-white">
-          <div>
-            <dd className="text-3xl font-bold sm:text-4xl"><CountUp value={120} suffix="+" /></dd>
-            <dt className="mt-1 text-xs uppercase tracking-wide opacity-75 sm:text-sm">Siswa Aktif</dt>
-          </div>
-          <div>
-            <dd className="text-3xl font-bold sm:text-4xl"><CountUp value={15} suffix="+" /></dd>
-            <dt className="mt-1 text-xs uppercase tracking-wide opacity-75 sm:text-sm">Guru &amp; Staf</dt>
-          </div>
-          <div>
-            <dd className="text-3xl font-bold sm:text-4xl"><CountUp value={8} /></dd>
-            <dt className="mt-1 text-xs uppercase tracking-wide opacity-75 sm:text-sm">Program Kegiatan</dt>
-          </div>
-        </dl>
-      </div>
-    </section>
+    </>
   )
 }

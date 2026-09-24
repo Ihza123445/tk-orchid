@@ -1,36 +1,173 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TK Orchid
 
-## Getting Started
+Sistem informasi sekolah TK berbasis web untuk mengelola siswa, wali, kelas, presensi, penilaian, laporan perkembangan, PPDB, tagihan, pembayaran, dan pengeluaran. Aplikasi juga menyediakan portal khusus guru dan orang tua serta halaman publik sekolah.
 
-First, run the development server:
+## Teknologi
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Next.js 16 (App Router) dan React 19
+- TypeScript dan Tailwind CSS 4
+- Prisma 7 dengan SQLite
+- Server Actions untuk mutasi data
+- Autentikasi berbasis cookie bertanda tangan dan pembatasan akses per peran
+
+## Persyaratan
+
+- Node.js 20.19 atau lebih baru; Node.js 22 LTS direkomendasikan
+- npm 10 atau lebih baru
+- Windows, macOS, atau Linux
+
+## Menjalankan secara lokal
+
+1. Pasang dependency:
+
+   ```bash
+   npm install
+   ```
+
+   Proses `postinstall` otomatis menjalankan `prisma generate`.
+
+2. Salin konfigurasi environment:
+
+   **PowerShell (Windows)**
+
+   ```powershell
+   Copy-Item .env.example .env
+   ```
+
+   **macOS/Linux**
+
+   ```bash
+   cp .env.example .env
+   ```
+
+3. Ganti `AUTH_SECRET` di `.env` dengan nilai acak. Contoh generator:
+
+   ```bash
+   node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"
+   ```
+
+4. Siapkan database:
+
+   ```bash
+   npm run db:migrate
+   npm run db:seed
+   ```
+
+   > `db:seed` menghapus lalu membuat ulang data demo di `prisma/dev.db`. Jangan jalankan perintah ini pada database yang berisi data penting.
+
+5. Jalankan development server:
+
+   ```bash
+   npm run dev
+   ```
+
+6. Buka [http://localhost:3000](http://localhost:3000).
+
+## Akun demo
+
+Semua akun demo memakai password `demo1234`.
+
+| Peran | Email | Halaman setelah login |
+| --- | --- | --- |
+| Admin | `admin@orchid.local` | `/dashboard` |
+| Staf | `staff@orchid.local` | `/dashboard` |
+| Guru | `guru1@orchid.local` | `/guru/dashboard` |
+| Orang tua | `orangtua@orchid.local` | `/portal` |
+
+## Perintah yang tersedia
+
+| Perintah | Kegunaan |
+| --- | --- |
+| `npm run dev` | Menjalankan server development |
+| `npm run build` | Membuat build production dan menjalankan pemeriksaan tipe Next.js |
+| `npm run start` | Menjalankan hasil build production |
+| `npm run lint` | Memeriksa kualitas kode dengan ESLint |
+| `npm run typecheck` | Memeriksa TypeScript tanpa membuat output |
+| `npm run db:generate` | Membuat Prisma Client |
+| `npm run db:migrate` | Menjalankan/membuat migrasi database development |
+| `npm run db:seed` | Mengisi ulang database dengan data demo |
+| `npm run db:verify` | Memeriksa relasi, saldo tagihan, dan constraint penting |
+
+## Struktur utama
+
+```text
+src/
+├── actions/             # Server Actions dan validasi mutasi
+├── app/
+│   ├── (auth)/          # Login dan reset password
+│   ├── (dashboard)/     # Admin/staf
+│   ├── (public)/        # Website publik
+│   ├── guru/            # Portal guru
+│   └── portal/          # Portal orang tua
+├── components/          # Form, layout, dan komponen UI
+├── lib/                 # Autentikasi, database, format, aset
+└── proxy.ts             # Redirect awal dan pemeriksaan akses rute
+prisma/
+├── migrations/          # Riwayat migrasi
+├── schema.prisma        # Skema database
+├── seed.ts              # Data demo
+└── dev.db               # Database SQLite lokal
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Rute penting
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Publik: `/`, `/profil`, `/program`, `/fasilitas`, `/kegiatan`, `/pengumuman`, `/kontak`, `/pendaftaran`
+- Admin/staf: `/dashboard`, `/ppdb`, `/siswa`, `/wali`, `/kelas`, `/presensi`, `/penilaian`, `/perkembangan`, `/keuangan/*`
+- Guru: `/guru/dashboard`, `/guru/presensi`, `/guru/penilaian`, `/guru/perkembangan`, `/guru/jadwal`
+- Orang tua: `/portal`, `/portal/tagihan`, `/portal/presensi`, `/portal/perkembangan`, `/portal/pengumuman`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Pemeriksaan sebelum commit/deploy
 
-## Learn More
+```bash
+npm run lint
+npm run typecheck
+npm run db:verify
+npm run build
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Menjalankan mode production
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run build
+npm run start
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Untuk production:
 
-## Deploy on Vercel
+- `AUTH_SECRET` wajib diisi dengan nilai acak yang kuat; aplikasi sengaja menolak autentikasi production jika variabel ini kosong.
+- SQLite membutuhkan disk persisten dan cocok untuk satu instance aplikasi. Jangan deploy konfigurasi database saat ini ke platform serverless dengan filesystem sementara.
+- Buat backup `prisma/dev.db` secara rutin atau migrasikan datasource ke database production seperti PostgreSQL sebelum penggunaan skala besar/multi-instance.
+- Fitur lupa password saat ini belum terhubung ke email/SMTP. Pada development, tautan reset ditampilkan di layar untuk pengujian; pada production perlu integrasi pengiriman email.
+- Rate limit login saat ini tersimpan di memori proses. Untuk beberapa instance, pindahkan penyimpanan rate limit ke Redis atau layanan sejenis.
+- Website publik memakai light mode sebagai tampilan awal. Pilihan dark mode pengunjung disimpan di browser melalui `localStorage`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Pemecahan masalah
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### `Cannot find module '.prisma/client/default'`
+
+Jalankan:
+
+```bash
+npm run db:generate
+```
+
+### Database belum memiliki data
+
+Jalankan migrasi dan seed:
+
+```bash
+npm run db:migrate
+npm run db:seed
+```
+
+### Port 3000 sedang dipakai
+
+Gunakan port lain:
+
+```bash
+npm run dev -- --port 3001
+```
+
+### Ingin mengembalikan data demo
+
+Cadangkan database bila diperlukan, lalu jalankan `npm run db:seed`. Perintah tersebut bersifat destruktif terhadap isi database lokal saat ini.

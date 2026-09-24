@@ -50,7 +50,7 @@ export async function createGuardianAction(_prev: GuardianFormState, formData: F
   const data = parsed.data
 
   try {
-    let userId: number | undefined
+    let passwordHash: string | undefined
     if (data.createAccount) {
       if (!data.email) {
         return { error: 'Email wajib diisi untuk membuat akun.', fields: { email: 'Email wajib untuk akun.' } }
@@ -59,24 +59,26 @@ export async function createGuardianAction(_prev: GuardianFormState, formData: F
       if (dup) return { error: 'Email sudah dipakai akun lain.', fields: { email: 'Email sudah terdaftar.' } }
       // password awal random; reset via fitur lupa password
       const tempPassword = crypto.randomBytes(12).toString('base64url')
-      const hash = await bcrypt.hash(tempPassword, 12)
-      const newUser = await db.user.create({
-        data: { name: data.fullName, email: data.email, passwordHash: hash, role: 'PARENT' },
-      })
-      userId = newUser.id
+      passwordHash = await bcrypt.hash(tempPassword, 12)
     }
 
-    const guardian = await db.guardian.create({
-      data: {
-        userId: userId ?? null,
-        fullName: data.fullName,
-        relationship: data.relationship,
-        phone: data.phone,
-        email: data.email || null,
-        occupation: data.occupation || null,
-        address: data.address || null,
-        notes: 'input manual',
-      },
+    const guardian = await db.$transaction(async (tx) => {
+      const account = passwordHash && data.email
+        ? await tx.user.create({ data: { name: data.fullName, email: data.email, passwordHash, role: 'PARENT' } })
+        : null
+
+      return tx.guardian.create({
+        data: {
+          userId: account?.id ?? null,
+          fullName: data.fullName,
+          relationship: data.relationship,
+          phone: data.phone,
+          email: data.email || null,
+          occupation: data.occupation || null,
+          address: data.address || null,
+          notes: 'input manual',
+        },
+      })
     })
     await audit({ userId: user.id, action: 'GUARDIAN_CREATE', entityType: 'Guardian', entityId: guardian.id, afterJson: JSON.stringify({ fullName: guardian.fullName }) })
     revalidatePath('/wali')

@@ -1,10 +1,9 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 import { db } from '@/lib/db/db'
-import { requireAdminStaff, requireAuth, getSessionUser } from '@/lib/auth/guard'
+import { requireAdminStaff, getSessionUser } from '@/lib/auth/guard'
 import { audit } from '@/lib/auth/rate-limit'
 
 const studentSchema = z.object({
@@ -132,6 +131,11 @@ export async function updateStudentAction(_prev: StudentFormState, formData: For
   const existing = await db.student.findUnique({ where: { id } })
   if (!existing) return { error: 'Siswa tidak ditemukan.' }
 
+  if (rest.nis) {
+    const duplicate = await db.student.findFirst({ where: { nis: rest.nis, id: { not: id } }, select: { id: true } })
+    if (duplicate) return { error: 'NIS sudah digunakan siswa lain.', fields: { nis: 'NIS sudah terdaftar.' } }
+  }
+
   try {
     const student = await db.student.update({
       where: { id },
@@ -139,6 +143,7 @@ export async function updateStudentAction(_prev: StudentFormState, formData: For
         ...(rest.fullName !== undefined ? { fullName: rest.fullName } : {}),
         ...(rest.nickname !== undefined ? { nickname: rest.nickname || null } : {}),
         ...(rest.gender !== undefined ? { gender: rest.gender } : {}),
+        ...(rest.birthPlace !== undefined ? { birthPlace: rest.birthPlace || null } : {}),
         ...(rest.birthDate ? { birthDate: new Date(rest.birthDate) } : {}),
         ...(rest.address !== undefined ? { address: rest.address || null } : {}),
         ...(rest.city !== undefined ? { city: rest.city || null } : {}),
@@ -195,7 +200,7 @@ export async function listStudents(opts: {
   search?: string
   status?: string
 }) {
-  await requireAuth()
+  await requireAdminStaff()
   const page = Math.max(1, opts.page ?? 1)
   const pageSize = Math.min(100, Math.max(10, opts.pageSize ?? 20))
   const where = {

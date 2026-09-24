@@ -30,16 +30,16 @@ export function NavLink({
       href={href}
       onClick={onNavigate}
       aria-current={active ? 'page' : undefined}
-      className={`group relative px-3 py-2 text-sm font-medium transition-colors duration-200 ${
+      className={`group relative flex min-h-11 items-center rounded-xl px-3 text-[13px] font-semibold transition-colors duration-200 ${
         active
-          ? 'text-[var(--primary)]'
-          : 'text-[var(--foreground)]/80 hover:text-[var(--primary)]'
+          ? 'bg-[var(--secondary)] text-[var(--primary)]'
+          : 'text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]'
       }`}
     >
       {label}
       <span
         aria-hidden="true"
-        className={`absolute inset-x-3 bottom-0 h-0.5 origin-left rounded-full bg-[var(--primary)] transition-transform duration-300 ease-out ${
+        className={`absolute inset-x-3 bottom-1.5 h-0.5 origin-left rounded-full bg-[var(--primary)] transition-transform duration-300 ease-out ${
           active ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
         }`}
       />

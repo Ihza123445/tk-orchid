@@ -55,11 +55,11 @@ export async function requireTeacherClassAccess(classId: number): Promise<Sessio
 export async function requireGuardianStudentAccess(studentId: number): Promise<SessionUser> {
   const user = await requireRole('PARENT')
   const guardian = await db.guardian.findUnique({ where: { userId: user.id } })
-  if (!guardian) redirect('/ortu/dashboard')
+  if (!guardian) redirect('/portal')
   const rel = await db.studentGuardian.findUnique({
     where: { studentId_guardianId: { studentId, guardianId: guardian.id } },
   })
-  if (!rel) redirect('/ortu/dashboard')
+  if (!rel) redirect('/portal')
   return user
 }
 

@@ -1,6 +1,7 @@
 'use client'
 
 import { useActionState } from 'react'
+import Link from 'next/link'
 import { forgotPasswordAction, type ForgotState } from '@/lib/auth/actions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,9 +14,9 @@ export function ForgotPasswordForm() {
   const [state, formAction, pending] = useActionState(forgotPasswordAction, initial)
 
   return (
-    <Card className="w-full max-w-sm">
-      <CardHeader>
-        <CardTitle className="text-xl">Lupa Password</CardTitle>
+    <Card className="w-full shadow-xl shadow-black/5 ring-1 ring-[var(--border)]">
+      <CardHeader className="border-b">
+        <CardTitle className="text-lg">Email akun</CardTitle>
         <CardDescription>
           Masukkan email akun Anda. Kami akan mengirim tautan untuk mengatur ulang password.
         </CardDescription>
@@ -39,7 +40,7 @@ export function ForgotPasswordForm() {
           </p>
         )}
         <div className="text-center text-sm">
-          <a href="/login" className="underline underline-offset-4 opacity-80 hover:opacity-100">Kembali ke login</a>
+          <Link href="/login" className="font-medium text-[var(--primary)] underline-offset-4 hover:underline">Kembali ke login</Link>
         </div>
       </CardContent>
     </Card>

@@ -16,7 +16,6 @@ const STATUS_STYLE: Record<string, string> = {
 export default async function TagihanPage() {
   await requireAdminStaff()
 
-  const ay = await db.academicYear.findFirst({ where: { status: 'ACTIVE' } })
   const [students, feeTypes, invoices] = await Promise.all([
     db.student.findMany({ where: { status: 'ACTIVE' }, select: { id: true, fullName: true, studentCode: true }, orderBy: { fullName: 'asc' } }),
     db.feeType.findMany({ where: { isActive: true }, select: { id: true, name: true, defaultAmount: true }, orderBy: { code: 'asc' } }),

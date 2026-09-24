@@ -6,7 +6,6 @@ const DAY_NAMES = ['', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Mi
 const DAYS = [1, 2, 3, 4, 5]
 
 export default async function GuruJadwalPage() {
-  await requireRole('TEACHER')
   const user = await requireRole('TEACHER')
   const teacher = await db.teacher.findUnique({ where: { userId: user.id } })
   if (!teacher) return <p className="text-sm text-[var(--muted-foreground)]">Profil guru tidak ditemukan.</p>

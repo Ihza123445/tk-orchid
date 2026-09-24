@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClassAction, type ClassFormState } from '@/actions/classes'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { LEVELS } from '@/lib/ppdb/levels'
 import { Label } from '@/components/ui/label'
 
 const initial: ClassFormState = {}
@@ -42,7 +43,8 @@ export function KelasForm({ years, teachers }: { years: Option[]; teachers: Opti
         </div>
         <div className="space-y-2">
           <Label htmlFor="level">Level/Kelompok *</Label>
-          <Input id="level" name="level" required maxLength={50} placeholder="Kelompok A" />
+          <Input id="level" name="level" required maxLength={50} placeholder="Kelompok A" list="class-levels" />
+          <datalist id="class-levels">{LEVELS.map((level) => <option key={level.value} value={level.value} />)}</datalist>
         </div>
         <div className="space-y-2">
           <Label htmlFor="room">Ruang</Label>

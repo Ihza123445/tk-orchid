@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
 import { requireAdminStaff } from '@/lib/auth/guard'
 import { db } from '@/lib/db/db'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -63,7 +64,7 @@ export default async function DetailWaliPage({ params }: { params: Promise<{ id:
             <ul className="divide-y text-sm">
               {guardian.studentGuardians.map((sg) => (
                 <li key={sg.student.id} className="flex items-center justify-between py-2">
-                  <a href={`/siswa/${sg.student.id}`} className="underline-offset-4 hover:underline">{sg.student.fullName}</a>
+                  <Link href={`/siswa/${sg.student.id}`} className="underline-offset-4 hover:underline">{sg.student.fullName}</Link>
                   <span className="flex items-center gap-2 text-xs">
                     {sg.isPrimary && <span className="rounded-full bg-[var(--secondary)] px-2 py-0.5 text-[var(--primary)]">utama</span>}
                     <span className="text-[var(--muted-foreground)]">{sg.student.studentCode}</span>

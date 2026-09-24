@@ -4,6 +4,7 @@ import { formatTanggalSingkat } from '@/lib/formatting/format'
 
 export default async function PortalPengumumanPage() {
   const user = await requireRole('PARENT')
+  const now = new Date()
 
   // Pengumuman untuk semua orang tua + yang ditujukan ke kelas anaknya
   const myStudents = await db.student.findMany({
@@ -15,6 +16,10 @@ export default async function PortalPengumumanPage() {
   const announcements = await db.announcement.findMany({
     where: {
       status: 'PUBLISHED',
+      AND: [
+        { OR: [{ publishAt: null }, { publishAt: { lte: now } }] },
+        { OR: [{ expireAt: null }, { expireAt: { gt: now } }] },
+      ],
       OR: [
         { audience: { in: ['ALL_PARENTS', 'PUBLIC'] } },
         ...(myClassIds.length > 0 ? [{ audience: 'CLASS_SPECIFIC', classId: { in: myClassIds } }] : []),

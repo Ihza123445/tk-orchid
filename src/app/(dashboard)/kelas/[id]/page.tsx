@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
 import { requireAdminStaff } from '@/lib/auth/guard'
 import { db } from '@/lib/db/db'
 import { enrollStudentAction } from '@/actions/classes'
@@ -26,9 +27,11 @@ export default async function DetailKelasPage({ params }: { params: Promise<{ id
   if (!klass) notFound()
 
   // siswa aktif yang belum terdaftar di TA ini (untuk dropdown enroll)
-  const enrolledIds = new Set(klass.enrollments.map((e) => e.student.id))
   const unenrolled = await db.student.findMany({
-    where: { status: 'ACTIVE', id: { notIn: Array.from(enrolledIds) } },
+    where: {
+      status: 'ACTIVE',
+      enrollments: { none: { academicYearId: klass.academicYearId } },
+    },
     select: { id: true, fullName: true, studentCode: true },
     orderBy: { fullName: 'asc' },
     take: 200,
@@ -82,7 +85,7 @@ export default async function DetailKelasPage({ params }: { params: Promise<{ id
             <ul className="divide-y text-sm">
               {klass.enrollments.map((e) => (
                 <li key={e.id} className="flex items-center justify-between py-2">
-                  <a href={`/siswa/${e.student.id}`} className="underline-offset-4 hover:underline">{e.student.fullName}</a>
+                  <Link href={`/siswa/${e.student.id}`} className="underline-offset-4 hover:underline">{e.student.fullName}</Link>
                   <span className="flex gap-3 text-xs text-[var(--muted-foreground)]">
                     <span>{e.student.gender === 'L' ? 'L' : 'P'}</span>
                     <span>masuk {formatTanggalSingkat(e.enrollmentDate)}</span>

@@ -39,7 +39,7 @@ export default async function PortalPresensiPage() {
     <div className="space-y-6">
       <header>
         <h1 className="text-2xl font-semibold tracking-tight">Presensi Anak</h1>
-        <p className="text-sm text-[var(--muted-foreground)]">60 catatan terakhir per anak.</p>
+        <p className="text-sm text-[var(--muted-foreground)]">Maksimal 60 catatan terbaru untuk semua anak.</p>
       </header>
 
       {[...byStudent.entries()].length === 0 ? (

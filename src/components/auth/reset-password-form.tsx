@@ -18,7 +18,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
 
   if (state.success) {
     return (
-      <Card className="w-full max-w-sm">
+      <Card className="w-full shadow-xl shadow-black/5 ring-1 ring-[var(--border)]">
         <CardHeader>
           <CardTitle className="text-xl">Password Diperbarui</CardTitle>
           <CardDescription>Password Anda berhasil diatur ulang.</CardDescription>
@@ -33,9 +33,9 @@ export function ResetPasswordForm({ token }: { token: string }) {
   }
 
   return (
-    <Card className="w-full max-w-sm">
-      <CardHeader>
-        <CardTitle className="text-xl">Atur Ulang Password</CardTitle>
+    <Card className="w-full shadow-xl shadow-black/5 ring-1 ring-[var(--border)]">
+      <CardHeader className="border-b">
+        <CardTitle className="text-lg">Password baru</CardTitle>
         <CardDescription>Masukkan password baru untuk akun Anda.</CardDescription>
       </CardHeader>
       <CardContent>

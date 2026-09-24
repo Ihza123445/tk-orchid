@@ -92,7 +92,7 @@ export default async function DetailSiswaPage({ params }: { params: Promise<{ id
                   ))}
                 </ul>
               )}
-              <p className="mt-2 text-xs text-[var(--muted-foreground)]">{totalHadir} hadir dari 10 record terakhir.</p>
+              <p className="mt-2 text-xs text-[var(--muted-foreground)]">{totalHadir} hadir dari {student.attendances.length} catatan terakhir.</p>
             </CardContent>
           </Card>
         </div>
@@ -139,7 +139,7 @@ export default async function DetailSiswaPage({ params }: { params: Promise<{ id
             <CardContent>
               <p className="text-2xl font-semibold">{formatRupiah(outstanding)}</p>
               <p className="text-xs text-[var(--muted-foreground)]">Total belum dibayar</p>
-              <Link href={`/tagihan?studentId=${student.id}`} className="mt-3 inline-block text-sm underline underline-offset-4">
+              <Link href={`/keuangan/tagihan?studentId=${student.id}`} className="mt-3 inline-block text-sm underline underline-offset-4">
                 Lihat tagihan
               </Link>
             </CardContent>

@@ -28,12 +28,19 @@ export async function verifyPasswordResetToken(token: string): Promise<number | 
 
 /** Konsumsi token (single-use) + ganti password + invalidasi via isActive tetap. */
 export async function consumePasswordResetToken(token: string, newPasswordHash: string): Promise<boolean> {
-  const userId = await verifyPasswordResetToken(token)
-  if (!userId) return false
+  if (!token) return false
   const tokenHash = crypto.createHash('sha256').update(token).digest('hex')
-  await db.$transaction([
-    db.passwordResetToken.update({ where: { tokenHash }, data: { usedAt: new Date() } }),
-    db.user.update({ where: { id: userId }, data: { passwordHash: newPasswordHash } }),
-  ])
-  return true
+  return db.$transaction(async (tx) => {
+    const row = await tx.passwordResetToken.findUnique({ where: { tokenHash } })
+    if (!row || row.usedAt || row.expiresAt.getTime() < Date.now()) return false
+
+    const claimed = await tx.passwordResetToken.updateMany({
+      where: { id: row.id, usedAt: null, expiresAt: { gt: new Date() } },
+      data: { usedAt: new Date() },
+    })
+    if (claimed.count !== 1) return false
+
+    await tx.user.update({ where: { id: row.userId }, data: { passwordHash: newPasswordHash } })
+    return true
+  })
 }

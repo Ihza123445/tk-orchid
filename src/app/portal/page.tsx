@@ -1,8 +1,9 @@
 import Link from 'next/link'
 import { requireRole } from '@/lib/auth/guard'
 import { db } from '@/lib/db/db'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { formatRupiah, formatTanggalSingkat } from '@/lib/formatting/format'
+import { CheckCircle2, ChevronRight, ReceiptText } from 'lucide-react'
+import { formatRupiah, formatTanggal, formatTanggalSingkat } from '@/lib/formatting/format'
+import { Empty, PageHeader, Panel, Row, RowList } from '@/components/dashboard/primitives'
 
 /**
  * Scoping inti portal ortu: user GUARDIAN hanya boleh lihat anak yang
@@ -32,6 +33,7 @@ export async function assertStudentAccess(userId: number, studentId: number): Pr
 export default async function PortalOrtuPage() {
   const user = await requireRole('PARENT')
   const students = await getMyStudents(user.id)
+  const now = new Date()
 
   if (students.length === 0) {
     return (
@@ -56,7 +58,14 @@ export default async function PortalOrtuPage() {
 
   // Pengumuman untuk orang tua
   const announcements = await db.announcement.findMany({
-    where: { status: 'PUBLISHED', audience: { in: ['ALL_PARENTS', 'PUBLIC'] } },
+    where: {
+      status: 'PUBLISHED',
+      audience: { in: ['ALL_PARENTS', 'PUBLIC'] },
+      AND: [
+        { OR: [{ publishAt: null }, { publishAt: { lte: now } }] },
+        { OR: [{ expireAt: null }, { expireAt: { gt: now } }] },
+      ],
+    },
     orderBy: { publishAt: 'desc' },
     take: 5,
   })
@@ -68,91 +77,61 @@ export default async function PortalOrtuPage() {
     take: 3,
   })
 
+  const unpaidCount = invoices.filter((inv) => !['VOID', 'PAID'].includes(inv.status)).length
+
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold tracking-tight">Portal Orang Tua</h1>
-        <p className="text-sm text-[var(--muted-foreground)]">Selamat datang, {user.name}.</p>
-      </header>
+      <PageHeader eyebrow={formatTanggal(now)} title={`Halo, ${user.name.split(' ')[0]}`} description="Kabar terbaru tentang si kecil di TK Orchid." />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <Card>
-          <CardHeader><CardTitle className="text-base">Anak Terdaftar</CardTitle></CardHeader>
-          <CardContent><p className="text-3xl font-semibold tabular-nums">{students.length}</p></CardContent>
-        </Card>
-        <Card>
-          <CardHeader><CardTitle className="text-base">Tagihan Belum Lunas</CardTitle></CardHeader>
-          <CardContent>
-            <p className={`text-2xl font-semibold tabular-nums ${totalOutstanding > 0 ? 'text-amber-600' : 'text-[var(--primary)]'}`}>
-              {formatRupiah(totalOutstanding)}
-            </p>
-            <Link href="/portal/tagihan" className="mt-1 inline-block text-xs underline underline-offset-4">Lihat rincian</Link>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader><CardTitle className="text-base">Menu Cepat</CardTitle></CardHeader>
-          <CardContent className="space-y-1 text-sm">
-            <Link href="/portal/presensi" className="block underline-offset-4 hover:underline">Presensi anak</Link>
-            <Link href="/portal/perkembangan" className="block underline-offset-4 hover:underline">Rapor perkembangan</Link>
-            <Link href="/portal/pengumuman" className="block underline-offset-4 hover:underline">Pengumuman</Link>
-          </CardContent>
-        </Card>
-      </div>
+      {totalOutstanding > 0 ? (
+        <Link href="/portal/tagihan" className="group flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-5 py-4 transition-colors hover:bg-amber-500/15">
+          <div className="flex items-center gap-3">
+            <ReceiptText className="size-5 text-amber-700 dark:text-amber-300" />
+            <div>
+              <p className="text-sm font-semibold">Ada tagihan yang belum lunas</p>
+              <p className="text-xs text-[var(--muted-foreground)]">Total {formatRupiah(totalOutstanding)} dari {unpaidCount} tagihan</p>
+            </div>
+          </div>
+          <span className="inline-flex items-center gap-1 text-sm font-medium">Lihat rincian <ChevronRight className="size-4 transition-transform group-hover:translate-x-0.5" /></span>
+        </Link>
+      ) : (
+        <p className="flex items-center gap-2 text-sm text-[var(--muted-foreground)]"><CheckCircle2 className="size-4 text-emerald-600" /> Semua tagihan sudah lunas. Terima kasih!</p>
+      )}
 
-      <section>
-        <h2 className="mb-3 text-base font-semibold">Anak Saya</h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {students.map((s) => (
-            <Card key={s.id}>
-              <CardHeader><CardTitle className="text-base">{s.fullName}</CardTitle></CardHeader>
-              <CardContent className="space-y-1 text-sm">
-                <p>NIS {s.studentCode}</p>
-                <p>Kelas {s.enrollments[0]?.klass?.name ?? '-'}</p>
-                <Link href={`/portal/anak/${s.id}`} className="inline-block underline underline-offset-4">Detail →</Link>
-              </CardContent>
-            </Card>
+      <Panel title="Anak saya" flush>
+        <RowList>
+          {students.map((student) => (
+            <Row
+              key={student.id}
+              href={`/portal/anak/${student.id}`}
+              primary={student.fullName}
+              secondary={`Kelas ${student.enrollments[0]?.klass?.name ?? '-'} · NIS ${student.studentCode}`}
+              trailing={<span className="text-xs text-[var(--muted-foreground)]">Lihat detail</span>}
+            />
           ))}
-        </div>
-      </section>
+        </RowList>
+      </Panel>
 
-      <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader><CardTitle className="text-base">Pengumuman Terbaru</CardTitle></CardHeader>
-          <CardContent>
-            {announcements.length === 0 ? (
-              <p className="text-sm text-[var(--muted-foreground)]">Belum ada pengumuman.</p>
-            ) : (
-              <ul className="space-y-2 text-sm">
-                {announcements.map((a) => (
-                  <li key={a.id} className="flex justify-between gap-2">
-                    <span className="truncate">{a.title}</span>
-                    <span className="shrink-0 text-xs text-[var(--muted-foreground)]">{formatTanggalSingkat(a.publishAt ?? a.createdAt)}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader><CardTitle className="text-base">Kegiatan</CardTitle></CardHeader>
-          <CardContent>
-            {activities.length === 0 ? (
-              <p className="text-sm text-[var(--muted-foreground)]">Belum ada kegiatan.</p>
-            ) : (
-              <ul className="space-y-2 text-sm">
-                {activities.map((a) => (
-                  <li key={a.id} className="flex justify-between gap-2">
-                    <span className="truncate">{a.title}</span>
-                    <span className="shrink-0 text-xs text-[var(--muted-foreground)]">
-                      {a.startDatetime ? formatTanggalSingkat(a.startDatetime) : ''}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </CardContent>
-        </Card>
-      </section>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Panel title="Pengumuman terbaru" action={{ href: '/portal/pengumuman', label: 'Semua' }} flush>
+          {announcements.length === 0 ? <Empty>Belum ada pengumuman.</Empty> : (
+            <RowList>
+              {announcements.map((item) => (
+                <Row key={item.id} href="/portal/pengumuman" primary={item.title} secondary={formatTanggalSingkat(item.publishAt ?? item.createdAt)} />
+              ))}
+            </RowList>
+          )}
+        </Panel>
+        <Panel title="Kegiatan sekolah" flush>
+          {activities.length === 0 ? <Empty>Belum ada kegiatan.</Empty> : (
+            <RowList>
+              {activities.map((item) => (
+                <Row key={item.id} primary={item.title} secondary={[item.startDatetime && formatTanggalSingkat(item.startDatetime), item.location].filter(Boolean).join(' · ')} />
+              ))}
+            </RowList>
+          )}
+        </Panel>
+      </div>
     </div>
   )
 }
