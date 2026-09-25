@@ -2,7 +2,7 @@ import { BookHeart, House, NotebookPen } from 'lucide-react'
 import { formatTanggalSingkat } from '@/lib/formatting/format'
 
 // Warna skala STPPA: BB → MB → BSH → BSB (makin tinggi makin "matang")
-const SCALE_STYLE: Record<string, string> = {
+export const SCALE_STYLE: Record<string, string> = {
   BB: 'bg-rose-500/10 text-rose-700 ring-rose-500/20 dark:text-rose-300',
   MB: 'bg-amber-500/10 text-amber-700 ring-amber-500/25 dark:text-amber-300',
   BSH: 'bg-emerald-500/10 text-emerald-700 ring-emerald-500/20 dark:text-emerald-300',

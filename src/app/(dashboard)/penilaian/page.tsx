@@ -24,7 +24,7 @@ export default async function PenilaianPage() {
     db.assessmentScale.findMany({ where: { isActive: true }, orderBy: { sortOrder: 'asc' } }),
     db.assessment.findMany({
       where: { academicYearId: ay.id },
-      include: { student: { select: { fullName: true } }, scale: { select: { label: true } }, domain: { select: { id: true, name: true } } },
+      include: { student: { select: { fullName: true } }, scale: { select: { label: true, code: true } }, domain: { select: { id: true, name: true } } },
       orderBy: { studentId: 'asc' },
     }),
   ])
@@ -43,7 +43,7 @@ export default async function PenilaianPage() {
     const byStudent = new Map<number, { name: string; cells: Record<number, string | null>; narrativeCount: number }>()
     for (const a of assessments.filter((x) => x.period === period)) {
       const entry = byStudent.get(a.studentId) ?? { name: a.student.fullName, cells: {}, narrativeCount: 0 }
-      entry.cells[a.domainId] = a.scale.label
+      entry.cells[a.domainId] = a.scale.code
       if (a.narrative) entry.narrativeCount++
       byStudent.set(a.studentId, entry)
     }

@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation'
 import { saveAssessmentAction, type AssessmentState } from '@/actions/assessments'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
+import { SCALE_STYLE, ScaleLegend } from '@/components/reports/report-card'
+
+const SCALE_LABEL: Record<string, string> = { BB: 'Belum Berkembang', MB: 'Mulai Berkembang', BSH: 'Berkembang Sesuai Harapan', BSB: 'Berkembang Sangat Baik' }
 
 interface Option { id: number; label: string }
 interface StudentOpt { id: number; label: string }
@@ -113,6 +116,8 @@ export function RekapTable({ rows, domainLabels }: { rows: { studentName: string
   }
   const domainIds = Object.keys(domainLabels).map(Number).sort((a, b) => a - b)
   return (
+    <div className="space-y-2">
+    <ScaleLegend />
     <div className="table-card">
       <table className="w-full min-w-[720px]">
         <thead>
@@ -120,24 +125,31 @@ export function RekapTable({ rows, domainLabels }: { rows: { studentName: string
             <th className="px-4 py-3">Siswa</th>
             <th className="px-4 py-3">Periode</th>
             {domainIds.map((d) => (
-              <th key={d} className="px-4 py-3 font-medium">{domainLabels[d] ?? `D${d}`}</th>
+              <th key={d} className="whitespace-normal px-3 py-3 text-center leading-tight">{domainLabels[d] ?? `D${d}`}</th>
             ))}
-            <th className="px-4 py-3">Narasi</th>
+            <th className="px-4 py-3 text-center">Narasi</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((r) => (
-            <tr key={`${r.studentName}-${r.period}`} className="border-b last:border-0">
+            <tr key={`${r.studentName}-${r.period}`}>
               <td className="px-4 py-3 font-medium">{r.studentName}</td>
               <td className="px-4 py-3">{r.period}</td>
               {domainIds.map((d) => (
-                <td key={d} className="px-4 py-3 tabular-nums">{r.cells[d] ?? '-'}</td>
+                <td key={d} className="px-4 py-3 text-center">
+                  {r.cells[d] ? (
+                    <span title={SCALE_LABEL[r.cells[d]!] ?? r.cells[d]!} className={`inline-block min-w-10 rounded-md px-1.5 py-0.5 text-[11px] font-bold ring-1 ring-inset ${SCALE_STYLE[r.cells[d]!] ?? 'bg-[var(--muted)] ring-[var(--border)]'}`}>{r.cells[d]}</span>
+                  ) : (
+                    <span className="text-[var(--muted-foreground)]">–</span>
+                  )}
+                </td>
               ))}
-              <td className="px-4 py-3 tabular-nums">{r.narrativeCount > 0 ? `${r.narrativeCount}` : '-'}</td>
+              <td className="px-4 py-3 text-center tabular-nums">{r.narrativeCount > 0 ? `${r.narrativeCount}` : '–'}</td>
             </tr>
           ))}
         </tbody>
       </table>
+    </div>
     </div>
   )
 }
