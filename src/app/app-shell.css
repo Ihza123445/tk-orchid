@@ -78,13 +78,22 @@
   }
 
   /* ----- Tabel data ----- */
+  /* Tabel menggulir di dalam kotaknya sendiri (horizontal & vertikal);
+     judul kolom tetap menempel di atas saat isi digulir. */
   .table-card {
-    overflow-x: auto;
+    max-height: min(70vh, 640px);
+    overflow: auto;
+    overscroll-behavior: contain;
     border: 1px solid var(--border);
     border-radius: 1rem;
     background: var(--card);
     box-shadow: var(--shadow-card);
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--foreground) 22%, transparent) transparent;
   }
+  .table-card::-webkit-scrollbar { width: 8px; height: 8px; }
+  .table-card::-webkit-scrollbar-thumb { border-radius: 99px; background: color-mix(in srgb, var(--foreground) 20%, transparent); }
+  .table-card::-webkit-scrollbar-track { background: transparent; }
   .table-card table {
     width: 100%;
     border-collapse: separate;
@@ -94,7 +103,7 @@
   .table-card thead th {
     position: sticky;
     top: 0;
-    z-index: 1;
+    z-index: 2;
     border-bottom: 1px solid var(--border);
     background: color-mix(in srgb, var(--muted) 70%, var(--card));
     color: var(--muted-foreground);
