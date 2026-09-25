@@ -396,10 +396,10 @@ export function Progress({ value, tone = 'brand', label }: { value: number; tone
 }
 
 /** Petak pintasan (quick actions). */
-export function QuickLinks({ items, columns = 4 }: { items: { href: string; label: string; description?: string; icon: LucideIcon; tone?: Tone }[]; columns?: 2 | 3 | 4 }) {
+export function QuickLinks({ items, columns = 4, fill = false }: { items: { href: string; label: string; description?: string; icon: LucideIcon; tone?: Tone }[]; columns?: 2 | 3 | 4; /** true = petak meregang mengisi tinggi wadah */ fill?: boolean }) {
   const cols = { 2: 'grid-cols-2', 3: 'grid-cols-2 lg:grid-cols-3', 4: 'grid-cols-2 lg:grid-cols-4' }[columns]
   return (
-    <div className={`grid gap-3 ${cols}`}>
+    <div className={`grid gap-3 ${cols} ${fill ? 'h-full auto-rows-fr' : ''}`}>
       {items.map((item) => (
         <Link key={item.href + item.label} href={item.href} className="app-card group flex items-center gap-3 p-3.5 transition-all hover:-translate-y-0.5 hover:border-[var(--primary)]/30 hover:shadow-[var(--shadow-raised)]">
           <IconTile icon={item.icon} tone={item.tone ?? 'brand'} />

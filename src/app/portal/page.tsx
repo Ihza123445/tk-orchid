@@ -94,6 +94,7 @@ export default async function PortalOrtuPage() {
     return { total, present }
   }
   const monthName = new Intl.DateTimeFormat('id-ID', { month: 'long', timeZone: 'Asia/Jakarta' }).format(now)
+  const single = students.length === 1
   const greetName = students.length === 1 ? `Ayah & Bunda ${firstName(students[0].fullName)}` : 'Ayah & Bunda'
 
   return (
@@ -134,15 +135,18 @@ export default async function PortalOrtuPage() {
         </Link>
       ) : null}
 
-      <section className="space-y-3">
-        <h2 className="section-title">Anak saya</h2>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      {/* Satu anak: kartu anak & menu cepat berdampingan agar tidak ada ruang kosong.
+          Beberapa anak: kartu anak dua kolom, menu cepat satu baris di bawahnya. */}
+      <div className={`grid grid-cols-1 gap-6 ${single ? 'lg:grid-cols-2' : ''}`}>
+        <section className="flex flex-col gap-3">
+          <h2 className="section-title">{single ? 'Anak saya' : `Anak saya (${students.length})`}</h2>
+          <div className={`grid flex-1 grid-cols-1 gap-4 ${single ? '' : 'md:grid-cols-2'}`}>
           {students.map((student) => {
             const att = attendanceOf(student.id)
             const ratio = att.total ? Math.round((att.present / att.total) * 100) : null
             const owed = outstandingByStudent.get(student.id) ?? 0
             return (
-              <Link key={student.id} href={`/portal/anak/${student.id}`} className="app-card group block p-5 transition-all hover:-translate-y-0.5 hover:border-[var(--primary)]/30 hover:shadow-[var(--shadow-raised)]">
+              <Link key={student.id} href={`/portal/anak/${student.id}`} className="app-card group flex h-full flex-col justify-between p-5 transition-all hover:-translate-y-0.5 hover:border-[var(--primary)]/30 hover:shadow-[var(--shadow-raised)]">
                 <div className="flex items-center gap-4">
                   <Avatar name={student.fullName} size="lg" />
                   <div className="min-w-0 flex-1">
@@ -166,48 +170,59 @@ export default async function PortalOrtuPage() {
               </Link>
             )
           })}
-        </div>
-      </section>
+          </div>
+        </section>
+        <section className="flex flex-col gap-3">
+          <h2 className="section-title">Menu cepat</h2>
+          <div className="flex-1">
+          <QuickLinks
+            fill={single}
+            columns={single ? 2 : 4}
+            items={[
+              { href: '/portal/tagihan', label: 'Tagihan', description: 'Rincian & kwitansi', icon: ReceiptText, tone: 'warning' },
+              { href: '/portal/presensi', label: 'Presensi', description: 'Riwayat kehadiran', icon: ClipboardCheck, tone: 'success' },
+              { href: '/portal/perkembangan', label: 'Rapor', description: 'Laporan perkembangan', icon: ChartNoAxesCombined, tone: 'info' },
+              { href: '/portal/pengumuman', label: 'Pengumuman', description: 'Kabar dari sekolah', icon: Megaphone, tone: 'brand' },
+            ]}
+          />
+          </div>
+        </section>
+      </div>
 
-      <QuickLinks
-        items={[
-          { href: '/portal/tagihan', label: 'Tagihan', description: 'Rincian & kwitansi', icon: ReceiptText, tone: 'warning' },
-          { href: '/portal/presensi', label: 'Presensi', description: 'Riwayat kehadiran', icon: ClipboardCheck, tone: 'success' },
-          { href: '/portal/perkembangan', label: 'Rapor', description: 'Laporan perkembangan', icon: ChartNoAxesCombined, tone: 'info' },
-          { href: '/portal/pengumuman', label: 'Pengumuman', description: 'Kabar dari sekolah', icon: Megaphone, tone: 'brand' },
-        ]}
-      />
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <Panel title="Pengumuman terbaru" icon={Megaphone} action={{ href: '/portal/pengumuman', label: 'Semua' }} flush>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <Panel className="lg:col-span-2" title="Pengumuman terbaru" icon={Megaphone} action={{ href: '/portal/pengumuman', label: 'Semua' }} flush>
           {announcements.length === 0 ? <Empty icon={Megaphone}>Belum ada pengumuman.</Empty> : (
             <RowList>
               {announcements.map((item) => (
-                <Row key={item.id} href="/portal/pengumuman" primary={item.title} secondary={formatTanggalSingkat(item.publishAt ?? item.createdAt)} />
+                <Row key={item.id} href="/portal/pengumuman" leading={<IconTile icon={Megaphone} size="sm" tone="info" />} primary={item.title} secondary={formatTanggalSingkat(item.publishAt ?? item.createdAt)} />
               ))}
             </RowList>
           )}
         </Panel>
         <Panel title="Kegiatan sekolah" icon={Sparkles} flush>
-          {activities.length === 0 ? <Empty icon={Sparkles}>Belum ada kegiatan.</Empty> : (
-            <RowList>
-              {activities.map((item) => (
-                <Row
-                  key={item.id}
-                  leading={
-                    item.startDatetime ? (
-                      <span className="flex w-11 shrink-0 flex-col items-center rounded-xl bg-[var(--primary)]/10 py-1 text-[var(--primary)]">
-                        <span className="font-heading text-base font-bold leading-none">{new Intl.DateTimeFormat('id-ID', { day: 'numeric', timeZone: 'Asia/Jakarta' }).format(item.startDatetime)}</span>
-                        <span className="text-[10px] font-semibold uppercase">{new Intl.DateTimeFormat('id-ID', { month: 'short', timeZone: 'Asia/Jakarta' }).format(item.startDatetime)}</span>
+          <div className="flex h-full flex-col">
+            {activities.length === 0 ? <Empty icon={Sparkles}>Belum ada kegiatan.</Empty> : (
+              <ol className="flex-1 space-y-2 p-3">
+                {activities.map((item) => (
+                  <li key={item.id} className="flex gap-3 rounded-xl p-2.5 transition-colors hover:bg-[var(--muted)]/70">
+                    {item.startDatetime ? (
+                      <span className="flex w-12 shrink-0 flex-col items-center justify-center rounded-xl bg-[var(--primary)]/10 py-1.5 text-[var(--primary)]">
+                        <span className="font-heading text-lg font-bold leading-none">{new Intl.DateTimeFormat('id-ID', { day: 'numeric', timeZone: 'Asia/Jakarta' }).format(item.startDatetime)}</span>
+                        <span className="mt-0.5 text-[10px] font-semibold uppercase">{new Intl.DateTimeFormat('id-ID', { month: 'short', timeZone: 'Asia/Jakarta' }).format(item.startDatetime)}</span>
                       </span>
-                    ) : <IconTile icon={Sparkles} size="sm" />
-                  }
-                  primary={item.title}
-                  secondary={item.location ? <span className="inline-flex items-center gap-1"><MapPin className="size-3" /> {item.location}</span> : 'Kegiatan sekolah'}
-                />
-              ))}
-            </RowList>
-          )}
+                    ) : <IconTile icon={Sparkles} />}
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold leading-snug">{item.title}</p>
+                      <p className="mt-1 flex items-start gap-1 text-xs text-[var(--muted-foreground)]"><MapPin className="mt-px size-3 shrink-0" /> {item.location ?? 'Lingkungan sekolah'}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            )}
+            <a href="/kegiatan" target="_blank" rel="noreferrer" className="mt-auto flex items-center justify-between border-t border-[var(--border)] px-5 py-3 text-xs font-semibold text-[var(--primary)] transition-colors hover:bg-[var(--primary)]/[0.04]">
+              Lihat dokumentasi kegiatan <ChevronRight className="size-4" />
+            </a>
+          </div>
         </Panel>
       </div>
     </div>
