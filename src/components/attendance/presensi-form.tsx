@@ -99,14 +99,14 @@ export function PresensiForm({ classes }: { classes: Option[] }) {
       <div className="app-card grid grid-cols-2 items-end gap-3 p-4 sm:flex sm:flex-wrap">
         <div className="col-span-2 space-y-2 sm:col-span-1">
           <Label htmlFor="classId">Kelas</Label>
-          <select id="classId" value={classId} onChange={(e) => { startReload(); setClassId(e.target.value) }}
+          <select id="classId" value={classId} onChange={(e) => { if (e.target.value !== classId) { startReload(); setClassId(e.target.value) } }}
             className="field-select sm:w-auto">
             {classes.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
           </select>
         </div>
         <div className="col-span-2 space-y-2 sm:col-span-1">
           <Label htmlFor="tanggal">Tanggal</Label>
-          <Input id="tanggal" type="date" value={date} onChange={(e) => { startReload(); setDate(e.target.value) }} className="sm:w-44" />
+          <Input id="tanggal" type="date" value={date} onChange={(e) => { if (e.target.value !== date) { startReload(); setDate(e.target.value) } }} className="sm:w-44" />
         </div>
         <Button type="button" variant="outline" onClick={markAllPresent} disabled={loading || rows.length === 0} className="col-span-2 sm:col-span-1">
           Tandai Hadir Semua

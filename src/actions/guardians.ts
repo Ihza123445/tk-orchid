@@ -16,6 +16,7 @@ const guardianSchema = z.object({
   occupation: z.string().trim().max(100).optional().or(z.literal('')),
   address: z.string().trim().max(255).optional().or(z.literal('')),
   createAccount: z.boolean().optional(),
+  studentId: z.coerce.number().int().positive().optional(),
 })
 
 export interface GuardianFormState {
@@ -45,9 +46,14 @@ export async function createGuardianAction(_prev: GuardianFormState, formData: F
     occupation: formData.get('occupation'),
     address: formData.get('address'),
     createAccount: formData.get('createAccount') === 'on',
+    studentId: formData.get('studentId') || undefined,
   })
   if (!parsed.success) return { error: 'Periksa kembali data yang diisi.', fields: collectFields(parsed.error) }
   const data = parsed.data
+  if (data.studentId) {
+    const student = await db.student.findUnique({ where: { id: data.studentId }, select: { id: true } })
+    if (!student) return { error: 'Siswa tidak ditemukan.', fields: { studentId: 'Pilih siswa yang valid.' } }
+  }
 
   try {
     let passwordHash: string | undefined
@@ -67,7 +73,7 @@ export async function createGuardianAction(_prev: GuardianFormState, formData: F
         ? await tx.user.create({ data: { name: data.fullName, email: data.email, passwordHash, role: 'PARENT' } })
         : null
 
-      return tx.guardian.create({
+      const created = await tx.guardian.create({
         data: {
           userId: account?.id ?? null,
           fullName: data.fullName,
@@ -79,9 +85,16 @@ export async function createGuardianAction(_prev: GuardianFormState, formData: F
           notes: 'input manual',
         },
       })
+      if (data.studentId) {
+        // wali pertama siswa otomatis menjadi wali utama
+        const hasPrimary = await tx.studentGuardian.count({ where: { studentId: data.studentId, isPrimary: true } })
+        await tx.studentGuardian.create({ data: { studentId: data.studentId, guardianId: created.id, isPrimary: hasPrimary === 0 } })
+      }
+      return created
     })
-    await audit({ userId: user.id, action: 'GUARDIAN_CREATE', entityType: 'Guardian', entityId: guardian.id, afterJson: JSON.stringify({ fullName: guardian.fullName }) })
+    await audit({ userId: user.id, action: 'GUARDIAN_CREATE', entityType: 'Guardian', entityId: guardian.id, afterJson: JSON.stringify({ fullName: guardian.fullName, studentId: data.studentId ?? null }) })
     revalidatePath('/wali')
+    if (data.studentId) revalidatePath(`/siswa/${data.studentId}`)
     return { success: true, guardianId: guardian.id }
   } catch (err) {
     console.error('[guardians] create gagal:', err)
@@ -110,16 +123,19 @@ export async function linkStudentGuardianAction(formData: FormData): Promise<voi
   })
   if (existing) return
 
-  if (isPrimary) {
+  // siswa yang belum punya wali utama otomatis memakai wali ini sebagai wali utama
+  const makePrimary = isPrimary || (await db.studentGuardian.count({ where: { studentId, isPrimary: true } })) === 0
+  if (makePrimary) {
     await db.studentGuardian.updateMany({ where: { studentId }, data: { isPrimary: false } })
   }
-  await db.studentGuardian.create({ data: { studentId, guardianId, isPrimary } })
+  await db.studentGuardian.create({ data: { studentId, guardianId, isPrimary: makePrimary } })
   await audit({
     userId: user.id, action: 'GUARDIAN_LINK', entityType: 'Student',
     entityId: studentId,
-    afterJson: JSON.stringify({ guardianId, isPrimary }),
+    afterJson: JSON.stringify({ guardianId, isPrimary: makePrimary }),
   })
   revalidatePath(`/siswa/${studentId}`)
+  revalidatePath(`/wali/${guardianId}`)
   revalidatePath('/wali')
 }
 

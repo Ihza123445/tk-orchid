@@ -4,6 +4,8 @@ import { db } from '@/lib/db/db'
 import { GraduationCap, KeyRound, Phone, UserRound } from 'lucide-react'
 import { Avatar, Empty, HeaderButton, InfoGrid, Panel, Pill, Row, RowList, STUDENT_STATUS, StatusPill } from '@/components/dashboard/primitives'
 import { formatTanggalSingkat } from '@/lib/formatting/format'
+import { linkStudentGuardianAction } from '@/actions/guardians'
+import { Button } from '@/components/ui/button'
 
 const REL: Record<string, string> = { AYAH: 'Ayah', IBU: 'Ibu', WALI: 'Wali', LAINNYA: 'Lainnya' }
 
@@ -23,6 +25,13 @@ export default async function DetailWaliPage({ params }: { params: Promise<{ id:
     },
   })
   if (!guardian) notFound()
+
+  const linkedIds = guardian.studentGuardians.map((sg) => sg.student.id)
+  const linkable = await db.student.findMany({
+    where: { status: { in: ['ACTIVE', 'CANDIDATE'] }, id: { notIn: linkedIds } },
+    select: { id: true, fullName: true, studentCode: true },
+    orderBy: { fullName: 'asc' },
+  })
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -90,6 +99,24 @@ export default async function DetailWaliPage({ params }: { params: Promise<{ id:
               />
             ))}
           </RowList>
+        )}
+        {linkable.length > 0 && (
+          <form action={linkStudentGuardianAction} className="flex flex-wrap items-end gap-3 border-t border-[var(--border)] p-4">
+            <input type="hidden" name="guardianId" value={guardian.id} />
+            <label className="min-w-56 flex-1 space-y-1.5 text-sm font-medium">
+              <span>Hubungkan anak</span>
+              <select name="studentId" required defaultValue="" className="field-select w-full">
+                <option value="" disabled>Pilih siswa…</option>
+                {linkable.map((s) => (
+                  <option key={s.id} value={s.id}>{s.fullName} ({s.studentCode})</option>
+                ))}
+              </select>
+            </label>
+            <label className="flex h-9 items-center gap-2 text-sm">
+              <input type="checkbox" name="isPrimary" className="h-4 w-4" /> Jadikan wali utama
+            </label>
+            <Button type="submit">Hubungkan</Button>
+          </form>
         )}
       </Panel>
     </div>

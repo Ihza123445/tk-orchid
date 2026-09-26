@@ -44,3 +44,7 @@ next-env.d.ts
 # upload foto dari admin
 /storage/uploads
 .cache/
+
+# hasil System Integration Test (scripts/sit.mjs)
+sit-hasil.json
+sit-screenshot/

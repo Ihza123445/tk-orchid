@@ -1,0 +1,24 @@
+' Ditulis manual. Jadwal tahapan pengembangan (tanggal setelah 26 Sep 2026 adalah rencana).
+@startgantt gantt-pengembangan
+title Jadwal Tahapan Pengembangan Sistem Informasi TK Orchid
+skinparam defaultFontName "DejaVu Sans"
+language id
+printscale weekly
+Project starts 2026-08-24
+saturday are closed
+sunday are closed
+[1. Gathering Requirements] starts 2026-08-24 and ends 2026-08-31
+[2. Blueprint] starts 2026-09-01 and ends 2026-09-09
+[Pembangunan + 3. UT] starts 2026-09-07 and ends 2026-09-25
+[4. SIT] starts 2026-09-24 and ends 2026-09-29
+[5. UAT] starts 2026-09-30 and ends 2026-10-07
+[6. Go Live] happens 2026-10-12
+[7. Monitoring & Support (hypercare)] starts 2026-10-12 and ends 2026-10-23
+[1. Gathering Requirements] is colored in #A64CA6
+[2. Blueprint] is colored in #A64CA6
+[Pembangunan + 3. UT] is colored in #A64CA6
+[4. SIT] is colored in #D8A7D8
+[5. UAT] is colored in #D8A7D8
+[7. Monitoring & Support (hypercare)] is colored in #D8A7D8
+today is 2026-09-26 and is colored in #F4C542
+@endgantt

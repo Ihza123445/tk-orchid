@@ -14,7 +14,13 @@ function FieldError({ message }: { message?: string }) {
   return <p className="text-sm text-[var(--danger)]">{message}</p>
 }
 
-export function TambahWaliForm() {
+export interface StudentOption {
+  id: number
+  fullName: string
+  studentCode: string
+}
+
+export function TambahWaliForm({ students }: { students: StudentOption[] }) {
   const [state, formAction, pending] = useActionState(createGuardianAction, initial)
   const router = useRouter()
 
@@ -61,6 +67,17 @@ export function TambahWaliForm() {
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="address">Alamat</Label>
             <Input id="address" name="address" maxLength={255} />
+          </div>
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor="studentId">Hubungkan ke siswa</Label>
+            <select id="studentId" name="studentId" defaultValue="" className="field-select">
+              <option value="">Nanti saja</option>
+              {students.map((s) => (
+                <option key={s.id} value={s.id}>{s.fullName} ({s.studentCode})</option>
+              ))}
+            </select>
+            <p className="text-xs text-[var(--muted-foreground)]">Anak yang diasuh wali ini. Anak lain dapat dihubungkan dari halaman detail wali.</p>
+            <FieldError message={state.fields?.studentId} />
           </div>
         </div>
       </section>

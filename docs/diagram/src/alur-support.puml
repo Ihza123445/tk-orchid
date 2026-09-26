@@ -1,0 +1,29 @@
+' Ditulis manual. Alur penanganan laporan masalah pada tahap Monitoring & Support.
+@startuml alur-support
+!include _gaya.iuml
+title Alur Penanganan Laporan Masalah (Support)
+|Pengguna (Staf/Guru/Orang Tua)|
+start
+:Menemukan masalah;
+:Melapor ke Staf TU\n(WhatsApp/formulir: siapa, halaman, langkah, tangkapan layar);
+|Staf TU (Helpdesk)|
+:Mencatat di log tiket\n(nomor, tanggal, pelapor, deskripsi);
+if (Masalah penggunaan?) then (ya)
+  :Memberi panduan penggunaan;
+  |Pengguna (Staf/Guru/Orang Tua)|
+  :Konfirmasi selesai;
+  stop
+else (tidak)
+endif
+|Tim Pengembang|
+:Menentukan prioritas P1–P4\n(dampak & urgensi);
+:Reproduksi & analisis\n(log server, log_audit);
+:Perbaikan + UT;
+:Uji regresi (SIT singkat);
+:Deploy perbaikan\n(backup basis data terlebih dahulu);
+|Staf TU (Helpdesk)|
+:Memberi kabar ke pelapor\n& menutup tiket;
+|Pengguna (Staf/Guru/Orang Tua)|
+:Verifikasi hasil perbaikan;
+stop
+@enduml

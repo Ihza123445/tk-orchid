@@ -468,9 +468,38 @@ Rancangan kasar (*low-fidelity*) form input dan output. Sumber: [`diagram/wirefr
 ![Output: rapor perkembangan orang tua](diagram/png/ui-rapor-ortu.png)
 
 
+### 12. Tahapan pengembangan
+
+#### Alur tahapan pengembangan
+
+![Alur tahapan pengembangan](diagram/png/tahapan-pengembangan.png)
+
+<sub>Sumber: [`diagram/src/tahapan-pengembangan.puml`](diagram/src/tahapan-pengembangan.puml) · Vektor: [`diagram/svg/tahapan-pengembangan.svg`](diagram/svg/tahapan-pengembangan.svg)</sub>
+
+#### Jadwal (Gantt chart)
+
+![Jadwal tahapan pengembangan](diagram/png/gantt-pengembangan.png)
+
+<sub>Sumber: [`diagram/src/gantt-pengembangan.puml`](diagram/src/gantt-pengembangan.puml) · Vektor: [`diagram/svg/gantt-pengembangan.svg`](diagram/svg/gantt-pengembangan.svg)</sub>
+
+#### Alur penanganan laporan masalah (support)
+
+![Alur penanganan laporan masalah](diagram/png/alur-support.png)
+
+<sub>Sumber: [`diagram/src/alur-support.puml`](diagram/src/alur-support.puml) · Vektor: [`diagram/svg/alur-support.svg`](diagram/svg/alur-support.svg)</sub>
+
 ## Laporan Kerja Praktek
 
-[`laporan/BAB_IV_PEMBAHASAN.docx`](laporan/BAB_IV_PEMBAHASAN.docx) — BAB IV Pembahasan sesuai format Buku Panduan KP Prodi Sistem Informasi (A4, margin 4-4-3-3 cm, Times New Roman 12 pt spasi 1,5), berisi definisi masalah & penyelesaian, use case + skenario, activity, sequence, class diagram, ERD, LRS, spesifikasi tabel, rancangan antarmuka, tampilan layar, serta kelebihan & kekurangan sistem.
+- [`laporan/BAB_IV_PEMBAHASAN.docx`](laporan/BAB_IV_PEMBAHASAN.docx) — BAB IV Pembahasan sesuai format Buku Panduan KP Prodi Sistem Informasi (A4, margin 4-4-3-3 cm, Times New Roman 12 pt spasi 1,5), berisi definisi masalah & penyelesaian, use case + skenario, activity, sequence, class diagram, ERD, LRS, spesifikasi tabel, rancangan antarmuka, tampilan layar, serta kelebihan & kekurangan sistem.
+- [`laporan/Tahapan_Pengembangan_Sistem.docx`](laporan/Tahapan_Pengembangan_Sistem.docx) — tahapan pengembangan: Gathering Requirements, Blueprint, UT, SIT, UAT, Go Live, Monitoring & Support. Hasil UT dan SIT di dalamnya adalah hasil eksekusi nyata.
+
+## Pengujian
+
+```bash
+npm test                 # unit test (Vitest)
+node scripts/sit.mjs     # System Integration Test end-to-end (butuh `npm run dev` dan paket playwright; lihat komentar di awal skrip)
+git checkout -- prisma/dev.db   # kembalikan data demo setelah SIT
+```
 
 ## Memperbarui dokumentasi
 

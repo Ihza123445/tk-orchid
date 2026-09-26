@@ -1,0 +1,42 @@
+' Ditulis manual. Alur tahapan pengembangan sistem beserta keluaran tiap tahap.
+@startuml tahapan-pengembangan
+!include _gaya.iuml
+title Tahapan Pengembangan Sistem Informasi TK Orchid
+skinparam ActivityBackgroundColor #FDF8FD
+skinparam ActivityBorderColor #A64CA6
+skinparam ActivityDiamondBackgroundColor #FFFFFF
+skinparam ActivityDiamondBorderColor #A64CA6
+
+start
+:**1. Gathering Requirements**
+observasi, wawancara, studi dokumen;
+note right: Daftar kebutuhan fungsional &\nnon-fungsional (disetujui sekolah)
+:**2. Blueprint**
+arsitektur, UML, ERD, wireframe;
+note right: Dokumen rancangan (BAB IV),\nkamus data, rancangan antarmuka
+repeat
+  :Pembangunan (coding) per modul;
+  :**3. UT — Unit Testing**
+  Vitest, typecheck, lint;
+repeat while (Semua unit test lulus?) is (belum) not (ya)
+:**4. SIT — System Integration Test**
+skenario end-to-end antarmodul & antarperan;
+if (Ada defect?) then (ya)
+  :Perbaiki & ulangi UT + SIT;
+  note right: Contoh: DEF-01 wali belum\nbisa dihubungkan ke siswa
+else (tidak)
+endif
+:**5. UAT — User Acceptance Test**
+diuji kepala sekolah, staf TU, guru, orang tua;
+if (Diterima pengguna?) then (tidak)
+  :Revisi sesuai catatan UAT;
+  detach
+else (ya)
+  :Berita acara UAT ditandatangani;
+endif
+:**6. Go Live**
+deploy produksi, migrasi data, pelatihan;
+:**7. Monitoring & Support**
+hypercare 2 minggu, pemeliharaan rutin;
+stop
+@enduml

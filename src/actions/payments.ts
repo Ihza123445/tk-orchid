@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { db } from '@/lib/db/db'
 import { getSessionUser, requireAdminStaff } from '@/lib/auth/guard'
 import { audit } from '@/lib/auth/rate-limit'
+import { invoiceStatus } from '@/lib/finance/invoice-status'
 
 const allocationSchema = z.object({
   invoiceId: z.coerce.number().int().positive('Tagihan wajib dipilih.'),
@@ -112,7 +113,7 @@ export async function createPaymentAction(_prev: PaymentState, formData: FormDat
         })
         const total = inv!.items.reduce((s, i) => s + i.subtotal, 0)
         const allocated = inv!.allocations.filter((al) => al.payment.status === 'POSTED').reduce((s, al) => s + al.amount, 0)
-        const status = allocated >= total ? 'PAID' : 'PARTIAL'
+        const status = invoiceStatus(total, allocated)
         await tx.invoice.update({ where: { id: invId }, data: { status } })
       }
 
@@ -162,7 +163,7 @@ export async function voidPaymentAction(formData: FormData): Promise<void> {
         if (!inv || inv.status === 'VOID') continue
         const total = inv.items.reduce((s, i) => s + i.subtotal, 0)
         const allocated = inv.allocations.filter((al) => al.payment.status === 'POSTED').reduce((s, al) => s + al.amount, 0)
-        const status = allocated >= total ? 'PAID' : allocated > 0 ? 'PARTIAL' : 'ISSUED'
+        const status = invoiceStatus(total, allocated)
         await tx.invoice.update({ where: { id: inv.id }, data: { status } })
       }
     })
