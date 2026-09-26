@@ -104,12 +104,3 @@ export async function saveAssessmentAction(_prev: AssessmentState, formData: For
     return { error: 'Gagal menyimpan penilaian.' }
   }
 }
-
-export async function getAssessmentOptions() {
-  const [domains, scales, periods] = await Promise.all([
-    db.assessmentDomain.findMany({ where: { isActive: true }, orderBy: { sortOrder: 'asc' } }),
-    db.assessmentScale.findMany({ where: { isActive: true }, orderBy: { sortOrder: 'asc' } }),
-    Promise.resolve(['Semester 1', 'Semester 2']),
-  ])
-  return { domains, scales, periods }
-}

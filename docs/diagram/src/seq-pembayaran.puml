@@ -1,0 +1,39 @@
+' Ditulis manual. Sequence diagram catat pembayaran.
+@startuml seq-pembayaran
+!include _gaya.iuml
+title Sequence Diagram — Mencatat Pembayaran
+autonumber
+
+actor "Admin/Staf" as Admin
+boundary "Halaman Pembayaran\n(PaymentForm)" as UI
+control "createPaymentAction" as Act
+database "SQLite\n(transaksi)" as DB
+entity "tagihan" as T
+entity "pembayaran" as P
+entity "alokasi_pembayaran" as AP
+entity "log_audit" as Log
+
+Admin -> UI : pilih siswa
+UI --> Admin : daftar tagihan terbuka + sisa
+Admin -> UI : isi alokasi per tagihan, metode, tanggal
+UI -> Act : kirim formulir
+Act -> Act : validasi & cek peran (Admin/Staf)
+Act -> DB : BEGIN TRANSACTION
+loop setiap tagihan dialokasikan
+  Act -> T : ambil tagihan + detail + alokasi POSTED
+  alt tagihan VOID atau alokasi > sisa
+    Act -> DB : ROLLBACK
+    Act --> UI : pesan kesalahan
+  end
+end
+Act -> P : simpan (no_kwitansi, nominal = Σ alokasi, POSTED)
+Act -> AP : simpan baris alokasi
+loop setiap tagihan terdampak
+  Act -> T : hitung total teralokasi
+  Act -> T : status = PAID (lunas) / PARTIAL
+end
+Act -> DB : COMMIT
+Act -> Log : PAYMENT_CREATE
+Act --> UI : no_kwitansi berhasil dicatat
+UI --> Admin : tampilkan konfirmasi
+@enduml

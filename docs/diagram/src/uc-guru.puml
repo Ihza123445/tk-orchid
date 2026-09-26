@@ -1,0 +1,41 @@
+' Ditulis manual. Use case detail Guru.
+@startuml uc-guru
+!include _gaya.iuml
+left to right direction
+title Use Case Diagram — Guru
+
+actor "Guru" as Guru
+
+rectangle "Portal Guru" {
+  usecase "Login" as Login
+  usecase "Melihat dashboard\n(agenda hari ini, kelas)" as Dash
+  usecase "Mengisi presensi kelas" as Presensi
+  usecase "Menandai hadir semua" as Semua
+  usecase "Menginput penilaian\nper domain" as Nilai
+  usecase "Melihat rekap penilaian" as Rekap
+  usecase "Menyusun laporan\nperkembangan (draf)" as Laporan
+  usecase "Mengirim laporan\nuntuk direview" as Kirim
+  usecase "Melihat jadwal mengajar" as Jadwal
+  usecase "Melihat kegiatan sekolah" as Kegiatan
+  usecase "Melihat profil" as Profil
+}
+
+Guru --> Login
+Guru --> Dash
+Guru --> Presensi
+Presensi <.. Semua : <<extend>>
+Guru --> Nilai
+Nilai <.. Rekap : <<extend>>
+Guru --> Laporan
+Laporan <.. Kirim : <<extend>>
+Guru --> Jadwal
+Guru --> Kegiatan
+Guru --> Profil
+Dash ..> Login : <<include>>
+
+note right of Presensi
+  Guru hanya dapat mengakses
+  kelas yang ia ampu
+  (dicek di server).
+end note
+@enduml

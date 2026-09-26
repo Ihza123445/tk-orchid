@@ -1,19 +1,25 @@
-import { CheckCircle2, ChevronRight, CreditCard, UserPlus } from 'lucide-react'
+import {
+  CheckCircle2,
+  ChevronRight,
+  ClipboardCheck,
+  ClipboardList,
+  CreditCard,
+  Globe,
+  GraduationCap,
+  ListTodo,
+  ReceiptText,
+  TrendingUp,
+  UserPlus,
+  Wallet,
+} from 'lucide-react'
 import Link from 'next/link'
 import { requireAdminStaff } from '@/lib/auth/guard'
 import { db } from '@/lib/db/db'
-import { formatRupiah, formatTanggal, formatTanggalSingkat } from '@/lib/formatting/format'
-import { ADMISSION_STATUS, Empty, HeaderButton, PageHeader, Panel, Pill, Row, RowList, Stat, StatGroup } from '@/components/dashboard/primitives'
+import { formatRupiah, formatTanggalSingkat } from '@/lib/formatting/format'
+import { ADMISSION_STATUS, Avatar, Empty, Panel, QuickLinks, Row, RowList, Stat, StatGroup, StatusPill, firstName } from '@/components/dashboard/primitives'
+import { AdminHero, HeroButton } from '@/components/dashboard/hero'
 
 const METHOD: Record<string, string> = { CASH: 'Tunai', TRANSFER: 'Transfer', QRIS: 'QRIS', OTHER: 'Lainnya' }
-
-function greeting(date: Date) {
-  const hour = Number(new Intl.DateTimeFormat('en-GB', { hour: 'numeric', hourCycle: 'h23', timeZone: 'Asia/Jakarta' }).format(date))
-  if (hour < 11) return 'Selamat pagi'
-  if (hour < 15) return 'Selamat siang'
-  if (hour < 18) return 'Selamat sore'
-  return 'Selamat malam'
-}
 
 export default async function DashboardPage() {
   const user = await requireAdminStaff()
@@ -98,69 +104,95 @@ export default async function DashboardPage() {
     draftAnnouncements > 0 && { href: '/website/pengumuman', label: `${draftAnnouncements} pengumuman masih draf`, tone: 'neutral' as const },
   ].filter(Boolean) as { href: string; label: string; tone: 'warning' | 'danger' | 'neutral' }[]
 
+  const net = income - spending
+  const flowMax = Math.max(income, spending, 1)
+
   return (
     <div className="space-y-6">
-      <PageHeader
-        eyebrow={formatTanggal(now)}
-        title={`${greeting(now)}, ${user.name.split(' ')[0]}`}
-        description="Ringkasan operasional sekolah hari ini."
+      <AdminHero
+        now={now}
+        name={firstName(user.name)}
+        description={tasks.length ? `Ada ${tasks.length} hal yang perlu ditindaklanjuti hari ini. Mari mulai dari daftar "Perlu tindakan" di bawah.` : 'Semua beres untuk hari ini. Berikut ringkasan operasional TK Orchid.'}
         actions={
           <>
-            <HeaderButton href="/keuangan/pembayaran"><CreditCard /> Catat pembayaran</HeaderButton>
-            <HeaderButton href="/siswa/tambah" primary><UserPlus /> Tambah siswa</HeaderButton>
+            <HeroButton href="/siswa/tambah"><UserPlus /> Tambah siswa</HeroButton>
+            <HeroButton href="/keuangan/pembayaran" variant="ghost"><CreditCard /> Catat pembayaran</HeroButton>
           </>
         }
+        facts={[
+          { label: 'Perlu tindakan', value: tasks.length, tone: tasks.length ? 'warning' : 'success' },
+          { label: 'Hadir hari ini', value: attendanceRatio === null ? 'belum diisi' : `${attendanceRatio}%`, tone: attendanceRatio === null ? 'warning' : 'success' },
+          { label: `Kas ${monthName}`, value: formatRupiah(net), tone: net < 0 ? 'danger' : 'default' },
+        ]}
       />
 
       <StatGroup>
-        <Stat label="Siswa aktif" value={activeStudents} hint={`${activeClasses.length} kelas · ${activeTeachers} guru`} href="/siswa" />
+        <Stat icon={GraduationCap} label="Siswa aktif" value={activeStudents} hint={`${activeClasses.length} kelas · ${activeTeachers} guru`} href="/siswa" />
         <Stat
+          icon={ClipboardCheck}
           label="Kehadiran hari ini"
           value={attendanceRatio === null ? '—' : `${attendanceRatio}%`}
           hint={attendanceRatio === null ? 'Belum ada presensi tercatat' : `${presentToday} dari ${todayAttendance.length} siswa hadir`}
           tone={attendanceRatio !== null && attendanceRatio < 80 ? 'warning' : 'default'}
           href="/presensi"
         />
-        <Stat label="Pendaftar menunggu" value={pendingAdmissions} hint={pendingAdmissions ? 'Perlu ditinjau' : 'Tidak ada antrean'} tone={pendingAdmissions ? 'warning' : 'default'} href="/ppdb?status=pending" />
-        <Stat label="Tagihan belum dibayar" value={formatRupiah(outstanding)} hint={overdueCount ? `${overdueCount} lewat jatuh tempo` : `${outstandingInvoices.length} tagihan terbuka`} tone={overdueCount ? 'danger' : 'default'} href="/keuangan/tagihan" />
+        <Stat icon={ClipboardList} label="Pendaftar menunggu" value={pendingAdmissions} hint={pendingAdmissions ? 'Perlu ditinjau' : 'Tidak ada antrean'} tone={pendingAdmissions ? 'warning' : 'default'} href="/ppdb?status=pending" />
+        <Stat icon={ReceiptText} label="Tagihan belum dibayar" value={formatRupiah(outstanding)} hint={overdueCount ? `${overdueCount} lewat jatuh tempo` : `${outstandingInvoices.length} tagihan terbuka`} tone={overdueCount ? 'danger' : 'default'} href="/keuangan/tagihan" />
       </StatGroup>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <Panel
           className="lg:col-span-2"
+          icon={TrendingUp}
           title="Kehadiran 14 hari terakhir"
-          description={trendAverage === null ? undefined : `Rata-rata ${trendAverage}% siswa hadir`}
+          description={trendAverage === null ? 'Persentase siswa hadir per hari' : `Rata-rata ${trendAverage}% siswa hadir`}
           action={{ href: '/presensi', label: 'Presensi' }}
         >
           {trend.length === 0 ? (
-            <p className="py-10 text-center text-sm text-[var(--muted-foreground)]">Belum ada data presensi dalam 14 hari terakhir.</p>
+            <Empty icon={ClipboardCheck}>Belum ada data presensi dalam 14 hari terakhir.</Empty>
           ) : (
-            <div className="flex h-44 items-end gap-1.5 overflow-x-auto" role="img" aria-label={`Grafik kehadiran, rata-rata ${trendAverage}%`}>
-              {trend.map((item) => (
-                <div key={item.date.toISOString()} className="group flex h-full min-w-8 flex-1 flex-col items-center justify-end gap-2" title={`${formatTanggalSingkat(item.date)}: ${item.ratio}% (${item.present}/${item.total})`}>
-                  <span className="text-[10px] font-medium tabular-nums text-[var(--muted-foreground)] opacity-0 transition-opacity group-hover:opacity-100">{item.ratio}%</span>
-                  <div className="relative w-full max-w-7 flex-1 overflow-hidden rounded-t-[4px] bg-[var(--muted)]">
-                    <div className="absolute inset-x-0 bottom-0 rounded-t-[4px] bg-[var(--primary)] transition-opacity group-hover:opacity-80" style={{ height: `${Math.max(item.ratio, 3)}%` }} />
+            <div className="relative">
+              <div className="pointer-events-none absolute inset-x-0 top-6 bottom-6 flex flex-col justify-between" aria-hidden="true">
+                {[100, 75, 50, 25, 0].map((mark) => (
+                  <div key={mark} className="flex items-center gap-2">
+                    <span className="w-7 text-right text-[10px] tabular-nums text-[var(--muted-foreground)]">{mark}%</span>
+                    <span className="h-px flex-1 border-t border-dashed border-[var(--border)]" />
                   </div>
-                  <span className="text-[10px] tabular-nums text-[var(--muted-foreground)]">{new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'short' }).format(item.date)}</span>
-                </div>
-              ))}
+                ))}
+              </div>
+              <div className="relative ml-9 flex h-56 items-end gap-1.5 overflow-x-auto" role="img" aria-label={`Grafik kehadiran, rata-rata ${trendAverage}%`}>
+                {trend.map((item) => (
+                  <div key={item.date.toISOString()} className="group flex h-full min-w-8 flex-1 flex-col items-center justify-end gap-2" title={`${formatTanggalSingkat(item.date)}: ${item.ratio}% (${item.present}/${item.total})`}>
+                    <span className="h-4 text-[10px] font-semibold tabular-nums text-[var(--primary)] opacity-0 transition-opacity group-hover:opacity-100">{item.ratio}%</span>
+                    <div className="relative w-full max-w-8 flex-1">
+                      <div
+                        className="absolute inset-x-0 bottom-0 rounded-t-lg bg-gradient-to-t from-[var(--primary)] to-[color-mix(in_srgb,var(--primary)_55%,#f0abfc)] shadow-sm transition-all group-hover:brightness-110"
+                        style={{ height: `${Math.max(item.ratio, 3)}%` }}
+                      />
+                    </div>
+                    <span className="h-4 text-[10px] tabular-nums text-[var(--muted-foreground)]">{new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'short' }).format(item.date)}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </Panel>
 
         <div className="flex flex-col gap-6">
-          <Panel title="Perlu tindakan" flush>
+          <Panel title="Perlu tindakan" icon={ListTodo} description={tasks.length ? `${tasks.length} item` : undefined} flush>
             {tasks.length === 0 ? (
-              <p className="flex items-center gap-2 px-5 py-6 text-sm text-[var(--muted-foreground)]"><CheckCircle2 className="size-4 text-emerald-600" /> Semua beres untuk hari ini.</p>
+              <div className="flex items-center gap-3 px-5 py-6 text-sm text-[var(--muted-foreground)]">
+                <span className="flex size-9 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600"><CheckCircle2 className="size-[18px]" /></span>
+                Semua beres untuk hari ini.
+              </div>
             ) : (
               <ul className="divide-y divide-[var(--border)]">
                 {tasks.map((task) => (
                   <li key={task.href}>
-                    <Link href={task.href} className="group flex items-center gap-3 px-5 py-3 text-sm transition-colors hover:bg-[var(--muted)]/60">
-                      <span className={`size-1.5 shrink-0 rounded-full ${task.tone === 'danger' ? 'bg-[var(--destructive)]' : task.tone === 'warning' ? 'bg-amber-500' : 'bg-[var(--muted-foreground)]'}`} aria-hidden="true" />
+                    <Link href={task.href} className="group flex items-center gap-3 px-5 py-3 text-sm transition-colors hover:bg-[var(--primary)]/[0.04]">
+                      <span className={`flex size-2 shrink-0 rounded-full ring-4 ${task.tone === 'danger' ? 'bg-[var(--destructive)] ring-[var(--destructive)]/15' : task.tone === 'warning' ? 'bg-amber-500 ring-amber-500/15' : 'bg-[var(--muted-foreground)] ring-[var(--muted)]'}`} aria-hidden="true" />
                       <span className="flex-1">{task.label}</span>
-                      <ChevronRight className="size-4 text-[var(--muted-foreground)] transition-transform group-hover:translate-x-0.5" />
+                      <ChevronRight className="size-4 text-[var(--muted-foreground)] transition-transform group-hover:translate-x-0.5 group-hover:text-[var(--primary)]" />
                     </Link>
                   </li>
                 ))}
@@ -168,48 +200,65 @@ export default async function DashboardPage() {
             )}
           </Panel>
 
-          <Panel title={`Kas bulan ${monthName}`} action={{ href: '/keuangan/pengeluaran', label: 'Keuangan' }}>
-            <dl className="space-y-2.5 text-sm">
-              <div className="flex justify-between gap-3"><dt className="text-[var(--muted-foreground)]">Penerimaan</dt><dd className="font-medium tabular-nums">{formatRupiah(income)}</dd></div>
-              <div className="flex justify-between gap-3"><dt className="text-[var(--muted-foreground)]">Pengeluaran</dt><dd className="font-medium tabular-nums">{formatRupiah(spending)}</dd></div>
-              <div className="flex justify-between gap-3 border-t border-[var(--border)] pt-2.5">
+          <Panel title={`Kas bulan ${monthName}`} icon={Wallet} action={{ href: '/keuangan/pengeluaran', label: 'Keuangan' }}>
+            <dl className="space-y-4 text-sm">
+              <div>
+                <div className="flex justify-between gap-3"><dt className="text-[var(--muted-foreground)]">Penerimaan</dt><dd className="font-semibold tabular-nums">{formatRupiah(income)}</dd></div>
+                <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-[var(--muted)]"><div className="h-full rounded-full bg-emerald-500" style={{ width: `${(income / flowMax) * 100}%` }} /></div>
+              </div>
+              <div>
+                <div className="flex justify-between gap-3"><dt className="text-[var(--muted-foreground)]">Pengeluaran</dt><dd className="font-semibold tabular-nums">{formatRupiah(spending)}</dd></div>
+                <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-[var(--muted)]"><div className="h-full rounded-full bg-amber-500" style={{ width: `${(spending / flowMax) * 100}%` }} /></div>
+              </div>
+              <div className="flex justify-between gap-3 border-t border-[var(--border)] pt-3">
                 <dt className="font-medium">Selisih</dt>
-                <dd className={`font-semibold tabular-nums ${income - spending < 0 ? 'text-[var(--destructive)]' : 'text-emerald-700 dark:text-emerald-300'}`}>{formatRupiah(income - spending)}</dd>
+                <dd className={`font-heading text-base font-bold tabular-nums ${net < 0 ? 'text-[var(--destructive)]' : 'text-emerald-600 dark:text-emerald-300'}`}>{formatRupiah(net)}</dd>
               </div>
             </dl>
           </Panel>
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Panel title="Pendaftaran terbaru" action={{ href: '/ppdb', label: 'Semua pendaftar' }} flush>
+      <section className="space-y-3">
+        <h2 className="section-title">Akses cepat</h2>
+        <QuickLinks
+          items={[
+            { href: '/presensi', label: 'Isi presensi', description: 'Catat kehadiran kelas', icon: ClipboardCheck, tone: 'success' },
+            { href: '/keuangan/tagihan', label: 'Buat tagihan', description: 'SPP & biaya lainnya', icon: ReceiptText, tone: 'info' },
+            { href: '/ppdb', label: 'Tinjau PPDB', description: 'Calon siswa baru', icon: ClipboardList, tone: 'warning' },
+            { href: '/website', label: 'Kelola website', description: 'Berita, galeri, slider', icon: Globe, tone: 'brand' },
+          ]}
+        />
+      </section>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <Panel title="Pendaftaran terbaru" icon={ClipboardList} action={{ href: '/ppdb', label: 'Semua pendaftar' }} flush>
           {latestAdmissions.length === 0 ? <Empty>Belum ada pendaftaran.</Empty> : (
             <RowList>
-              {latestAdmissions.map((item) => {
-                const status = ADMISSION_STATUS[item.status] ?? { label: item.status, tone: 'neutral' as const }
-                return (
-                  <Row
-                    key={item.id}
-                    href="/ppdb"
-                    primary={item.studentFullName}
-                    secondary={`${item.preferredLevel ?? 'Jenjang belum dipilih'} · ${formatTanggalSingkat(item.createdAt)}`}
-                    trailing={<Pill tone={status.tone}>{status.label}</Pill>}
-                  />
-                )
-              })}
+              {latestAdmissions.map((item) => (
+                <Row
+                  key={item.id}
+                  href="/ppdb"
+                  leading={<Avatar name={item.studentFullName} />}
+                  primary={item.studentFullName}
+                  secondary={`${item.preferredLevel ?? 'Jenjang belum dipilih'} · ${formatTanggalSingkat(item.createdAt)}`}
+                  trailing={<StatusPill map={ADMISSION_STATUS} status={item.status} />}
+                />
+              ))}
             </RowList>
           )}
         </Panel>
 
-        <Panel title="Pembayaran terbaru" action={{ href: '/keuangan/pembayaran', label: 'Semua pembayaran' }} flush>
+        <Panel title="Pembayaran terbaru" icon={CreditCard} action={{ href: '/keuangan/pembayaran', label: 'Semua pembayaran' }} flush>
           {latestPayments.length === 0 ? <Empty>Belum ada pembayaran.</Empty> : (
             <RowList>
               {latestPayments.map((item) => (
                 <Row
                   key={item.id}
+                  leading={<Avatar name={item.student.fullName} />}
                   primary={item.student.fullName}
                   secondary={`${formatTanggalSingkat(item.paymentDate)} · ${METHOD[item.method] ?? item.method}`}
-                  trailing={<span className="font-medium tabular-nums">{formatRupiah(item.amount)}</span>}
+                  trailing={<span className="font-semibold tabular-nums text-emerald-600 dark:text-emerald-300">+{formatRupiah(item.amount)}</span>}
                 />
               ))}
             </RowList>

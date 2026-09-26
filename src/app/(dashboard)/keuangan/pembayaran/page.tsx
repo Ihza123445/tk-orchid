@@ -3,6 +3,10 @@ import { db } from '@/lib/db/db'
 import { voidPaymentAction } from '@/actions/payments'
 import { PaymentForm } from '@/components/finance/payment-form'
 import { formatRupiah, formatTanggalSingkat } from '@/lib/formatting/format'
+import { CreditCard, Info } from 'lucide-react'
+import { Avatar, LEDGER_STATUS, PageHeader, Pill, SectionHeader, StatusPill } from '@/components/dashboard/primitives'
+
+export const metadata = { title: 'Pembayaran' }
 
 const METHOD_LABEL: Record<string, string> = { CASH: 'Tunai', TRANSFER: 'Transfer', QRIS: 'QRIS', OTHER: 'Lainnya' }
 
@@ -44,10 +48,7 @@ export default async function PembayaranPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold tracking-tight">Pembayaran</h1>
-        <p className="text-sm text-[var(--muted-foreground)]">Kwitansi pembayaran dan alokasinya ke tagihan.</p>
-      </header>
+      <PageHeader icon={CreditCard} eyebrow="Keuangan" title="Pembayaran" description="Catat kwitansi pembayaran dan alokasikan ke tagihan siswa." />
 
       <PaymentForm
         students={students.map((s) => ({ id: s.id, label: `${s.fullName} (${s.studentCode})` }))}
@@ -55,54 +56,52 @@ export default async function PembayaranPage() {
       />
 
       <section className="space-y-3">
-        <h2 className="text-base font-semibold">Riwayat Pembayaran</h2>
-        <div className="overflow-x-auto rounded-lg border bg-[var(--card)]">
-          <table className="w-full min-w-[820px] text-sm">
+        <SectionHeader title="Riwayat pembayaran" description="100 kwitansi terbaru" />
+        <div className="table-card">
+          <table className="w-full min-w-[820px]">
             <thead>
-              <tr className="border-b bg-[var(--muted)] text-left">
-                <th className="px-4 py-3 font-medium">No. Kwitansi</th>
-                <th className="px-4 py-3 font-medium">Tanggal</th>
-                <th className="px-4 py-3 font-medium">Siswa</th>
-                <th className="px-4 py-3 font-medium">Metode</th>
-                <th className="px-4 py-3 font-medium">Alokasi</th>
-                <th className="px-4 py-3 font-medium text-right">Jumlah</th>
-                <th className="px-4 py-3 font-medium">Status</th>
-                {user?.role === 'ADMIN' && <th className="px-4 py-3 font-medium">Aksi</th>}
+              <tr className="text-left">
+                <th className="px-4 py-3">No. Kwitansi</th>
+                <th className="px-4 py-3">Tanggal</th>
+                <th className="px-4 py-3">Siswa</th>
+                <th className="px-4 py-3">Metode</th>
+                <th className="px-4 py-3">Alokasi</th>
+                <th className="px-4 py-3 text-right">Jumlah</th>
+                <th className="px-4 py-3">Status</th>
+                {user?.role === 'ADMIN' && <th className="px-4 py-3">Aksi</th>}
               </tr>
             </thead>
             <tbody>
               {payments.map((p) => (
-                <tr key={p.id} className={`border-b last:border-0 ${p.status === 'VOID' ? 'opacity-50 line-through' : ''}`}>
-                  <td className="px-4 py-3 font-mono text-xs">{p.receiptNo}</td>
+                <tr key={p.id} className={p.status === 'VOID' ? 'opacity-55 [&_td]:line-through' : ''}>
+                  <td className="px-4 py-3 font-mono text-xs text-[var(--muted-foreground)]">{p.receiptNo}</td>
                   <td className="px-4 py-3">{formatTanggalSingkat(p.paymentDate)}</td>
-                  <td className="px-4 py-3">{p.student.fullName}</td>
-                  <td className="px-4 py-3">{METHOD_LABEL[p.method] ?? p.method}</td>
-                  <td className="px-4 py-3 text-xs">{p.allocations.map((al) => `${al.invoice.invoiceNo}: ${al.amount.toLocaleString('id-ID')}`).join(', ')}</td>
-                  <td className="px-4 py-3 text-right tabular-nums">{formatRupiah(p.amount)}</td>
+                  <td className="px-4 py-3"><span className="flex items-center gap-2.5 font-medium"><Avatar name={p.student.fullName} size="sm" /> {p.student.fullName}</span></td>
+                  <td className="px-4 py-3"><Pill>{METHOD_LABEL[p.method] ?? p.method}</Pill></td>
+                  <td className="px-4 py-3 text-xs text-[var(--muted-foreground)]">{p.allocations.map((al) => <span key={al.invoice.invoiceNo} className="block"><span className="font-mono">{al.invoice.invoiceNo}</span> · {formatRupiah(al.amount)}</span>)}</td>
+                  <td className="px-4 py-3 text-right font-semibold tabular-nums">{formatRupiah(p.amount)}</td>
                   <td className="px-4 py-3">
-                    <span className={`rounded-full px-2 py-0.5 text-xs ${p.status === 'POSTED' ? 'bg-[var(--secondary)] text-[var(--primary)]' : 'bg-[var(--destructive)]/15 text-[var(--destructive)]'}`}>
-                      {p.status === 'POSTED' ? 'Tercatat' : 'Void'}
-                    </span>
+                    <StatusPill map={LEDGER_STATUS} status={p.status} />
                   </td>
                   {user?.role === 'ADMIN' && <td className="px-4 py-3">
                     {p.status === 'POSTED' && (
                       <form action={voidPaymentAction} className="mt-1 flex items-center gap-1">
                         <input type="hidden" name="id" value={p.id} />
                         <input name="reason" required minLength={5} placeholder="Alasan" aria-label={`Alasan void kwitansi ${p.receiptNo}`}
-                          className="h-7 w-24 rounded border border-[var(--input)] px-1.5 text-xs" />
-                        <button type="submit" className="text-xs underline underline-offset-4 opacity-70 hover:opacity-100">Void</button>
+                          className="field-mini w-28" />
+                        <button type="submit" className="link-danger">Batalkan</button>
                       </form>
                     )}
                   </td>}
                 </tr>
               ))}
               {payments.length === 0 && (
-                <tr><td colSpan={user?.role === 'ADMIN' ? 8 : 7} className="px-4 py-10 text-center text-sm text-[var(--muted-foreground)]">Belum ada pembayaran.</td></tr>
+                <tr><td colSpan={user?.role === 'ADMIN' ? 8 : 7} className="px-4 py-12 text-center text-sm text-[var(--muted-foreground)]">Belum ada pembayaran.</td></tr>
               )}
             </tbody>
           </table>
         </div>
-        <p className="text-xs text-[var(--muted-foreground)]">Void pembayaran hanya oleh Admin — status tagihan terkait dihitung ulang otomatis.</p>
+        <p className="flex items-center gap-1.5 text-xs text-[var(--muted-foreground)]"><Info className="size-3.5" /> Pembatalan (void) kwitansi hanya oleh Admin — status tagihan terkait dihitung ulang otomatis.</p>
       </section>
     </div>
   )

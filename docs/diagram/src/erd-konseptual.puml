@@ -1,0 +1,203 @@
+' Dibuat otomatis oleh scripts/generate-docs.ts — jangan diedit manual.
+@startchen erd-konseptual
+left to right direction
+
+entity PENGGUNA {
+  id_pengguna <<key>>
+  nama
+  email
+  peran
+}
+
+entity GURU {
+  id_guru <<key>>
+  nama_lengkap
+  kode_pegawai
+}
+
+entity WALI {
+  id_wali <<key>>
+  nama_lengkap
+  hubungan
+  telepon
+}
+
+entity SISWA {
+  id_siswa <<key>>
+  kode_siswa
+  nama_lengkap
+  tanggal_lahir
+}
+
+entity TAHUN_AJARAN {
+  id_tahun_ajaran <<key>>
+  nama
+  status
+}
+
+entity KELAS {
+  id_kelas <<key>>
+  nama
+  jenjang
+  kapasitas
+}
+
+entity PERIODE_PPDB {
+  id_periode_ppdb <<key>>
+  nama
+}
+
+entity PENDAFTARAN_PPDB {
+  id_pendaftaran <<key>>
+  no_pendaftaran
+  status
+}
+
+entity PRESENSI {
+  id_presensi <<key>>
+  tanggal
+  status
+}
+
+entity PENILAIAN {
+  id_penilaian <<key>>
+  periode
+  narasi
+}
+
+entity DOMAIN_PENILAIAN {
+  id_domain <<key>>
+  nama
+}
+
+entity SKALA_PENILAIAN {
+  id_skala <<key>>
+  kode
+}
+
+entity LAPORAN_PERKEMBANGAN {
+  id_laporan <<key>>
+  no_laporan
+  status
+}
+
+entity JENIS_BIAYA {
+  id_jenis_biaya <<key>>
+  nama
+  nominal_default
+}
+
+entity TAGIHAN {
+  id_tagihan <<key>>
+  no_tagihan
+  jatuh_tempo
+  status
+}
+
+entity PEMBAYARAN {
+  id_pembayaran <<key>>
+  no_kwitansi
+  nominal
+}
+
+entity PENGUMUMAN {
+  id_pengumuman <<key>>
+  judul
+  sasaran
+}
+
+entity KEGIATAN {
+  id_kegiatan <<key>>
+  judul
+}
+
+relationship MEMILIKI_AKUN_GURU {
+}
+PENGGUNA -1- MEMILIKI_AKUN_GURU
+MEMILIKI_AKUN_GURU -1- GURU
+
+relationship MEMILIKI_AKUN_WALI {
+}
+PENGGUNA -1- MEMILIKI_AKUN_WALI
+MEMILIKI_AKUN_WALI -1- WALI
+
+relationship DIASUH {
+}
+SISWA -N- DIASUH
+DIASUH -N- WALI
+
+relationship MEMUAT {
+}
+TAHUN_AJARAN -1- MEMUAT
+MEMUAT -N- KELAS
+
+relationship MENJADI_WALI_KELAS {
+}
+GURU -1- MENJADI_WALI_KELAS
+MENJADI_WALI_KELAS -N- KELAS
+
+relationship DITEMPATKAN {
+}
+SISWA -N- DITEMPATKAN
+DITEMPATKAN -N- KELAS
+
+relationship MENERIMA {
+}
+PERIODE_PPDB -1- MENERIMA
+MENERIMA -N- PENDAFTARAN_PPDB
+
+relationship MENJADI {
+}
+PENDAFTARAN_PPDB -1- MENJADI
+MENJADI -1- SISWA
+
+relationship DICATAT_HADIR {
+}
+SISWA -1- DICATAT_HADIR
+DICATAT_HADIR -N- PRESENSI
+
+relationship DINILAI {
+}
+SISWA -1- DINILAI
+DINILAI -N- PENILAIAN
+
+relationship DINILAI_PADA {
+}
+DOMAIN_PENILAIAN -1- DINILAI_PADA
+DINILAI_PADA -N- PENILAIAN
+
+relationship MENGUKUR {
+}
+SKALA_PENILAIAN -1- MENGUKUR
+MENGUKUR -N- PENILAIAN
+
+relationship MENERIMA_RAPOR {
+}
+SISWA -1- MENERIMA_RAPOR
+MENERIMA_RAPOR -N- LAPORAN_PERKEMBANGAN
+
+relationship DITAGIH {
+}
+SISWA -1- DITAGIH
+DITAGIH -N- TAGIHAN
+
+relationship BERISI {
+}
+TAGIHAN -N- BERISI
+BERISI -N- JENIS_BIAYA
+
+relationship MELUNASI {
+}
+PEMBAYARAN -N- MELUNASI
+MELUNASI -N- TAGIHAN
+
+relationship MENERBITKAN {
+}
+PENGGUNA -1- MENERBITKAN
+MENERBITKAN -N- PENGUMUMAN
+
+relationship MEMPUBLIKASIKAN {
+}
+PENGGUNA -1- MEMPUBLIKASIKAN
+MEMPUBLIKASIKAN -N- KEGIATAN
+@endchen

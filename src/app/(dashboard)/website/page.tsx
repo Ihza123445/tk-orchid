@@ -1,9 +1,9 @@
 import Link from 'next/link'
-import { CalendarRange, ChevronRight, ExternalLink, GalleryHorizontalEnd, Images, Megaphone, MessageSquareQuote, MessagesSquare, School, Settings2, Sparkles, type LucideIcon } from 'lucide-react'
+import { CalendarRange, ChevronRight, ExternalLink, GalleryHorizontalEnd, Globe, Images, Megaphone, MessageSquareQuote, MessagesSquare, School, Settings2, Sparkles, type LucideIcon } from 'lucide-react'
 import { requireAdminStaff } from '@/lib/auth/guard'
 import { db } from '@/lib/db/db'
 import { CONTENT_SECTIONS } from '@/lib/cms/registry'
-import { PageHeader, Panel } from '@/components/dashboard/primitives'
+import { HeaderButton, IconTile, PageHeader, Panel } from '@/components/dashboard/primitives'
 
 export const metadata = { title: 'Kelola Website' }
 
@@ -52,15 +52,16 @@ export default async function WebsiteHubPage() {
   return (
     <div className="space-y-6">
       <PageHeader
+        icon={Globe}
         eyebrow="Website sekolah"
         title="Kelola Website"
         description="Ganti foto, teks, dan konten website. Perubahan langsung tampil setelah disimpan."
-        actions={<a href="/" target="_blank" rel="noreferrer" className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 text-sm font-medium hover:bg-[var(--muted)]"><ExternalLink className="size-4" /> Buka website</a>}
+        actions={<HeaderButton href="/" external><ExternalLink /> Buka website</HeaderButton>}
       />
 
-      <Link href="/website/ppdb" className="group flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[var(--border)] bg-[var(--card)] px-5 py-3.5 text-sm transition-colors hover:bg-[var(--muted)]/60">
+      <Link href="/website/ppdb" className={`group flex flex-wrap items-center justify-between gap-3 rounded-2xl border px-5 py-4 text-sm transition-colors ${ppdbOpen ? 'border-emerald-500/25 bg-emerald-500/[0.06] hover:bg-emerald-500/[0.1]' : 'border-amber-500/30 bg-amber-500/[0.07] hover:bg-amber-500/[0.11]'}`}>
         <span className="flex items-center gap-2.5">
-          <span className={`size-2 rounded-full ${ppdbOpen ? 'bg-emerald-500' : 'bg-amber-500'}`} aria-hidden="true" />
+          <span className={`size-2.5 rounded-full ring-4 ${ppdbOpen ? 'animate-pulse bg-emerald-500 ring-emerald-500/20' : 'bg-amber-500 ring-amber-500/20'}`} aria-hidden="true" />
           <span>
             <strong className="font-medium">PPDB {ppdbOpen ? 'dibuka' : 'ditutup'}</strong>
             <span className="text-[var(--muted-foreground)]">
@@ -80,14 +81,14 @@ export default async function WebsiteHubPage() {
         <ul className="divide-y divide-[var(--border)]">
           {items.map((item) => (
             <li key={item.href}>
-              <Link href={item.href} className="group flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-[var(--muted)]/60">
-                <item.icon className="size-[18px] shrink-0 text-[var(--muted-foreground)] transition-colors group-hover:text-[var(--primary)]" aria-hidden="true" />
+              <Link href={item.href} className="group flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-[var(--primary)]/[0.04]">
+                <IconTile icon={item.icon} size="sm" />
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium">{item.title}</p>
                   <p className="truncate text-xs text-[var(--muted-foreground)]">{item.description}</p>
                 </div>
-                {item.meta && <span className="hidden shrink-0 text-xs tabular-nums text-[var(--muted-foreground)] sm:block">{item.meta}</span>}
-                <ChevronRight className="size-4 shrink-0 text-[var(--muted-foreground)] transition-transform group-hover:translate-x-0.5" />
+                {item.meta && <span className="hidden shrink-0 rounded-full bg-[var(--muted)] px-2.5 py-0.5 text-xs font-medium tabular-nums text-[var(--muted-foreground)] sm:block">{item.meta}</span>}
+                <ChevronRight className="size-4 shrink-0 text-[var(--muted-foreground)] transition-transform group-hover:translate-x-0.5 group-hover:text-[var(--primary)]" />
               </Link>
             </li>
           ))}

@@ -1,0 +1,37 @@
+' Ditulis manual. Sequence diagram simpan presensi.
+@startuml seq-presensi
+!include _gaya.iuml
+title Sequence Diagram — Mengisi Presensi Kelas
+autonumber
+
+actor Guru
+boundary "Halaman Presensi\n(PresensiForm)" as UI
+control "loadRosterAction" as Load
+control "saveAttendanceAction" as Save
+entity "kelas / guru" as K
+entity "penempatan_kelas" as PK
+entity "presensi" as Pr
+entity "log_audit" as Log
+
+Guru -> UI : pilih kelas & tanggal
+UI -> Load : (id_kelas, tanggal)
+Load -> K : cek kelas diampu guru ini
+alt bukan kelasnya
+  Load --> UI : allowed = false
+  UI --> Guru : "Kelas ini bukan assignment Anda"
+else berhak
+  Load -> PK : siswa di kelas
+  Load -> Pr : presensi tanggal tsb (jika ada)
+  Load --> UI : daftar siswa + status
+  Guru -> UI : pilih status tiap siswa / "Tandai Hadir Semua"
+  Guru -> UI : klik Simpan Presensi
+  UI -> Save : payload (kelas, tanggal, daftar status)
+  Save -> K : cek akses kelas lagi (server)
+  loop setiap siswa
+    Save -> Pr : upsert (id_siswa + tanggal unik)
+  end
+  Save -> Log : ATTENDANCE_BULK_SAVE
+  Save --> UI : berhasil (n siswa)
+  UI --> Guru : tampilkan konfirmasi
+end
+@enduml

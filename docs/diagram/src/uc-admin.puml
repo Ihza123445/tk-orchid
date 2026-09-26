@@ -1,0 +1,73 @@
+' Ditulis manual. Use case detail Administrator & Staf TU.
+@startuml uc-admin
+!include _gaya.iuml
+left to right direction
+title Use Case Diagram — Administrator & Staf TU
+
+actor "Staf TU" as Staf
+actor "Administrator" as Admin
+Admin -|> Staf
+
+rectangle "Area Administrasi" {
+  usecase "Login" as Login
+  usecase "Melihat dashboard\nringkasan sekolah" as Dash
+
+  package "Penerimaan" {
+    usecase "Meninjau pendaftar PPDB" as PPDB
+    usecase "Mengubah status pendaftar\n(tinjau/revisi/terima/tolak)" as PPDBStatus
+    usecase "Mengatur periode PPDB" as Periode
+  }
+  package "Siswa & Wali" {
+    usecase "Mengelola data siswa" as Siswa
+    usecase "Mengelola data wali" as Wali
+    usecase "Membuat akun portal\norang tua" as AkunWali
+  }
+  package "Akademik" {
+    usecase "Mengelola tahun ajaran" as TA
+    usecase "Mengelola kelas" as Kelas
+    usecase "Menempatkan siswa ke kelas" as Tempat
+    usecase "Mengisi presensi" as Presensi
+    usecase "Menginput penilaian" as Nilai
+    usecase "Menerbitkan laporan\nperkembangan" as Terbit
+  }
+  package "Keuangan" {
+    usecase "Mengelola jenis biaya" as Biaya
+    usecase "Membuat tagihan" as Tagihan
+    usecase "Mencatat pembayaran" as Bayar
+    usecase "Mengalokasikan pembayaran\nke tagihan" as Alokasi
+    usecase "Mencatat pengeluaran" as Keluar
+    usecase "Membatalkan tagihan" as BatalTagihan
+    usecase "Membatalkan pembayaran/\npengeluaran (void)" as Void
+  }
+  package "Website" {
+    usecase "Mengelola konten\n(slider, kegiatan, pengumuman,\ngaleri, fasilitas, testimoni, FAQ)" as Konten
+    usecase "Mengatur identitas situs" as Situs
+  }
+}
+
+Staf --> Login
+Staf --> Dash
+Staf --> PPDB
+PPDB <.. PPDBStatus : <<extend>>
+Staf --> Periode
+Staf --> Siswa
+Staf --> Wali
+Wali <.. AkunWali : <<extend>>
+Staf --> TA
+Staf --> Kelas
+Kelas <.. Tempat : <<extend>>
+Staf --> Presensi
+Staf --> Nilai
+Staf --> Terbit
+Staf --> Biaya
+Staf --> Tagihan
+Tagihan <.. BatalTagihan : <<extend>>
+Staf --> Bayar
+Bayar ..> Alokasi : <<include>>
+Staf --> Keluar
+Staf --> Konten
+Staf --> Situs
+Admin --> Void
+
+Dash ..> Login : <<include>>
+@enduml

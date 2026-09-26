@@ -12,8 +12,8 @@ export function TahunAjaranForm() {
   const [state, formAction, pending] = useActionState(createAcademicYearAction, initial)
 
   return (
-    <form action={formAction} className="space-y-4 rounded-lg border bg-[var(--card)] p-6">
-      <h2 className="text-base font-semibold">Tambah Tahun Ajaran</h2>
+    <form action={formAction} className="form-card space-y-4">
+      <h2>Tambah Tahun Ajaran</h2>
       <p className="text-xs text-[var(--muted-foreground)]">Tahun ajaran baru dibuat dengan status Perencanaan. Aktifkan dari tabel untuk menjadikannya tahun berjalan.</p>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="space-y-2">
@@ -31,7 +31,7 @@ export function TahunAjaranForm() {
           {state.fields?.endDate && <p className="text-sm text-[var(--danger)]">{state.fields.endDate}</p>}
         </div>
       </div>
-      {state.error && <p className="rounded-md border border-[var(--danger)] bg-[var(--destructive)]/10 p-3 text-sm text-[var(--danger)]">{state.error}</p>}
+      {state.error && <p className="alert-error">{state.error}</p>}
       <Button type="submit" disabled={pending}>{pending ? 'Menyimpan…' : 'Tambah Tahun Ajaran'}</Button>
     </form>
   )

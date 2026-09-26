@@ -1,6 +1,8 @@
 import { requireRole } from '@/lib/auth/guard'
 import { db } from '@/lib/db/db'
+import { BookOpenCheck } from 'lucide-react'
 import { PenilaianForm, RekapTable } from '@/components/assessments/penilaian-form'
+import { EmptyState, PageHeader, SectionHeader } from '@/components/dashboard/primitives'
 
 export const metadata = { title: 'Penilaian — Guru' }
 
@@ -10,7 +12,7 @@ export default async function GuruPenilaianPage() {
 
   const ay = await db.academicYear.findFirst({ where: { status: 'ACTIVE' } })
   if (!teacher || !ay) {
-    return <p className="text-sm text-[var(--muted-foreground)]">Tidak ada data penilaian.</p>
+    return <EmptyState icon={BookOpenCheck} title="Tidak ada data penilaian" description="Belum ada tahun ajaran aktif atau profil guru belum terhubung." />
   }
 
   // Hanya kelas homeroom guru (server-side scoping, PRD §7.3)
@@ -25,7 +27,7 @@ export default async function GuruPenilaianPage() {
     db.assessmentScale.findMany({ where: { isActive: true }, orderBy: { sortOrder: 'asc' } }),
     db.assessment.findMany({
       where: { academicYearId: ay.id, classId: { in: classIds.length ? classIds : [-1] } },
-      include: { student: { select: { fullName: true } }, scale: { select: { label: true } }, domain: { select: { id: true, name: true } } },
+      include: { student: { select: { fullName: true } }, scale: { select: { label: true, code: true } }, domain: { select: { id: true, name: true } } },
     }),
   ])
 
@@ -42,7 +44,7 @@ export default async function GuruPenilaianPage() {
     const byStudent = new Map<number, { name: string; cells: Record<number, string | null>; narrativeCount: number }>()
     for (const a of assessments.filter((x) => x.period === period)) {
       const entry = byStudent.get(a.studentId) ?? { name: a.student.fullName, cells: {}, narrativeCount: 0 }
-      entry.cells[a.domainId] = a.scale.label
+      entry.cells[a.domainId] = a.scale.code
       if (a.narrative) entry.narrativeCount++
       byStudent.set(a.studentId, entry)
     }
@@ -53,10 +55,7 @@ export default async function GuruPenilaianPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold tracking-tight">Penilaian Kelas</h1>
-        <p className="text-sm text-[var(--muted-foreground)]">Input capaian per domain untuk kelas Anda.</p>
-      </header>
+      <PageHeader icon={BookOpenCheck} eyebrow={`Kelas saya · ${ay.name}`} title="Penilaian Kelas" description="Input capaian per domain untuk siswa di kelas Anda." />
 
       <PenilaianForm
         classes={classes.map((c) => ({ id: c.id, label: `${c.name} (${c.code})` }))}
@@ -67,7 +66,7 @@ export default async function GuruPenilaianPage() {
       />
 
       <section className="space-y-3">
-        <h2 className="text-base font-semibold">Rekap Kelas</h2>
+        <SectionHeader title="Rekap kelas" description="Ringkasan skala capaian per domain." />
         <RekapTable rows={rows} domainLabels={Object.fromEntries(domains.map((d) => [d.id, d.name]))} />
       </section>
     </div>

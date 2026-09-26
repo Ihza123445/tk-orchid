@@ -1,0 +1,48 @@
+' Ditulis manual. Activity diagram tagihan & pembayaran.
+@startuml act-keuangan
+!include _gaya.iuml
+title Activity Diagram — Tagihan & Pembayaran
+
+|Admin / Staf TU|
+start
+:Membuka menu Tagihan;
+:Memilih siswa, tanggal terbit, jatuh tempo;
+repeat
+  :Menambah baris jenis biaya\n(jumlah × harga satuan);
+repeat while (Tambah baris lagi?) is (ya)
+->tidak;
+:Klik "Buat Tagihan";
+|Sistem|
+:Buat no_tagihan & simpan tagihan\n+ detail_tagihan (status = ISSUED);
+|Orang Tua|
+:Melihat tagihan & sisa di portal;
+:Membayar ke sekolah (tunai/transfer/QRIS);
+|Admin / Staf TU|
+:Membuka menu Pembayaran;
+:Memilih siswa → daftar tagihan terbuka tampil;
+:Mengisi nominal alokasi per tagihan & metode;
+:Klik "Catat Pembayaran";
+|Sistem|
+if (Alokasi melebihi sisa tagihan\natau tagihan dibatalkan?) then (ya)
+  :Tolak dengan pesan kesalahan;
+  stop
+endif
+:Dalam satu transaksi:\nbuat no_kwitansi, simpan pembayaran (POSTED)\n& alokasi_pembayaran;
+:Hitung ulang status tiap tagihan terdampak;
+if (Total teralokasi ≥ total tagihan?) then (ya)
+  :Status = PAID (Lunas);
+else (tidak)
+  :Status = PARTIAL (Dibayar sebagian);
+endif
+|Orang Tua|
+:Melihat status lunas & riwayat pembayaran;
+|Administrator|
+if (Ada kesalahan pencatatan?) then (ya)
+  :Membatalkan (void) kwitansi + alasan;
+  |Sistem|
+  :Status pembayaran = VOID;
+  :Hitung ulang status tagihan\n(PAID / PARTIAL / ISSUED);
+else (tidak)
+endif
+stop
+@enduml

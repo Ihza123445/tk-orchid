@@ -1,0 +1,63 @@
+' Ditulis manual. Activity diagram login & lupa kata sandi.
+@startuml act-login
+!include _gaya.iuml
+title Activity Diagram — Login & Lupa Kata Sandi
+
+|Pengguna|
+start
+:Membuka halaman /login;
+:Mengisi email & kata sandi;
+|Sistem|
+:Validasi format isian;
+if (Format valid?) then (tidak)
+  :Tampilkan pesan kesalahan;
+  |Pengguna|
+  :Memperbaiki isian;
+  detach
+else (ya)
+endif
+if (Terlalu banyak percobaan gagal?) then (ya)
+  :Tolak & catat LOGIN_RATE_LIMITED;
+  stop
+else (tidak)
+endif
+:Cari pengguna berdasarkan email;
+:Bandingkan hash kata sandi (bcrypt);
+if (Cocok & akun aktif?) then (tidak)
+  :Catat LOGIN_FAILED\n& tambah hitungan gagal;
+  :Tampilkan "Email atau password salah";
+  stop
+else (ya)
+  :Buat cookie sesi bertanda tangan (HMAC);
+  :Perbarui terakhir_masuk & catat LOGIN_SUCCESS;
+  switch (Peran?)
+  case (Admin / Staf TU)
+    :Arahkan ke /dashboard;
+  case (Guru)
+    :Arahkan ke /guru/dashboard;
+  case (Orang tua)
+    :Arahkan ke /portal;
+  endswitch
+endif
+|Pengguna|
+:Melihat dashboard sesuai peran;
+stop
+
+|Pengguna|
+start
+:Memilih "Lupa password";
+:Mengisi email;
+|Sistem|
+:Buat token acak & simpan hash-nya\n(berlaku terbatas);
+:Kirim/tampilkan tautan reset;
+|Pengguna|
+:Membuka tautan & mengisi kata sandi baru;
+|Sistem|
+if (Token valid, belum dipakai,\nbelum kedaluwarsa?) then (ya)
+  :Simpan hash kata sandi baru;
+  :Tandai token dipakai;
+else (tidak)
+  :Tampilkan "tautan tidak berlaku";
+endif
+stop
+@enduml

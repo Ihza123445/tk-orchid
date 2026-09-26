@@ -1,12 +1,23 @@
 'use client'
 
 import { useActionState, useEffect, useState, useTransition } from 'react'
-import Link from 'next/link'
-import { ArrowDown, ArrowUp, CalendarDays, Check, ExternalLink, Eye, EyeOff, ImageOff, Pencil, Plus, Trash2, X } from 'lucide-react'
+import { ArrowDown, ArrowUp, CalendarDays, CalendarRange, Check, ExternalLink, Eye, EyeOff, GalleryHorizontalEnd, ImageOff, Images, Megaphone, MessageSquareQuote, MessagesSquare, Pencil, Plus, School, Sparkles, Trash2, X, type LucideIcon } from 'lucide-react'
+import { EmptyState, HeaderButton, PageHeader, Pill } from '@/components/dashboard/primitives'
 import { deleteContentAction, moveContentAction, saveContentAction, toggleContentAction, type ContentFormState } from '@/actions/website'
 import { BADGE_LABELS, type SectionDef } from '@/lib/cms/registry'
 import type { AdminRow, OptionMap } from '@/lib/cms/admin-data'
 import { FieldInput } from '@/components/website/field-input'
+
+const SECTION_ICONS: Record<string, LucideIcon> = {
+  slider: GalleryHorizontalEnd,
+  kegiatan: Sparkles,
+  pengumuman: Megaphone,
+  galeri: Images,
+  fasilitas: School,
+  testimoni: MessageSquareQuote,
+  faq: MessagesSquare,
+  ppdb: CalendarRange,
+}
 
 type Editing = { mode: 'new' } | { mode: 'edit'; row: AdminRow } | null
 
@@ -35,26 +46,25 @@ export function ContentManager({ section, rows, options }: { section: SectionDef
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div className="max-w-2xl">
-          <Link href="/website" className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--primary)] hover:underline">Kelola website</Link>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight">{section.title}</h1>
-          <p className="mt-1 text-sm text-[var(--muted-foreground)]">{section.description}</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Link href={section.publicHref} target="_blank" className="inline-flex h-10 items-center gap-2 rounded-xl border border-[var(--border)] px-4 text-sm font-medium hover:bg-[var(--muted)]">
-            <ExternalLink className="size-4" /> Lihat di website
-          </Link>
-          <button type="button" onClick={() => setEditing({ mode: 'new' })} className="inline-flex h-10 items-center gap-2 rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] shadow-sm hover:opacity-90">
-            <Plus className="size-4" /> Tambah {section.singular}
-          </button>
-        </div>
-      </header>
+      <PageHeader
+        icon={SECTION_ICONS[section.key] ?? Sparkles}
+        back={{ href: '/website', label: 'Kelola website' }}
+        title={section.title}
+        description={section.description}
+        actions={
+          <>
+            <HeaderButton href={section.publicHref} external><ExternalLink /> Lihat di website</HeaderButton>
+            <button type="button" onClick={() => setEditing({ mode: 'new' })} className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-[var(--primary)] px-3.5 text-sm font-medium text-[var(--primary-foreground)] shadow-sm shadow-[var(--primary)]/25 transition-all hover:-translate-y-px hover:shadow-md">
+              <Plus className="size-4" /> Tambah {section.singular}
+            </button>
+          </>
+        }
+      />
 
-      <div className="flex flex-wrap gap-3 text-sm">
-        <span className="rounded-full border border-[var(--border)] bg-[var(--card)] px-3 py-1">{rows.length} total</span>
-        <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-emerald-700 dark:text-emerald-300">{liveCount} tampil</span>
-        {section.sortable && <span className="rounded-full bg-[var(--muted)] px-3 py-1 text-[var(--muted-foreground)]">Gunakan panah untuk mengatur urutan tampil</span>}
+      <div className="flex flex-wrap items-center gap-2">
+        <Pill>{rows.length} total</Pill>
+        <Pill tone="success" dot>{liveCount} tampil</Pill>
+        {section.sortable && <span className="text-xs text-[var(--muted-foreground)]">Gunakan panah untuk mengatur urutan tampil</span>}
       </div>
 
       {notice && (
@@ -65,19 +75,23 @@ export function ContentManager({ section, rows, options }: { section: SectionDef
       )}
 
       {rows.length === 0 ? (
-        <div className="rounded-2xl border border-dashed p-12 text-center text-sm text-[var(--muted-foreground)]">
-          <p>{section.emptyText}</p>
-          <button type="button" onClick={() => setEditing({ mode: 'new' })} className="mt-4 inline-flex items-center gap-2 font-semibold text-[var(--primary)] hover:underline">
-            <Plus className="size-4" /> Tambah {section.singular} pertama
-          </button>
-        </div>
+        <EmptyState
+          icon={SECTION_ICONS[section.key] ?? Sparkles}
+          title={`Belum ada ${section.singular}`}
+          description={section.emptyText}
+          action={
+            <button type="button" onClick={() => setEditing({ mode: 'new' })} className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-[var(--primary)] px-3.5 text-sm font-medium text-[var(--primary-foreground)] shadow-sm">
+              <Plus className="size-4" /> Tambah {section.singular} pertama
+            </button>
+          }
+        />
       ) : (
         <ul className={`grid gap-4 ${list.image ? 'sm:grid-cols-2 xl:grid-cols-3' : 'lg:grid-cols-2'}`} aria-busy={pending}>
           {rows.map((row, index) => {
             const image = list.image ? String(row.values[list.image] ?? '') : ''
             const badge = list.badge ? String(row.values[list.badge] ?? '') : ''
             return (
-              <li key={row.id} className={`flex flex-col overflow-hidden rounded-2xl border bg-[var(--card)] shadow-sm transition-shadow hover:shadow-md ${row.live ? '' : 'opacity-70'}`}>
+              <li key={row.id} className={`app-card flex flex-col overflow-hidden transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-raised)] ${row.live ? '' : 'opacity-70'}`}>
                 {list.image && (
                   <div className="relative aspect-[16/9] bg-[var(--muted)]">
                     {image ? (
@@ -91,8 +105,8 @@ export function ContentManager({ section, rows, options }: { section: SectionDef
                 )}
                 <div className="flex flex-1 flex-col gap-2 p-4">
                   <div className="flex flex-wrap items-center gap-2 text-xs">
-                    <span className={`rounded-full px-2 py-0.5 font-medium ${row.live ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300' : 'bg-[var(--muted)] text-[var(--muted-foreground)]'}`}>{row.statusLabel}</span>
-                    {badge && <span className="rounded-full bg-[var(--secondary)] px-2 py-0.5 text-[var(--primary)]">{BADGE_LABELS[badge] ?? badge}</span>}
+                    <Pill tone={row.live ? 'success' : 'neutral'} dot>{row.statusLabel}</Pill>
+                    {badge && <Pill tone="brand">{BADGE_LABELS[badge] ?? badge}</Pill>}
                     {!list.image && section.sortable && <span className="text-[var(--muted-foreground)]">#{index + 1}</span>}
                   </div>
                   <h2 className="font-semibold leading-snug">{String(row.values[list.title] ?? '')}</h2>

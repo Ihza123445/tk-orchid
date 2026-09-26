@@ -1,0 +1,34 @@
+' Ditulis manual. Sequence diagram penyusunan hingga penerbitan rapor.
+@startuml seq-rapor
+!include _gaya.iuml
+title Sequence Diagram — Menyusun & Menerbitkan Laporan Perkembangan
+autonumber
+
+actor Guru
+control "saveDevelopmentReportAction" as Save
+control "submitReportAction" as Submit
+actor "Admin/Staf" as Admin
+control "publishReportAction" as Pub
+entity "laporan_perkembangan" as L
+entity "detail_laporan" as D
+actor "Orang Tua" as Ortu
+boundary "Portal: Rapor" as Portal
+
+Guru -> Save : capaian tiap domain, ringkasan, rekomendasi
+Save -> L : cek laporan (siswa + tahun ajaran + periode)
+alt sudah REVIEW/PUBLISHED
+  Save --> Guru : tolak (laporan terkunci)
+else baru / masih DRAFT
+  Save -> L : simpan status DRAFT
+  Save -> D : simpan ulang detail per domain
+  Save --> Guru : tersimpan sebagai draf
+end
+Guru -> Submit : kirim untuk review
+Submit -> L : DRAFT → REVIEW
+Admin -> Pub : publikasikan
+Pub -> L : REVIEW → PUBLISHED\n(diterbitkan_oleh, diterbitkan_pada)
+Ortu -> Portal : buka menu Rapor
+Portal -> L : ambil laporan status PUBLISHED milik anaknya
+L --> Portal : laporan + detail
+Portal --> Ortu : tampilkan rapor
+@enduml

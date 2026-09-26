@@ -1,0 +1,77 @@
+' Ditulis manual. Use case diagram keseluruhan sistem.
+@startuml uc-sistem
+!include _gaya.iuml
+left to right direction
+title Use Case Diagram — Sistem Informasi TK Orchid
+
+actor "Pengunjung" as Pengunjung
+actor "Orang Tua" as Ortu
+actor "Guru" as Guru
+actor "Staf TU" as Staf
+actor "Administrator" as Admin
+Admin -|> Staf : generalisasi
+
+rectangle "Sistem Informasi TK Orchid" {
+  usecase "Melihat website sekolah" as UC01
+  usecase "Mendaftar PPDB online" as UC02
+  usecase "Login" as UC03
+  usecase "Lupa & atur ulang kata sandi" as UC04
+
+  usecase "Melihat dashboard anak" as UC10
+  usecase "Melihat tagihan & riwayat pembayaran" as UC11
+  usecase "Melihat presensi anak" as UC12
+  usecase "Melihat rapor perkembangan" as UC13
+  usecase "Membaca pengumuman" as UC14
+
+  usecase "Mengisi presensi kelas" as UC20
+  usecase "Menginput penilaian" as UC21
+  usecase "Menyusun laporan perkembangan" as UC22
+  usecase "Melihat jadwal & kegiatan" as UC23
+
+  usecase "Meninjau pendaftaran PPDB" as UC30
+  usecase "Mengelola siswa & wali" as UC31
+  usecase "Mengelola tahun ajaran & kelas" as UC32
+  usecase "Menerbitkan laporan perkembangan" as UC33
+  usecase "Mengelola tagihan" as UC34
+  usecase "Mencatat pembayaran" as UC35
+  usecase "Mencatat pengeluaran" as UC36
+  usecase "Mengelola konten website" as UC37
+  usecase "Membatalkan (void) pembayaran/pengeluaran" as UC38
+}
+
+Pengunjung --> UC01
+Pengunjung --> UC02
+Ortu --> UC03
+Guru --> UC03
+Staf --> UC03
+UC03 <.. UC04 : <<extend>>
+
+Ortu --> UC10
+Ortu --> UC11
+Ortu --> UC12
+Ortu --> UC13
+Ortu --> UC14
+
+Guru --> UC20
+Guru --> UC21
+Guru --> UC22
+Guru --> UC23
+
+Staf --> UC30
+Staf --> UC31
+Staf --> UC32
+Staf --> UC20
+Staf --> UC21
+Staf --> UC33
+Staf --> UC34
+Staf --> UC35
+Staf --> UC36
+Staf --> UC37
+Admin --> UC38
+
+note bottom of UC38
+  Hanya Administrator.
+  Status tagihan terkait
+  dihitung ulang otomatis.
+end note
+@enduml

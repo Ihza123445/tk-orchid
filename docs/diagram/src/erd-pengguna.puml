@@ -1,0 +1,177 @@
+' Dibuat otomatis oleh scripts/generate-docs.ts — jangan diedit manual.
+@startuml erd-pengguna
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "DejaVu Sans"
+skinparam roundCorner 8
+skinparam linetype ortho
+skinparam ArrowColor #7a3f86
+skinparam class {
+  BackgroundColor #FDF8FD
+  BorderColor #A64CA6
+  HeaderBackgroundColor #F3E3F3
+  FontColor #1f1a2e
+}
+hide circle
+title ERD Modul Pengguna & Hak Akses
+
+entity "wali" as wali {
+  * id_wali : INTEGER <<PK>>
+  --
+    id_pengguna : INTEGER <<FK,UK>>
+  * nama_lengkap : TEXT
+  * hubungan : TEXT
+    nik : TEXT
+    pekerjaan : TEXT
+    nama_perusahaan : TEXT
+    pendidikan : TEXT
+  * telepon : TEXT
+    email : TEXT
+    alamat : TEXT
+    catatan : TEXT
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "pengguna" as pengguna {
+  * id_pengguna : INTEGER <<PK>>
+  --
+  * nama : TEXT
+  * email : TEXT <<UK>>
+    nama_pengguna : TEXT <<UK>>
+  * kata_sandi_hash : TEXT
+  * peran : TEXT
+  * aktif : BOOLEAN
+    terakhir_masuk : DATETIME
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "guru" as guru {
+  * id_guru : INTEGER <<PK>>
+  --
+  * id_pengguna : INTEGER <<FK,UK>>
+    kode_pegawai : TEXT <<UK>>
+  * nama_lengkap : TEXT
+    telepon : TEXT
+    email : TEXT
+    pendidikan : TEXT
+    spesialisasi : TEXT
+    tanggal_bergabung : DATETIME
+  * aktif : BOOLEAN
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "siswa_wali" as siswa_wali #EEEEEE {
+  * id_siswa : INTEGER <<PK,FK>>
+  * id_wali : INTEGER <<PK,FK>>
+}
+
+entity "kelas" as kelas #EEEEEE {
+  * id_kelas : INTEGER <<PK>>
+}
+
+entity "pendaftaran_ppdb" as pendaftaran_ppdb #EEEEEE {
+  * id_pendaftaran : INTEGER <<PK>>
+}
+
+entity "penilaian" as penilaian #EEEEEE {
+  * id_penilaian : INTEGER <<PK>>
+}
+
+entity "laporan_perkembangan" as laporan_perkembangan #EEEEEE {
+  * id_laporan : INTEGER <<PK>>
+}
+
+entity "presensi" as presensi #EEEEEE {
+  * id_presensi : INTEGER <<PK>>
+}
+
+entity "jadwal" as jadwal #EEEEEE {
+  * id_jadwal : INTEGER <<PK>>
+}
+
+entity "kegiatan" as kegiatan #EEEEEE {
+  * id_kegiatan : INTEGER <<PK>>
+}
+
+entity "pengumuman" as pengumuman #EEEEEE {
+  * id_pengumuman : INTEGER <<PK>>
+}
+
+entity "pengumuman_dibaca" as pengumuman_dibaca {
+  * id_pengumuman : INTEGER <<PK,FK>>
+  * id_pengguna : INTEGER <<PK,FK>>
+  --
+  * dibaca_pada : DATETIME
+}
+
+entity "tagihan" as tagihan #EEEEEE {
+  * id_tagihan : INTEGER <<PK>>
+}
+
+entity "pembayaran" as pembayaran #EEEEEE {
+  * id_pembayaran : INTEGER <<PK>>
+}
+
+entity "pengeluaran" as pengeluaran #EEEEEE {
+  * id_pengeluaran : INTEGER <<PK>>
+}
+
+entity "dokumen_siswa" as dokumen_siswa #EEEEEE {
+  * id_dokumen_siswa : INTEGER <<PK>>
+}
+
+entity "log_audit" as log_audit {
+  * id_log : INTEGER <<PK>>
+  --
+    id_pengguna : INTEGER <<FK>>
+  * aksi : TEXT
+  * jenis_entitas : TEXT
+    id_entitas : INTEGER
+    data_sebelum : TEXT
+    data_sesudah : TEXT
+    alamat_ip : TEXT
+    agen_pengguna : TEXT
+  * dibuat_pada : DATETIME
+}
+
+entity "token_reset_sandi" as token_reset_sandi {
+  * id_token : INTEGER <<PK>>
+  --
+  * id_pengguna : INTEGER <<FK>>
+  * hash_token : TEXT <<UK>>
+  * kedaluwarsa_pada : DATETIME
+    dipakai_pada : DATETIME
+  * dibuat_pada : DATETIME
+}
+
+pengguna |o--o| wali : id_pengguna
+pengguna ||--o| guru : id_pengguna
+wali ||--o{ siswa_wali : id_wali
+guru |o--o{ kelas : id_guru
+pengguna |o--o{ pendaftaran_ppdb : ditinjau_oleh
+pengguna ||--o{ penilaian : dibuat_oleh
+pengguna ||--o{ laporan_perkembangan : dibuat_oleh
+pengguna |o--o{ laporan_perkembangan : diterbitkan_oleh
+guru |o--o{ laporan_perkembangan : id_guru
+pengguna ||--o{ presensi : dicatat_oleh
+guru |o--o{ jadwal : id_guru
+pengguna ||--o{ kegiatan : dibuat_oleh
+pengguna ||--o{ pengumuman : dibuat_oleh
+pengumuman ||--o{ pengumuman_dibaca : id_pengumuman
+pengguna ||--o{ pengumuman_dibaca : id_pengguna
+pengguna ||--o{ tagihan : dibuat_oleh
+pengguna ||--o{ pembayaran : dicatat_oleh
+pengguna ||--o{ pengeluaran : dibuat_oleh
+pengguna ||--o{ dokumen_siswa : diunggah_oleh
+pengguna |o--o{ log_audit : id_pengguna
+pengguna ||--o{ token_reset_sandi : id_pengguna
+
+legend right
+  Abu-abu = entitas modul lain (hanya kunci)
+  PK = primary key, FK = foreign key, UK = unique
+  * = wajib diisi (NOT NULL)
+endlegend
+@enduml

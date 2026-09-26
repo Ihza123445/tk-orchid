@@ -1,0 +1,58 @@
+' Gaya bersama untuk diagram yang ditulis manual.
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 13
+skinparam roundCorner 10
+skinparam ArrowColor #7a3f86
+skinparam ActorBorderColor #7a3f86
+skinparam ActorBackgroundColor #F3E3F3
+skinparam usecase {
+  BackgroundColor #FDF8FD
+  BorderColor #A64CA6
+}
+skinparam rectangle {
+  BorderColor #A64CA6
+}
+skinparam package {
+  BorderColor #A64CA6
+  BackgroundColor #FFFFFF
+}
+skinparam activity {
+  BackgroundColor #FDF8FD
+  BorderColor #A64CA6
+  DiamondBackgroundColor #FFF6E5
+  DiamondBorderColor #E9A24B
+}
+skinparam swimlane {
+  BorderColor #A64CA6
+  TitleBackgroundColor #F3E3F3
+}
+skinparam sequence {
+  ParticipantBackgroundColor #FDF8FD
+  ParticipantBorderColor #A64CA6
+  LifeLineBorderColor #A64CA6
+  ActorBackgroundColor #F3E3F3
+  ActorBorderColor #7a3f86
+  GroupBorderColor #A64CA6
+}
+skinparam state {
+  BackgroundColor #FDF8FD
+  BorderColor #A64CA6
+}
+skinparam component {
+  BackgroundColor #FDF8FD
+  BorderColor #A64CA6
+}
+skinparam node {
+  BackgroundColor #FFFFFF
+  BorderColor #A64CA6
+}
+skinparam database {
+  BackgroundColor #FFF6E5
+  BorderColor #E9A24B
+}
+skinparam note {
+  BackgroundColor #FFFBEA
+  BorderColor #E9A24B
+}

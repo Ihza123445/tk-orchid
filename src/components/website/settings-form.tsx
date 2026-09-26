@@ -22,8 +22,8 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
       className="space-y-6"
     >
       {SETTING_GROUPS.map((group) => (
-        <section key={group.title} className="rounded-2xl border bg-[var(--card)] p-6 shadow-sm">
-          <h2 className="text-base font-semibold">{group.title}</h2>
+        <section key={group.title} className="form-card">
+          <h2>{group.title}</h2>
           <p className="mt-1 text-sm text-[var(--muted-foreground)]">{group.description}</p>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             {group.fields.map((field) => (
@@ -33,7 +33,7 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
         </section>
       ))}
 
-      <div className="sticky bottom-4 z-10 flex flex-wrap items-center justify-end gap-3 rounded-2xl border bg-[var(--card)]/95 p-4 shadow-lg backdrop-blur">
+      <div className="sticky bottom-4 z-10 flex flex-wrap items-center justify-end gap-3 rounded-2xl border border-[var(--border)] bg-[var(--card)]/95 p-4 shadow-[var(--shadow-raised)] backdrop-blur">
         {state.error && <p className="mr-auto text-sm font-medium text-[var(--destructive)]">{state.error}</p>}
         {state.success && !pending && <p className="mr-auto flex items-center gap-2 text-sm font-medium text-emerald-700 dark:text-emerald-300"><Check className="size-4" /> Pengaturan tersimpan dan sudah tampil di website.</p>}
         <button type="submit" disabled={pending} className="inline-flex h-10 items-center gap-2 rounded-xl bg-[var(--primary)] px-5 text-sm font-semibold text-[var(--primary-foreground)] hover:opacity-90 disabled:opacity-60">

@@ -1,9 +1,13 @@
 import { notFound } from 'next/navigation'
-import Link from 'next/link'
 import { requireAdminStaff } from '@/lib/auth/guard'
 import { db } from '@/lib/db/db'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { formatTanggal, formatRupiah } from '@/lib/formatting/format'
+import { CalendarCheck2, GraduationCap, PencilLine, ReceiptText, School, UserRound, UsersRound } from 'lucide-react'
+import { ATTENDANCE_STATUS, Avatar, Empty, HeaderButton, InfoGrid, Panel, Pill, Progress, RowList, Row, STUDENT_STATUS, StatusPill } from '@/components/dashboard/primitives'
+import { formatTanggal, formatTanggalSingkat, formatRupiah } from '@/lib/formatting/format'
+
+export const metadata = { title: 'Detail Siswa' }
+
+const REL: Record<string, string> = { AYAH: 'Ayah', IBU: 'Ibu', WALI: 'Wali', LAINNYA: 'Lainnya' }
 
 export default async function DetailSiswaPage({ params }: { params: Promise<{ id: string }> }) {
   await requireAdminStaff()
@@ -35,115 +39,118 @@ export default async function DetailSiswaPage({ params }: { params: Promise<{ id
     outstanding += Math.max(0, total - paid)
   }
 
+  const attendanceRatio = student.attendances.length ? Math.round((totalHadir / student.attendances.length) * 100) : null
+  const currentClass = student.enrollments[0]
+
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--secondary)] text-xl font-semibold text-[var(--primary)]">
-            {student.fullName.charAt(0)}
+      <section className="app-card overflow-hidden">
+        <div className="cover-doodle h-20 sm:h-24" />
+        <div className="flex flex-wrap items-start justify-between gap-4 px-5 pb-5 sm:px-6">
+          <div className="flex min-w-0 items-start gap-4">
+            <span className="-mt-10 shrink-0 rounded-full bg-[var(--card)] p-1 shadow-md"><Avatar name={student.fullName} size="xl" /></span>
+            <div className="min-w-0 pt-3">
+              <h1 className="truncate font-heading text-2xl font-bold tracking-tight">{student.fullName}</h1>
+              <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-[var(--muted-foreground)]">
+                <span className="font-mono text-xs">{student.studentCode}</span>
+                <span aria-hidden="true">·</span>
+                <span>{student.nis ? `NIS ${student.nis}` : 'Tanpa NIS'}</span>
+                <StatusPill map={STUDENT_STATUS} status={student.status} />
+              </div>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight">{student.fullName}</h1>
-            <p className="text-sm text-[var(--muted-foreground)]">
-              {student.studentCode} · {student.nis ?? 'tanpa NIS'} ·{' '}
-              <span className="rounded-full bg-[var(--secondary)] px-2 py-0.5 text-xs text-[var(--primary)]">
-                {student.status}
-              </span>
-            </p>
+          <div className="flex gap-2 pt-3">
+            <HeaderButton href="/siswa">Kembali</HeaderButton>
+            <HeaderButton href={`/siswa/${student.id}/edit`} primary><PencilLine /> Ubah data</HeaderButton>
           </div>
         </div>
-        <Link
-          href={`/siswa/${student.id}/edit`}
-          className="rounded-md bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--primary-foreground)] hover:opacity-90"
-        >
-          Edit Data
-        </Link>
-      </div>
+        <div className="grid grid-cols-1 border-t border-[var(--border)] sm:grid-cols-3 sm:divide-x sm:divide-[var(--border)]">
+          <div className="flex items-center gap-3 px-5 py-4 sm:px-6">
+            <School className="size-5 text-[var(--primary)]" aria-hidden="true" />
+            <div><p className="text-xs text-[var(--muted-foreground)]">Kelas saat ini</p><p className="text-sm font-semibold">{currentClass ? `${currentClass.klass.name} · ${currentClass.academicYear.name}` : 'Belum ditempatkan'}</p></div>
+          </div>
+          <div className="flex items-center gap-3 border-t border-[var(--border)] px-5 py-4 sm:border-t-0 sm:px-6">
+            <CalendarCheck2 className="size-5 text-emerald-600" aria-hidden="true" />
+            <div><p className="text-xs text-[var(--muted-foreground)]">Kehadiran (10 catatan terakhir)</p><p className="text-sm font-semibold">{attendanceRatio === null ? 'Belum ada data' : `${attendanceRatio}% hadir`}</p></div>
+          </div>
+          <div className="flex items-center gap-3 border-t border-[var(--border)] px-5 py-4 sm:border-t-0 sm:px-6">
+            <ReceiptText className={`size-5 ${outstanding > 0 ? 'text-amber-600' : 'text-emerald-600'}`} aria-hidden="true" />
+            <div><p className="text-xs text-[var(--muted-foreground)]">Tagihan belum dibayar</p><p className="text-sm font-semibold tabular-nums">{outstanding > 0 ? formatRupiah(outstanding) : 'Lunas'}</p></div>
+          </div>
+        </div>
+      </section>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Main */}
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
-          <Card>
-            <CardHeader><CardTitle className="text-base">Biodata</CardTitle></CardHeader>
-            <CardContent className="grid grid-cols-1 gap-x-8 gap-y-3 text-sm sm:grid-cols-2">
-              <div><span className="text-[var(--muted-foreground)]">Nama Panggilan</span><p>{student.nickname ?? '-'}</p></div>
-              <div><span className="text-[var(--muted-foreground)]">Jenis Kelamin</span><p>{student.gender === 'L' ? 'Laki-laki' : 'Perempuan'}</p></div>
-              <div><span className="text-[var(--muted-foreground)]">Tempat/Tanggal Lahir</span><p>{student.birthPlace ?? '-'}, {formatTanggal(student.birthDate)}</p></div>
-              <div><span className="text-[var(--muted-foreground)]">Agama</span><p>{student.religion ?? '-'}</p></div>
-              <div className="sm:col-span-2"><span className="text-[var(--muted-foreground)]">Alamat</span><p>{[student.address, student.city, student.province].filter(Boolean).join(', ') || '-'}</p></div>
-              <div><span className="text-[var(--muted-foreground)]">Tanggal Masuk</span><p>{formatTanggal(student.admissionDate)}</p></div>
-              <div><span className="text-[var(--muted-foreground)]">Catatan</span><p>{student.notes ?? '-'}</p></div>
-            </CardContent>
-          </Card>
+          <Panel title="Biodata" icon={UserRound}>
+            <InfoGrid
+              items={[
+                { label: 'Nama panggilan', value: student.nickname },
+                { label: 'Jenis kelamin', value: student.gender === 'L' ? 'Laki-laki' : 'Perempuan' },
+                { label: 'Tempat, tanggal lahir', value: `${student.birthPlace ?? '-'}, ${formatTanggal(student.birthDate)}` },
+                { label: 'Agama', value: student.religion },
+                { label: 'Alamat', value: [student.address, student.city, student.province].filter(Boolean).join(', '), wide: true },
+                { label: 'Tanggal masuk', value: formatTanggal(student.admissionDate) },
+                { label: 'Catatan', value: student.notes },
+              ]}
+            />
+          </Panel>
 
-          <Card>
-            <CardHeader><CardTitle className="text-base">Presensi Terakhir</CardTitle></CardHeader>
-            <CardContent>
-              {student.attendances.length === 0 ? (
-                <p className="text-sm text-[var(--muted-foreground)]">Belum ada data presensi.</p>
-              ) : (
-                <ul className="divide-y text-sm">
+          <Panel title="Presensi terakhir" icon={CalendarCheck2} description={student.attendances.length ? `${totalHadir} hadir dari ${student.attendances.length} catatan terakhir` : undefined} flush>
+            {student.attendances.length === 0 ? (
+              <Empty icon={CalendarCheck2}>Belum ada data presensi.</Empty>
+            ) : (
+              <>
+                {attendanceRatio !== null && <div className="px-5 pt-4"><Progress value={attendanceRatio} tone={attendanceRatio < 80 ? 'warning' : 'success'} label="Persentase kehadiran" /></div>}
+                <ul className="grid grid-cols-1 gap-x-6 px-5 py-2 sm:grid-cols-2">
                   {student.attendances.map((a) => (
-                    <li key={a.id} className="flex justify-between py-2">
+                    <li key={a.id} className="flex items-center justify-between border-b border-[var(--border)] py-2.5 text-sm last:border-0 sm:[&:nth-last-child(2)]:border-0">
                       <span>{formatTanggal(a.attendanceDate)}</span>
-                      <span className="rounded-full bg-[var(--secondary)] px-2 py-0.5 text-xs">{a.status}</span>
+                      <StatusPill map={ATTENDANCE_STATUS} status={a.status} />
                     </li>
                   ))}
                 </ul>
-              )}
-              <p className="mt-2 text-xs text-[var(--muted-foreground)]">{totalHadir} hadir dari {student.attendances.length} catatan terakhir.</p>
-            </CardContent>
-          </Card>
+              </>
+            )}
+          </Panel>
         </div>
 
-        {/* Side summary */}
         <div className="space-y-6">
-          <Card>
-            <CardHeader><CardTitle className="text-base">Wali</CardTitle></CardHeader>
-            <CardContent>
-              {student.studentGuardians.length === 0 ? (
-                <p className="text-sm text-[var(--muted-foreground)]">Belum ada wali terhubung.</p>
-              ) : (
-                <ul className="space-y-3 text-sm">
-                  {student.studentGuardians.map((sg) => (
-                    <li key={sg.guardian.id}>
-                      <p className="font-medium">{sg.guardian.fullName}{sg.isPrimary && <span className="ml-1 text-xs text-[var(--primary)]">(utama)</span>}</p>
-                      <p className="text-xs text-[var(--muted-foreground)]">{sg.guardian.relationship} · {sg.guardian.phone}</p>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </CardContent>
-          </Card>
+          <Panel title="Wali" icon={UsersRound} flush>
+            {student.studentGuardians.length === 0 ? (
+              <Empty icon={UsersRound}>Belum ada wali terhubung.</Empty>
+            ) : (
+              <RowList>
+                {student.studentGuardians.map((sg) => (
+                  <Row
+                    key={sg.guardian.id}
+                    href={`/wali/${sg.guardian.id}`}
+                    leading={<Avatar name={sg.guardian.fullName} />}
+                    primary={sg.guardian.fullName}
+                    secondary={`${REL[sg.guardian.relationship] ?? sg.guardian.relationship} · ${sg.guardian.phone}`}
+                    trailing={sg.isPrimary ? <Pill tone="brand">Utama</Pill> : undefined}
+                  />
+                ))}
+              </RowList>
+            )}
+          </Panel>
 
-          <Card>
-            <CardHeader><CardTitle className="text-base">Kelas</CardTitle></CardHeader>
-            <CardContent>
-              {student.enrollments.length === 0 ? (
-                <p className="text-sm text-[var(--muted-foreground)]">Belum ditempatkan di kelas.</p>
-              ) : (
-                <ul className="space-y-2 text-sm">
-                  {student.enrollments.map((e) => (
-                    <li key={e.id}>
-                      {e.klass.name} <span className="text-xs text-[var(--muted-foreground)]">({e.academicYear.name})</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </CardContent>
-          </Card>
+          <Panel title="Riwayat kelas" icon={GraduationCap} flush>
+            {student.enrollments.length === 0 ? (
+              <Empty icon={School}>Belum ditempatkan di kelas.</Empty>
+            ) : (
+              <RowList>
+                {student.enrollments.map((e) => (
+                  <Row key={e.id} href={`/kelas/${e.klass.id}`} primary={e.klass.name} secondary={`Tahun ajaran ${e.academicYear.name} · masuk ${formatTanggalSingkat(e.enrollmentDate)}`} />
+                ))}
+              </RowList>
+            )}
+          </Panel>
 
-          <Card>
-            <CardHeader><CardTitle className="text-base">Tagihan</CardTitle></CardHeader>
-            <CardContent>
-              <p className="text-2xl font-semibold">{formatRupiah(outstanding)}</p>
-              <p className="text-xs text-[var(--muted-foreground)]">Total belum dibayar</p>
-              <Link href={`/keuangan/tagihan?studentId=${student.id}`} className="mt-3 inline-block text-sm underline underline-offset-4">
-                Lihat tagihan
-              </Link>
-            </CardContent>
-          </Card>
+          <Panel title="Tagihan" icon={ReceiptText} action={{ href: '/keuangan/tagihan', label: 'Lihat tagihan' }}>
+            <p className={`font-heading text-3xl font-bold tabular-nums ${outstanding > 0 ? '' : 'text-emerald-600 dark:text-emerald-300'}`}>{formatRupiah(outstanding)}</p>
+            <p className="mt-1 text-xs text-[var(--muted-foreground)]">Total belum dibayar dari {student.invoices.filter((inv) => inv.status !== 'VOID').length} tagihan</p>
+          </Panel>
         </div>
       </div>
     </div>

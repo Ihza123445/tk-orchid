@@ -1,0 +1,72 @@
+' Ditulis manual. Object diagram contoh data (instance).
+@startuml object
+!include _gaya.iuml
+title Object Diagram — Contoh Data Satu Siswa
+
+object "adinda : siswa" as S {
+  id_siswa = 1
+  kode_siswa = "STD-2026-001"
+  nama_lengkap = "Adinda Putri"
+  jenis_kelamin = "P"
+  status = "ACTIVE"
+}
+object "ortu : wali" as W {
+  id_wali = 1
+  nama_lengkap = "Orang Tua Demo"
+  hubungan = "AYAH"
+}
+object "akunOrtu : pengguna" as U {
+  id_pengguna = 5
+  email = "orangtua@orchid.local"
+  peran = "PARENT"
+}
+object "relasi : siswa_wali" as SW {
+  wali_utama = true
+}
+object "ta2026 : tahun_ajaran" as TA {
+  nama = "2026/2027"
+  status = "ACTIVE"
+}
+object "kelompokA : kelas" as K {
+  nama = "Kelompok A"
+  jenjang = "Kelompok A"
+  kapasitas = 20
+}
+object "tempat : penempatan_kelas" as PK {
+  status = "ACTIVE"
+}
+object "inv1 : tagihan" as T {
+  no_tagihan = "INV/ORCHID/2026/07/0001"
+  status = "PAID"
+}
+object "spp : detail_tagihan" as D1 {
+  keterangan = "SPP Juli"
+  subtotal = 350000
+}
+object "kegiatan : detail_tagihan" as D2 {
+  keterangan = "Uang Kegiatan Juli"
+  subtotal = 50000
+}
+object "kw1 : pembayaran" as P {
+  no_kwitansi = "RCT/ORCHID/2026/0001"
+  nominal = 400000
+  metode = "TRANSFER"
+  status = "POSTED"
+}
+object "alok : alokasi_pembayaran" as A {
+  nominal = 400000
+}
+
+U -- W
+W -- SW
+SW -- S
+S -- PK
+PK -- K
+K -- TA
+S -- T
+T -- D1
+T -- D2
+P -- A
+A -- T
+S -- P
+@enduml

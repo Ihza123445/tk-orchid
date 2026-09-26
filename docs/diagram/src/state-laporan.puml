@@ -1,0 +1,15 @@
+' Ditulis manual. State machine laporan perkembangan.
+@startuml state-laporan
+!include _gaya.iuml
+title State Diagram — Laporan Perkembangan (laporan_perkembangan.status)
+
+[*] --> DRAFT : guru menyimpan laporan
+DRAFT : Draf\n(bisa disunting guru)
+REVIEW : Menunggu review\n(terkunci untuk guru)
+PUBLISHED : Terbit\n(tampil di portal orang tua)
+
+DRAFT --> DRAFT : guru menyunting & menyimpan
+DRAFT --> REVIEW : guru "Kirim untuk review"
+REVIEW --> PUBLISHED : admin/staf "Publikasikan"
+PUBLISHED --> [*]
+@enduml

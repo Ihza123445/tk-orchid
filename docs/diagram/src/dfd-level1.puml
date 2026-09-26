@@ -1,0 +1,68 @@
+' Ditulis manual. DFD Level 1.
+@startuml dfd-level1
+!include _gaya.iuml
+skinparam usecase {
+  BackgroundColor #F3E3F3
+  BorderColor #7a3f86
+}
+title DFD Level 1 — Sistem Informasi TK Orchid
+
+rectangle "Pengunjung" as E1
+rectangle "Orang Tua" as E2
+rectangle "Guru" as E3
+rectangle "Admin / Staf TU" as E4
+
+usecase "1.0\nAutentikasi" as P1
+usecase "2.0\nPPDB" as P2
+usecase "3.0\nKesiswaan &\nAkademik" as P3
+usecase "4.0\nPresensi" as P4
+usecase "5.0\nPenilaian &\nRapor" as P5
+usecase "6.0\nKeuangan" as P6
+usecase "7.0\nInformasi &\nWebsite" as P7
+
+database "D1 pengguna" as D1
+database "D2 periode_ppdb /\npendaftaran_ppdb" as D2
+database "D3 siswa / wali /\nkelas / penempatan_kelas" as D3
+database "D4 presensi" as D4
+database "D5 penilaian /\nlaporan_perkembangan" as D5
+database "D6 tagihan / pembayaran /\npengeluaran / jenis_biaya" as D6
+database "D7 kegiatan / pengumuman /\nkonten situs" as D7
+database "D8 log_audit" as D8
+
+E2 --> P1 : email & kata sandi
+E3 --> P1 : email & kata sandi
+E4 --> P1 : email & kata sandi
+P1 <--> D1 : data akun
+P1 --> D8 : catatan login
+
+E1 --> P2 : formulir pendaftaran
+P2 --> E1 : nomor pendaftaran
+E4 --> P2 : keputusan status
+P2 <--> D2 : data pendaftar
+
+E4 --> P3 : data siswa, wali, kelas
+P3 <--> D3 : data induk
+D2 --> P3 : pendaftar diterima
+
+E3 --> P4 : status kehadiran
+P4 <--> D4 : presensi
+D3 --> P4 : daftar siswa kelas
+P4 --> E2 : riwayat presensi
+
+E3 --> P5 : nilai & narasi
+E4 --> P5 : persetujuan terbit
+P5 <--> D5 : penilaian & laporan
+P5 --> E2 : rapor terbit
+
+E4 --> P6 : tagihan, pembayaran, pengeluaran
+P6 <--> D6 : transaksi
+D3 --> P6 : data siswa
+P6 --> E2 : tagihan & riwayat pembayaran
+P6 --> E4 : ringkasan kas
+
+E4 --> P7 : konten website
+P7 <--> D7 : konten
+P7 --> E1 : informasi sekolah
+P7 --> E2 : pengumuman
+P7 --> E3 : kegiatan
+@enduml

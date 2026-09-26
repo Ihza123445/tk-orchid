@@ -24,8 +24,8 @@ export function TambahWaliForm() {
 
   return (
     <form action={formAction} className="space-y-8">
-      <section className="rounded-lg border bg-[var(--card)] p-6">
-        <h2 className="mb-4 text-base font-semibold">Data Wali</h2>
+      <section className="form-card">
+        <h2 className="mb-5">Data Wali</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="fullName">Nama Lengkap *</Label>
@@ -35,7 +35,7 @@ export function TambahWaliForm() {
           <div className="space-y-2">
             <Label htmlFor="relationship">Hubungan *</Label>
             <select id="relationship" name="relationship" required defaultValue=""
-              className="h-9 w-full rounded-md border border-[var(--input)] bg-transparent px-3 text-sm">
+              className="field-select">
               <option value="" disabled>Pilih…</option>
               <option value="AYAH">Ayah</option>
               <option value="IBU">Ibu</option>
@@ -65,8 +65,8 @@ export function TambahWaliForm() {
         </div>
       </section>
 
-      <section className="rounded-lg border bg-[var(--card)] p-6">
-        <h2 className="mb-2 text-base font-semibold">Akun Portal Orang Tua</h2>
+      <section className="form-card">
+        <h2 className="mb-2">Akun Portal Orang Tua</h2>
         <p className="mb-3 text-xs text-[var(--muted-foreground)]">
           Buat akun agar wali dapat mengakses portal orang tua. Email wajib diisi. Password awal diatur melalui fitur lupa password.
         </p>
@@ -78,10 +78,10 @@ export function TambahWaliForm() {
       </section>
 
       {state.error && (
-        <p className="rounded-md border border-[var(--danger)] bg-[var(--destructive)]/10 p-3 text-sm text-[var(--danger)]">{state.error}</p>
+        <p className="alert-error">{state.error}</p>
       )}
 
-      <div className="sticky bottom-0 flex justify-end gap-2 border-t bg-[var(--background)] py-3">
+      <div className="sticky bottom-3 z-10 flex justify-end gap-2 rounded-2xl border border-[var(--border)] bg-[var(--card)]/95 p-3 shadow-[var(--shadow-raised)] backdrop-blur">
         <Button type="button" variant="outline" onClick={() => router.push('/wali')}>Batal</Button>
         <Button type="submit" disabled={pending}>{pending ? 'Menyimpan…' : 'Simpan'}</Button>
       </div>

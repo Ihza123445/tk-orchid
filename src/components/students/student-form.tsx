@@ -29,8 +29,8 @@ export function TambahSiswaForm() {
   return (
     <form action={formAction} className="space-y-8">
       {/* Section: Identitas */}
-      <section className="rounded-lg border bg-[var(--card)] p-6">
-        <h2 className="mb-4 text-base font-semibold">Identitas</h2>
+      <section className="form-card">
+        <h2 className="mb-5">Identitas</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="fullName">Nama Lengkap *</Label>
@@ -48,7 +48,7 @@ export function TambahSiswaForm() {
               id="gender"
               name="gender"
               required
-              className="h-9 w-full rounded-md border border-[var(--input)] bg-transparent px-3 text-sm"
+              className="field-select"
               defaultValue=""
             >
               <option value="" disabled>Pilih…</option>
@@ -79,8 +79,8 @@ export function TambahSiswaForm() {
       </section>
 
       {/* Section: Alamat */}
-      <section className="rounded-lg border bg-[var(--card)] p-6">
-        <h2 className="mb-4 text-base font-semibold">Alamat</h2>
+      <section className="form-card">
+        <h2 className="mb-5">Alamat</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="address">Alamat</Label>
@@ -98,8 +98,8 @@ export function TambahSiswaForm() {
       </section>
 
       {/* Section: Catatan */}
-      <section className="rounded-lg border bg-[var(--card)] p-6">
-        <h2 className="mb-4 text-base font-semibold">Catatan</h2>
+      <section className="form-card">
+        <h2 className="mb-5">Catatan</h2>
         <div className="space-y-2">
           <Label htmlFor="notes">Catatan Administrasi</Label>
           <textarea
@@ -107,16 +107,16 @@ export function TambahSiswaForm() {
             name="notes"
             rows={3}
             maxLength={500}
-            className="w-full rounded-md border border-[var(--input)] bg-transparent px-3 py-2 text-sm"
+            className="field-textarea"
           />
         </div>
       </section>
 
       {state.error && (
-        <p className="rounded-md border border-[var(--danger)] bg-[var(--destructive)]/10 p-3 text-sm text-[var(--danger)]">{state.error}</p>
+        <p className="alert-error">{state.error}</p>
       )}
 
-      <div className="sticky bottom-0 flex justify-end gap-2 border-t bg-[var(--background)] py-3">
+      <div className="sticky bottom-3 z-10 flex justify-end gap-2 rounded-2xl border border-[var(--border)] bg-[var(--card)]/95 p-3 shadow-[var(--shadow-raised)] backdrop-blur">
         <Link href="/siswa"><Button type="button" variant="outline">Batal</Button></Link>
         <Button type="submit" disabled={pending}>{pending ? 'Menyimpan…' : 'Simpan'}</Button>
       </div>

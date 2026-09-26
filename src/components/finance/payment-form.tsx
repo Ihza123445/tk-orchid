@@ -37,8 +37,8 @@ export function PaymentForm({ students, openInvoicesByStudent }: { students: Stu
   )
 
   return (
-    <form action={formAction} className="space-y-4 rounded-lg border bg-[var(--card)] p-6">
-      <h2 className="text-base font-semibold">Catat Pembayaran</h2>
+    <form action={formAction} className="form-card space-y-4">
+      <h2>Catat Pembayaran</h2>
       <p className="text-xs text-[var(--muted-foreground)]">Jumlah pembayaran dihitung otomatis dari total alokasi ke tagihan.</p>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
@@ -46,7 +46,7 @@ export function PaymentForm({ students, openInvoicesByStudent }: { students: Stu
           <Label htmlFor="pay-student">Siswa *</Label>
           <select id="pay-student" name="studentId" required value={studentId}
             onChange={(e) => { setStudentId(e.target.value); setAllocs({}) }}
-            className="h-9 w-full rounded-md border border-[var(--input)] bg-transparent px-3 text-sm">
+            className="field-select">
             <option value="" disabled>Pilih siswa…</option>
             {students.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
           </select>
@@ -58,7 +58,7 @@ export function PaymentForm({ students, openInvoicesByStudent }: { students: Stu
         <div className="space-y-2">
           <Label htmlFor="pay-method">Metode *</Label>
           <select id="pay-method" name="method" required value={method} onChange={(e) => setMethod(e.target.value)}
-            className="h-9 w-full rounded-md border border-[var(--input)] bg-transparent px-3 text-sm">
+            className="field-select">
             <option value="CASH">Tunai</option>
             <option value="TRANSFER">Transfer</option>
             <option value="QRIS">QRIS</option>
@@ -78,21 +78,21 @@ export function PaymentForm({ students, openInvoicesByStudent }: { students: Stu
 
       {studentId && (
         openInvoices.length === 0 ? (
-          <p className="rounded-md bg-[var(--muted)] p-3 text-sm text-[var(--muted-foreground)]">Tidak ada tagihan belum lunas untuk siswa ini.</p>
+          <p className="rounded-xl bg-[var(--muted)] p-3 text-sm text-[var(--muted-foreground)]">Tidak ada tagihan belum lunas untuk siswa ini.</p>
         ) : (
-          <div className="overflow-x-auto rounded-lg border">
-            <table className="w-full min-w-[560px] text-sm">
+          <div className="table-card">
+            <table className="w-full min-w-[560px]">
               <thead>
-                <tr className="border-b bg-[var(--muted)] text-left">
-                  <th className="px-3 py-2 font-medium">Invoice</th>
-                  <th className="px-3 py-2 font-medium">Jatuh Tempo</th>
-                  <th className="px-3 py-2 font-medium text-right">Sisa</th>
-                  <th className="px-3 py-2 font-medium w-40">Alokasi</th>
+                <tr className="text-left">
+                  <th className="px-3 py-2">Invoice</th>
+                  <th className="px-3 py-2">Jatuh Tempo</th>
+                  <th className="px-3 py-2 text-right">Sisa</th>
+                  <th className="px-3 py-2 w-40">Alokasi</th>
                 </tr>
               </thead>
               <tbody>
                 {openInvoices.map((inv) => (
-                  <tr key={inv.id} className="border-b last:border-0">
+                  <tr key={inv.id}>
                     <td className="px-3 py-2 font-mono text-xs">{inv.invoiceNo}</td>
                     <td className="px-3 py-2">{inv.dueDate}</td>
                     <td className="px-3 py-2 text-right tabular-nums">{inv.remaining.toLocaleString('id-ID')}</td>
@@ -111,7 +111,7 @@ export function PaymentForm({ students, openInvoicesByStudent }: { students: Stu
                 ))}
               </tbody>
               <tfoot>
-                <tr className="border-t bg-[var(--muted)]">
+                <tr className="">
                   <td colSpan={3} className="px-3 py-2 text-right font-medium">Total Alokasi</td>
                   <td className="px-3 py-2 tabular-nums font-semibold">{totalAlloc.toLocaleString('id-ID')}</td>
                 </tr>
@@ -126,9 +126,9 @@ export function PaymentForm({ students, openInvoicesByStudent }: { students: Stu
         <Input id="pay-note" name="note" maxLength={500} placeholder="Catatan pembayaran (opsional)" />
       </div>
 
-      {state.error && <p className="rounded-md border border-[var(--danger)] bg-[var(--destructive)]/10 p-3 text-sm text-[var(--danger)]">{state.error}</p>}
+      {state.error && <p className="alert-error">{state.error}</p>}
       {state.success && state.receiptNo && (
-        <p className="rounded-md bg-[var(--secondary)] p-3 text-sm text-[var(--primary)]">Pembayaran tercatat — kwitansi {state.receiptNo}.</p>
+        <p className="alert-success">Pembayaran tercatat — kwitansi {state.receiptNo}.</p>
       )}
 
       <Button type="submit" disabled={pending || !studentId || totalAlloc <= 0}>

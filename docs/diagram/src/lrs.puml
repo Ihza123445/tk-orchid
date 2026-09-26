@@ -1,0 +1,308 @@
+' Dibuat otomatis oleh scripts/generate-docs.ts — jangan diedit manual.
+@startuml lrs
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "DejaVu Sans"
+skinparam roundCorner 8
+skinparam linetype ortho
+skinparam ArrowColor #7a3f86
+skinparam class {
+  BackgroundColor #FDF8FD
+  BorderColor #A64CA6
+  HeaderBackgroundColor #F3E3F3
+  FontColor #1f1a2e
+}
+hide circle
+title Logical Record Structure (LRS) TK Orchid
+
+left to right direction
+entity "pengguna" as pengguna {
+  * id_pengguna : INTEGER <<PK>>
+  --
+}
+
+entity "wali" as wali {
+  * id_wali : INTEGER <<PK>>
+  --
+    id_pengguna : INTEGER <<FK,UK>>
+}
+
+entity "guru" as guru {
+  * id_guru : INTEGER <<PK>>
+  --
+  * id_pengguna : INTEGER <<FK,UK>>
+}
+
+entity "tahun_ajaran" as tahun_ajaran {
+  * id_tahun_ajaran : INTEGER <<PK>>
+  --
+}
+
+entity "siswa" as siswa {
+  * id_siswa : INTEGER <<PK>>
+  --
+}
+
+entity "siswa_wali" as siswa_wali {
+  * id_siswa : INTEGER <<PK,FK>>
+  * id_wali : INTEGER <<PK,FK>>
+  --
+}
+
+entity "kelas" as kelas {
+  * id_kelas : INTEGER <<PK>>
+  --
+  * id_tahun_ajaran : INTEGER <<FK>>
+    id_guru : INTEGER <<FK>>
+}
+
+entity "penempatan_kelas" as penempatan_kelas {
+  * id_penempatan : INTEGER <<PK>>
+  --
+  * id_siswa : INTEGER <<FK>>
+  * id_tahun_ajaran : INTEGER <<FK>>
+  * id_kelas : INTEGER <<FK>>
+}
+
+entity "periode_ppdb" as periode_ppdb {
+  * id_periode_ppdb : INTEGER <<PK>>
+  --
+}
+
+entity "pendaftaran_ppdb" as pendaftaran_ppdb {
+  * id_pendaftaran : INTEGER <<PK>>
+  --
+  * id_periode_ppdb : INTEGER <<FK>>
+    id_siswa : INTEGER <<FK,UK>>
+    ditinjau_oleh : INTEGER <<FK>>
+}
+
+entity "dokumen_pendaftaran" as dokumen_pendaftaran {
+  * id_dokumen_pendaftaran : INTEGER <<PK>>
+  --
+  * id_pendaftaran : INTEGER <<FK>>
+}
+
+entity "domain_penilaian" as domain_penilaian {
+  * id_domain : INTEGER <<PK>>
+  --
+}
+
+entity "skala_penilaian" as skala_penilaian {
+  * id_skala : INTEGER <<PK>>
+  --
+}
+
+entity "penilaian" as penilaian {
+  * id_penilaian : INTEGER <<PK>>
+  --
+  * id_siswa : INTEGER <<FK>>
+  * id_tahun_ajaran : INTEGER <<FK>>
+  * id_kelas : INTEGER <<FK>>
+  * id_domain : INTEGER <<FK>>
+  * id_skala : INTEGER <<FK>>
+  * dibuat_oleh : INTEGER <<FK>>
+}
+
+entity "laporan_perkembangan" as laporan_perkembangan {
+  * id_laporan : INTEGER <<PK>>
+  --
+  * id_siswa : INTEGER <<FK>>
+  * id_tahun_ajaran : INTEGER <<FK>>
+  * id_kelas : INTEGER <<FK>>
+  * dibuat_oleh : INTEGER <<FK>>
+    id_guru : INTEGER <<FK>>
+    diterbitkan_oleh : INTEGER <<FK>>
+}
+
+entity "detail_laporan" as detail_laporan {
+  * id_detail_laporan : INTEGER <<PK>>
+  --
+  * id_laporan : INTEGER <<FK>>
+  * id_domain : INTEGER <<FK>>
+  * id_skala : INTEGER <<FK>>
+}
+
+entity "presensi" as presensi {
+  * id_presensi : INTEGER <<PK>>
+  --
+  * id_siswa : INTEGER <<FK>>
+  * id_kelas : INTEGER <<FK>>
+  * dicatat_oleh : INTEGER <<FK>>
+}
+
+entity "jadwal" as jadwal {
+  * id_jadwal : INTEGER <<PK>>
+  --
+  * id_kelas : INTEGER <<FK>>
+    id_guru : INTEGER <<FK>>
+}
+
+entity "kegiatan" as kegiatan {
+  * id_kegiatan : INTEGER <<PK>>
+  --
+  * dibuat_oleh : INTEGER <<FK>>
+}
+
+entity "media_kegiatan" as media_kegiatan {
+  * id_media : INTEGER <<PK>>
+  --
+  * id_kegiatan : INTEGER <<FK>>
+}
+
+entity "pengumuman" as pengumuman {
+  * id_pengumuman : INTEGER <<PK>>
+  --
+    id_kelas : INTEGER <<FK>>
+  * dibuat_oleh : INTEGER <<FK>>
+}
+
+entity "pengumuman_dibaca" as pengumuman_dibaca {
+  * id_pengumuman : INTEGER <<PK,FK>>
+  * id_pengguna : INTEGER <<PK,FK>>
+  --
+}
+
+entity "jenis_biaya" as jenis_biaya {
+  * id_jenis_biaya : INTEGER <<PK>>
+  --
+}
+
+entity "tagihan" as tagihan {
+  * id_tagihan : INTEGER <<PK>>
+  --
+  * id_siswa : INTEGER <<FK>>
+    id_tahun_ajaran : INTEGER <<FK>>
+  * dibuat_oleh : INTEGER <<FK>>
+}
+
+entity "detail_tagihan" as detail_tagihan {
+  * id_detail_tagihan : INTEGER <<PK>>
+  --
+  * id_tagihan : INTEGER <<FK>>
+  * id_jenis_biaya : INTEGER <<FK>>
+}
+
+entity "pembayaran" as pembayaran {
+  * id_pembayaran : INTEGER <<PK>>
+  --
+  * id_siswa : INTEGER <<FK>>
+  * dicatat_oleh : INTEGER <<FK>>
+}
+
+entity "alokasi_pembayaran" as alokasi_pembayaran {
+  * id_alokasi : INTEGER <<PK>>
+  --
+  * id_pembayaran : INTEGER <<FK>>
+  * id_tagihan : INTEGER <<FK>>
+}
+
+entity "pengeluaran" as pengeluaran {
+  * id_pengeluaran : INTEGER <<PK>>
+  --
+  * dibuat_oleh : INTEGER <<FK>>
+}
+
+entity "dokumen_siswa" as dokumen_siswa {
+  * id_dokumen_siswa : INTEGER <<PK>>
+  --
+  * id_siswa : INTEGER <<FK>>
+  * diunggah_oleh : INTEGER <<FK>>
+}
+
+entity "log_audit" as log_audit {
+  * id_log : INTEGER <<PK>>
+  --
+    id_pengguna : INTEGER <<FK>>
+}
+
+entity "token_reset_sandi" as token_reset_sandi {
+  * id_token : INTEGER <<PK>>
+  --
+  * id_pengguna : INTEGER <<FK>>
+}
+
+entity "pengaturan_situs" as pengaturan_situs {
+  * kunci : TEXT <<PK>>
+  --
+}
+
+entity "slide_beranda" as slide_beranda {
+  * id_slide : INTEGER <<PK>>
+  --
+}
+
+entity "galeri" as galeri {
+  * id_galeri : INTEGER <<PK>>
+  --
+}
+
+entity "fasilitas" as fasilitas {
+  * id_fasilitas : INTEGER <<PK>>
+  --
+}
+
+entity "testimoni" as testimoni {
+  * id_testimoni : INTEGER <<PK>>
+  --
+}
+
+entity "tanya_jawab" as tanya_jawab {
+  * id_tanya_jawab : INTEGER <<PK>>
+  --
+}
+
+pengguna |o--o| wali
+pengguna ||--o| guru
+siswa ||--o{ siswa_wali
+wali ||--o{ siswa_wali
+tahun_ajaran ||--o{ kelas
+guru |o--o{ kelas
+siswa ||--o{ penempatan_kelas
+tahun_ajaran ||--o{ penempatan_kelas
+kelas ||--o{ penempatan_kelas
+periode_ppdb ||--o{ pendaftaran_ppdb
+siswa |o--o| pendaftaran_ppdb
+pengguna |o--o{ pendaftaran_ppdb
+pendaftaran_ppdb ||--o{ dokumen_pendaftaran
+siswa ||--o{ penilaian
+tahun_ajaran ||--o{ penilaian
+kelas ||--o{ penilaian
+domain_penilaian ||--o{ penilaian
+skala_penilaian ||--o{ penilaian
+pengguna ||--o{ penilaian
+siswa ||--o{ laporan_perkembangan
+tahun_ajaran ||--o{ laporan_perkembangan
+kelas ||--o{ laporan_perkembangan
+pengguna ||--o{ laporan_perkembangan
+pengguna |o--o{ laporan_perkembangan
+guru |o--o{ laporan_perkembangan
+laporan_perkembangan ||--o{ detail_laporan
+domain_penilaian ||--o{ detail_laporan
+skala_penilaian ||--o{ detail_laporan
+siswa ||--o{ presensi
+kelas ||--o{ presensi
+pengguna ||--o{ presensi
+kelas ||--o{ jadwal
+guru |o--o{ jadwal
+pengguna ||--o{ kegiatan
+kegiatan ||--o{ media_kegiatan
+kelas |o--o{ pengumuman
+pengguna ||--o{ pengumuman
+pengumuman ||--o{ pengumuman_dibaca
+pengguna ||--o{ pengumuman_dibaca
+siswa ||--o{ tagihan
+tahun_ajaran |o--o{ tagihan
+pengguna ||--o{ tagihan
+tagihan ||--o{ detail_tagihan
+jenis_biaya ||--o{ detail_tagihan
+siswa ||--o{ pembayaran
+pengguna ||--o{ pembayaran
+pembayaran ||--o{ alokasi_pembayaran
+tagihan ||--o{ alokasi_pembayaran
+pengguna ||--o{ pengeluaran
+siswa ||--o{ dokumen_siswa
+pengguna ||--o{ dokumen_siswa
+pengguna |o--o{ log_audit
+pengguna ||--o{ token_reset_sandi
+@enduml

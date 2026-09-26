@@ -1,0 +1,29 @@
+' Ditulis manual. Sequence diagram orang tua melihat tagihan & riwayat pembayaran.
+@startuml seq-ortu-tagihan
+!include _gaya.iuml
+title Sequence Diagram — Orang Tua Melihat Tagihan & Riwayat Pembayaran
+autonumber
+
+actor "Orang Tua" as Ortu
+control "Proxy (middleware)" as Proxy
+boundary "Portal: Tagihan\n(server component)" as Page
+control "requireRole('PARENT')" as Guard
+entity "wali / siswa_wali" as W
+entity "tagihan + detail_tagihan" as T
+entity "pembayaran + alokasi" as P
+
+Ortu -> Proxy : GET /portal/tagihan
+Proxy -> Proxy : cookie sesi valid & peran PARENT?
+Proxy -> Page : lanjutkan
+Page -> Guard : verifikasi sesi di server
+Guard --> Page : pengguna (id_pengguna)
+Page -> W : anak yang terhubung dengan akun ini
+W --> Page : daftar id_siswa
+par
+  Page -> T : tagihan milik anak-anak tsb
+else
+  Page -> P : pembayaran milik anak-anak tsb
+end
+Page -> Page : hitung total, dibayar, sisa
+Page --> Ortu : ringkasan, daftar tagihan,\nriwayat pembayaran (tabel)
+@enduml

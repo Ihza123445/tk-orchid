@@ -1,0 +1,159 @@
+' Dibuat otomatis oleh scripts/generate-docs.ts — jangan diedit manual.
+@startuml erd-informasi
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "DejaVu Sans"
+skinparam roundCorner 8
+skinparam linetype ortho
+skinparam ArrowColor #7a3f86
+skinparam class {
+  BackgroundColor #FDF8FD
+  BorderColor #A64CA6
+  HeaderBackgroundColor #F3E3F3
+  FontColor #1f1a2e
+}
+hide circle
+title ERD Modul Informasi & Konten Website
+
+entity "kegiatan" as kegiatan {
+  * id_kegiatan : INTEGER <<PK>>
+  --
+  * judul : TEXT
+  * slug : TEXT <<UK>>
+  * deskripsi : TEXT
+    waktu_mulai : DATETIME
+    waktu_selesai : DATETIME
+    lokasi : TEXT
+    gambar_sampul : TEXT
+  * visibilitas : TEXT
+  * status : TEXT
+  * dibuat_oleh : INTEGER <<FK>>
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "pengguna" as pengguna #EEEEEE {
+  * id_pengguna : INTEGER <<PK>>
+}
+
+entity "media_kegiatan" as media_kegiatan {
+  * id_media : INTEGER <<PK>>
+  --
+  * id_kegiatan : INTEGER <<FK>>
+  * lokasi_file : TEXT
+  * nama_file_asli : TEXT
+  * urutan : INTEGER
+  * dibuat_pada : DATETIME
+}
+
+entity "pengumuman" as pengumuman {
+  * id_pengumuman : INTEGER <<PK>>
+  --
+  * judul : TEXT
+  * slug : TEXT <<UK>>
+  * isi : TEXT
+  * sasaran : TEXT
+    id_kelas : INTEGER <<FK>>
+    terbit_pada : DATETIME
+    kedaluwarsa_pada : DATETIME
+  * status : TEXT
+    lokasi_lampiran : TEXT
+  * dibuat_oleh : INTEGER <<FK>>
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "kelas" as kelas #EEEEEE {
+  * id_kelas : INTEGER <<PK>>
+}
+
+entity "pengumuman_dibaca" as pengumuman_dibaca {
+  * id_pengumuman : INTEGER <<PK,FK>>
+  * id_pengguna : INTEGER <<PK,FK>>
+  --
+  * dibaca_pada : DATETIME
+}
+
+entity "pengaturan_situs" as pengaturan_situs {
+  * kunci : TEXT <<PK>>
+  --
+  * nilai : TEXT
+  * diperbarui_pada : DATETIME
+}
+
+entity "slide_beranda" as slide_beranda {
+  * id_slide : INTEGER <<PK>>
+  --
+  * label_atas : TEXT
+  * judul : TEXT
+    aksen : TEXT
+  * deskripsi : TEXT
+  * gambar : TEXT
+    teks_alt_gambar : TEXT
+  * urutan : INTEGER
+  * aktif : BOOLEAN
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "galeri" as galeri {
+  * id_galeri : INTEGER <<PK>>
+  --
+  * judul : TEXT
+  * kategori : TEXT
+  * gambar : TEXT
+  * urutan : INTEGER
+  * aktif : BOOLEAN
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "fasilitas" as fasilitas {
+  * id_fasilitas : INTEGER <<PK>>
+  --
+  * judul : TEXT
+  * deskripsi : TEXT
+  * gambar : TEXT
+  * urutan : INTEGER
+  * aktif : BOOLEAN
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "testimoni" as testimoni {
+  * id_testimoni : INTEGER <<PK>>
+  --
+  * nama : TEXT
+  * hubungan : TEXT
+  * kutipan : TEXT
+  * urutan : INTEGER
+  * aktif : BOOLEAN
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "tanya_jawab" as tanya_jawab {
+  * id_tanya_jawab : INTEGER <<PK>>
+  --
+  * pertanyaan : TEXT
+  * jawaban : TEXT
+  * kategori : TEXT
+  * urutan : INTEGER
+  * aktif : BOOLEAN
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+pengguna ||--o{ kegiatan : dibuat_oleh
+kegiatan ||--o{ media_kegiatan : id_kegiatan
+kelas |o--o{ pengumuman : id_kelas
+pengguna ||--o{ pengumuman : dibuat_oleh
+pengumuman ||--o{ pengumuman_dibaca : id_pengumuman
+pengguna ||--o{ pengumuman_dibaca : id_pengguna
+
+legend right
+  Abu-abu = entitas modul lain (hanya kunci)
+  PK = primary key, FK = foreign key, UK = unique
+  * = wajib diisi (NOT NULL)
+endlegend
+@enduml

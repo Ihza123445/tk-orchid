@@ -1,0 +1,30 @@
+' Ditulis manual. Use case detail Pengunjung website.
+@startuml uc-pengunjung
+!include _gaya.iuml
+left to right direction
+title Use Case Diagram — Pengunjung Website
+
+actor "Pengunjung" as P
+
+rectangle "Website Publik TK Orchid" {
+  usecase "Melihat beranda" as Home
+  usecase "Melihat profil & program" as Profil
+  usecase "Melihat fasilitas & pendidik" as Fasilitas
+  usecase "Melihat kegiatan & galeri" as Kegiatan
+  usecase "Membaca pengumuman" as Info
+  usecase "Membaca tanya jawab (FAQ)" as Faq
+  usecase "Menghubungi sekolah\n(WhatsApp/peta)" as Kontak
+  usecase "Mengisi formulir PPDB" as PPDB
+  usecase "Memeriksa periode\nPPDB aktif" as Cek
+}
+
+P --> Home
+P --> Profil
+P --> Fasilitas
+P --> Kegiatan
+P --> Info
+P --> Faq
+P --> Kontak
+P --> PPDB
+PPDB ..> Cek : <<include>>
+@enduml

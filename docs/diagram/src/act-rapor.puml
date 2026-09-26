@@ -1,0 +1,37 @@
+' Ditulis manual. Activity diagram penilaian & laporan perkembangan.
+@startuml act-rapor
+!include _gaya.iuml
+title Activity Diagram — Penilaian & Laporan Perkembangan
+
+|Guru|
+start
+:Memilih kelas, siswa, periode;
+fork
+  :Menginput penilaian per domain\n(skala BB/MB/BSH/BSB + narasi);
+fork again
+  :Menyusun laporan perkembangan\n(capaian tiap domain, ringkasan,\nrekomendasi di rumah);
+end fork
+|Sistem|
+:Simpan penilaian (unik per siswa,\ntahun ajaran, periode, domain);
+:Simpan laporan berstatus DRAFT;
+|Guru|
+if (Laporan sudah lengkap?) then (belum)
+  :Melanjutkan penyuntingan draf;
+  detach
+else (sudah)
+  :Klik "Kirim untuk review";
+endif
+|Sistem|
+:Ubah status DRAFT → REVIEW\n(laporan terkunci dari penyuntingan guru);
+|Admin / Staf TU|
+:Membuka menu Laporan Perkembangan;
+:Memeriksa laporan berstatus "Menunggu review";
+:Klik "Publikasikan";
+|Sistem|
+:Ubah status REVIEW → PUBLISHED;
+:Simpan diterbitkan_oleh & diterbitkan_pada;
+|Orang Tua|
+:Membuka menu Rapor di portal;
+:Melihat rapor yang sudah terbit;
+stop
+@enduml

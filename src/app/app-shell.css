@@ -1,0 +1,443 @@
+/* ==========================================================================
+   TK Orchid — area setelah login (admin, staf, guru, orang tua)
+   Referensi pola: shadcn/ui "dashboard shell" (sidebar bergrup + site header +
+   kartu statistik + tabel data), portal orang tua mobile-first dengan tab bawah.
+   Token hanya ditimpa di dalam .app-shell agar website publik tidak berubah.
+   ========================================================================== */
+
+.app-shell {
+  --background: #f6f5f9;
+  --muted: #f3f1f7;
+  --muted-foreground: #68647a;
+  --border: #e8e5ef;
+  --input: #dcd8e5;
+  --sidebar: #ffffff;
+  --shadow-card: 0 1px 2px rgb(31 24 48 / 0.04), 0 1px 1px rgb(31 24 48 / 0.02);
+  --shadow-raised: 0 10px 30px -12px rgb(76 29 88 / 0.18), 0 2px 6px rgb(31 24 48 / 0.05);
+  --brand-gradient: linear-gradient(135deg, #b14fb0 0%, #8f3f9f 55%, #6d3aa8 100%);
+  --tone-info: #2563eb;
+  --tone-success: #059669;
+  --tone-warning: #d97706;
+  --tone-danger: var(--destructive);
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+.dark .app-shell {
+  --background: #0c0c0f;
+  --muted: #18181c;
+  --muted-foreground: #a09cab;
+  --border: rgba(255, 255, 255, 0.08);
+  --input: rgba(255, 255, 255, 0.14);
+  --sidebar: #111114;
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-raised: 0 12px 32px -12px rgb(0 0 0 / 0.7);
+  --brand-gradient: linear-gradient(135deg, #7a2f7a 0%, #5b2a76 60%, #3c2468 100%);
+  --tone-info: #60a5fa;
+  --tone-success: #34d399;
+  --tone-warning: #fbbf24;
+}
+
+@layer components {
+  /* ----- Kartu & panel ----- */
+  .app-card {
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    background: var(--card);
+    box-shadow: var(--shadow-card);
+  }
+
+  .form-card {
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    background: var(--card);
+    box-shadow: var(--shadow-card);
+    padding: 1.25rem;
+  }
+  @media (min-width: 640px) {
+    .form-card { padding: 1.5rem; }
+  }
+  .form-card > h2:first-of-type,
+  .form-card > h3:first-of-type,
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-heading), var(--font-inter), system-ui, sans-serif;
+    font-size: 1rem;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+  }
+  .form-card > h2:first-of-type::before,
+  .form-card > h3:first-of-type::before {
+    content: '';
+    width: 0.25rem;
+    height: 1rem;
+    border-radius: 99px;
+    background: var(--primary);
+  }
+
+  /* ----- Tabel data ----- */
+  /* Tabel menggulir di dalam kotaknya sendiri (horizontal & vertikal);
+     judul kolom tetap menempel di atas saat isi digulir. */
+  .table-card {
+    max-height: min(70vh, 640px);
+    overflow: auto;
+    overscroll-behavior: contain;
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    background: var(--card);
+    box-shadow: var(--shadow-card);
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--foreground) 22%, transparent) transparent;
+  }
+  .table-card::-webkit-scrollbar { width: 8px; height: 8px; }
+  .table-card::-webkit-scrollbar-thumb { border-radius: 99px; background: color-mix(in srgb, var(--foreground) 20%, transparent); }
+  .table-card::-webkit-scrollbar-track { background: transparent; }
+  .table-card table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.875rem;
+  }
+  .table-card thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    border-bottom: 1px solid var(--border);
+    background: color-mix(in srgb, var(--muted) 70%, var(--card));
+    color: var(--muted-foreground);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .table-card tbody tr { transition: background-color 0.15s ease; }
+  .table-card tbody tr:hover { background: color-mix(in srgb, var(--primary) 4%, transparent); }
+  .table-card tbody td { border-bottom: 1px solid var(--border); vertical-align: middle; white-space: nowrap; }
+  .table-card tbody tr:last-child td { border-bottom: 0; }
+  .table-card tfoot td { border-top: 1px solid var(--border); background: color-mix(in srgb, var(--muted) 60%, var(--card)); }
+  .table-card a:not([class*='inline-flex']) { font-weight: 500; }
+
+  /* ----- Kontrol form bawaan (select, textarea, input mini) ----- */
+  .field-select,
+  .field-textarea {
+    width: 100%;
+    border: 1px solid var(--input);
+    border-radius: 0.625rem;
+    background-color: var(--card);
+    font-size: 0.875rem;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .field-select { height: 2.25rem; padding: 0 0.75rem; }
+  .field-textarea { padding: 0.5rem 0.75rem; line-height: 1.55; }
+  .field-mini {
+    height: 1.875rem;
+    border: 1px solid var(--input);
+    border-radius: 0.5rem;
+    background: var(--card);
+    padding: 0 0.5rem;
+    font-size: 0.75rem;
+  }
+  .field-select:hover,
+  .field-textarea:hover,
+  .field-mini:hover { border-color: color-mix(in srgb, var(--primary) 35%, var(--input)); }
+
+  /* ----- Pesan status form ----- */
+  .alert-error,
+  .alert-success {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    border-radius: 0.75rem;
+    padding: 0.75rem 0.9rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+  .alert-error {
+    border: 1px solid color-mix(in srgb, var(--destructive) 30%, transparent);
+    background: color-mix(in srgb, var(--destructive) 8%, var(--card));
+    color: var(--destructive);
+  }
+  .alert-success {
+    border: 1px solid color-mix(in srgb, var(--tone-success) 28%, transparent);
+    background: color-mix(in srgb, var(--tone-success) 9%, var(--card));
+    color: color-mix(in srgb, var(--tone-success) 80%, var(--foreground));
+  }
+  .alert-error::before,
+  .alert-success::before {
+    flex: none;
+    width: 1.1rem;
+    height: 1.1rem;
+    margin-top: 0.1rem;
+    border-radius: 50%;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 800;
+    line-height: 1.1rem;
+    text-align: center;
+  }
+  .alert-error::before { content: '!'; background: var(--destructive); }
+  .alert-success::before { content: '✓'; background: var(--tone-success); }
+
+  /* ----- Empty state ----- */
+  .empty-state {
+    display: grid;
+    place-items: center;
+    gap: 0.5rem;
+    border: 1px dashed color-mix(in srgb, var(--foreground) 16%, transparent);
+    border-radius: 1rem;
+    background: color-mix(in srgb, var(--card) 55%, transparent);
+    padding: 2.5rem 1.5rem;
+    color: var(--muted-foreground);
+    font-size: 0.875rem;
+    text-align: center;
+  }
+
+  /* ----- Tautan aksi kecil di tabel ----- */
+  .link-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    border-radius: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    color: var(--primary);
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: background-color 0.15s ease;
+  }
+  .link-action:hover { background: color-mix(in srgb, var(--primary) 10%, transparent); }
+  .link-danger {
+    border-radius: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    color: var(--destructive);
+    font-size: 0.75rem;
+    font-weight: 600;
+    transition: background-color 0.15s ease;
+  }
+  .link-danger:hover { background: color-mix(in srgb, var(--destructive) 10%, transparent); }
+
+  /* ===== Hero dashboard per peran ===== */
+  .font-hand { font-family: var(--font-playful), 'Comic Sans MS', cursive; letter-spacing: 0; }
+
+  /* --- Admin: kartu meja kerja + kalender sobek --- */
+  .hero-desk {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 1.25rem;
+    background:
+      radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 55%),
+      color-mix(in srgb, var(--primary) 3%, var(--card));
+    box-shadow: var(--shadow-card);
+  }
+  .tear-calendar {
+    position: relative;
+    width: 7.25rem;
+    flex: none;
+    overflow: hidden;
+    border-radius: 1rem;
+    background: var(--card);
+    box-shadow: 0 1px 0 var(--border), 0 12px 24px -14px rgb(60 20 70 / 0.45), 0 0 0 1px var(--border);
+    text-align: center;
+    transform: rotate(-3deg);
+  }
+  .tear-calendar::after {
+    /* tepi bawah bergerigi seperti kertas sobekan */
+    position: absolute;
+    right: 0;
+    bottom: -1px;
+    left: 0;
+    height: 8px;
+    content: '';
+    background: radial-gradient(circle at 5px 8px, transparent 4px, var(--card) 4.5px) 0 0 / 10px 8px repeat-x;
+    transform: rotate(180deg);
+  }
+  .tear-calendar-top {
+    position: relative;
+    padding: 0.85rem 0.5rem 0.35rem;
+    background: var(--primary);
+    color: var(--primary-foreground);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .tear-calendar-top::before,
+  .tear-calendar-top::after {
+    /* ring spiral */
+    position: absolute;
+    top: 0.3rem;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--background);
+    box-shadow: inset 0 1px 1px rgb(0 0 0 / 0.25);
+    content: '';
+  }
+  .tear-calendar-top::before { left: 1.6rem; }
+  .tear-calendar-top::after { right: 1.6rem; }
+
+  /* --- Guru: papan tulis kapur --- */
+  .chalk-frame {
+    position: relative;
+    border-radius: 1.25rem;
+    padding: 0.65rem;
+    background:
+      repeating-linear-gradient(95deg, rgb(255 255 255 / 0.05) 0 2px, transparent 2px 9px),
+      linear-gradient(180deg, #b98552, #94623a);
+    box-shadow: 0 14px 30px -16px rgb(60 30 10 / 0.55), inset 0 1px 0 rgb(255 255 255 / 0.25);
+  }
+  .chalkboard {
+    position: relative;
+    overflow: hidden;
+    border-radius: 0.8rem;
+    background:
+      radial-gradient(ellipse at 18% 25%, rgb(255 255 255 / 0.07), transparent 45%),
+      radial-gradient(ellipse at 85% 80%, rgb(255 255 255 / 0.05), transparent 40%),
+      radial-gradient(ellipse at 60% 10%, rgb(255 255 255 / 0.04), transparent 35%),
+      #2b4a3f;
+    box-shadow: inset 0 0 40px rgb(0 0 0 / 0.35);
+    color: #f4f1e8;
+  }
+  .chalkboard::before {
+    position: absolute;
+    inset: 0;
+    content: '';
+    opacity: 0.08;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .chalk-text { text-shadow: 0 0 1px rgb(255 255 255 / 0.55), 0 0 6px rgb(255 255 255 / 0.12); }
+  .chalk-tray {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    gap: 0.4rem;
+    height: 0.9rem;
+    margin: 0.45rem 0.6rem -0.2rem;
+    padding: 0 1rem;
+    border-radius: 0 0 0.4rem 0.4rem;
+    background: linear-gradient(180deg, #7e5231, #6a4428);
+  }
+  .chalk-stick { width: 2.1rem; height: 0.45rem; margin-bottom: 0.45rem; border-radius: 99px; box-shadow: inset 0 -1px 0 rgb(0 0 0 / 0.15); }
+  .chalk-eraser {
+    width: 3.2rem;
+    height: 0.8rem;
+    margin-bottom: 0.45rem;
+    margin-left: auto;
+    border-radius: 0.2rem;
+    background: linear-gradient(180deg, #d8c3a0 0 45%, #3d3d46 45%);
+  }
+
+  /* --- Orang tua: buku penghubung bergaris --- */
+  .notebook {
+    --paper: #fffdf7;
+    --paper-line: rgb(96 165 250 / 0.22);
+    --paper-margin: rgb(244 114 182 / 0.45);
+    --ink: #3b2a63;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, #d9cfb5 60%, var(--border));
+    border-radius: 1.25rem;
+    background:
+      linear-gradient(90deg, transparent 3.4rem, var(--paper-margin) 3.4rem, var(--paper-margin) calc(3.4rem + 1.5px), transparent calc(3.4rem + 1.5px)),
+      repeating-linear-gradient(180deg, transparent 0 calc(2rem - 1px), var(--paper-line) calc(2rem - 1px) 2rem),
+      var(--paper);
+    background-position: 0 0, 0 1.1rem, 0 0;
+    box-shadow: var(--shadow-card), 0 16px 30px -22px rgb(80 60 20 / 0.45);
+    color: var(--ink);
+  }
+  .dark .notebook {
+    --paper: #1c1a22;
+    --paper-line: rgb(147 197 253 / 0.09);
+    --paper-margin: rgb(244 114 182 / 0.3);
+    --ink: #ece7ff;
+    border-color: var(--border);
+  }
+  .notebook-holes {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 1.05rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+  }
+  .notebook-holes span {
+    width: 0.85rem;
+    height: 0.85rem;
+    border-radius: 50%;
+    background: var(--background);
+    box-shadow: inset 0 1.5px 2px rgb(0 0 0 / 0.22);
+  }
+  .notebook-lines { line-height: 2rem; }
+  .polaroid {
+    position: relative;
+    width: 9.5rem;
+    padding: 0.55rem 0.55rem 0;
+    background: #fff;
+    box-shadow: 0 10px 22px -10px rgb(40 20 50 / 0.45), 0 0 0 1px rgb(0 0 0 / 0.04);
+    color: #3b2a63;
+  }
+  .dark .polaroid { background: #f3f0ea; }
+  .polaroid::before {
+    /* selotip washi */
+    position: absolute;
+    top: -0.7rem;
+    left: 50%;
+    width: 4.5rem;
+    height: 1.3rem;
+    content: '';
+    background: repeating-linear-gradient(45deg, rgb(244 114 182 / 0.55) 0 6px, rgb(251 207 232 / 0.55) 6px 12px);
+    transform: translateX(-50%) rotate(-4deg);
+  }
+  .sticker {
+    display: grid;
+    width: 5.5rem;
+    height: 5.5rem;
+    place-items: center;
+    border-radius: 50%;
+    padding: 0.5rem;
+    box-shadow: 0 6px 14px -6px rgb(0 0 0 / 0.35);
+    text-align: center;
+  }
+  .sticker > span {
+    display: grid;
+    width: 100%;
+    height: 100%;
+    place-items: center;
+    border: 2px dashed rgb(255 255 255 / 0.7);
+    border-radius: 50%;
+  }
+
+  /* --- Sampul profil: pola doodle, bukan gradasi --- */
+  .cover-doodle {
+    background-color: color-mix(in srgb, var(--primary) 10%, var(--card));
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='96' fill='none' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='16' cy='20' r='6' stroke='%23a64ca6' stroke-opacity='.35'/%3E%3Cpath d='M52 12l5 9 10 1-7 7 2 10-10-5-9 5 2-10-7-7 10-1z' stroke='%23e9a24b' stroke-opacity='.5'/%3E%3Cpath d='M92 30q6-10 12 0t12 0' stroke='%2360a5fa' stroke-opacity='.4'/%3E%3Cpath d='M22 70l8-12 8 12z' stroke='%2334d399' stroke-opacity='.45'/%3E%3Cpath d='M70 66q4-8 8 0q4 8 8 0' stroke='%23f472b6' stroke-opacity='.45'/%3E%3Crect x='98' y='64' width='11' height='11' rx='2' stroke='%23a64ca6' stroke-opacity='.3'/%3E%3C/svg%3E");
+  }
+}
+
+/* Aksesibilitas fokus yang konsisten untuk semua kontrol di area aplikasi */
+.app-shell :is(select, textarea, input):focus-visible {
+  outline: none;
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 22%, transparent);
+}
+.app-shell :is(a, button):focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--ring) 70%, transparent);
+  outline-offset: 2px;
+}
+
+/* Scrollbar tipis untuk sidebar dan tabel */
+.app-scroll { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--foreground) 18%, transparent) transparent; }
+
+@keyframes app-fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+.app-page { animation: app-fade-up 0.35s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@media (prefers-reduced-motion: reduce) {
+  .app-page { animation: none; }
+}

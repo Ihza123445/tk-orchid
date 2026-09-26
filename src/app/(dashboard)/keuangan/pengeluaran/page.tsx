@@ -3,6 +3,10 @@ import { db } from '@/lib/db/db'
 import { voidExpenseAction } from '@/actions/expenses'
 import { ExpenseForm } from '@/components/finance/expense-form'
 import { formatRupiah, formatTanggalSingkat } from '@/lib/formatting/format'
+import { HandCoins } from 'lucide-react'
+import { LEDGER_STATUS, PageHeader, Pill, SectionHeader, StatusPill } from '@/components/dashboard/primitives'
+
+export const metadata = { title: 'Pengeluaran' }
 
 export default async function PengeluaranPage() {
   await requireAdminStaff()
@@ -21,52 +25,53 @@ export default async function PengeluaranPage() {
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Pengeluaran</h1>
-          <p className="text-sm text-[var(--muted-foreground)]">Operasional sekolah.</p>
-        </div>
-        <p className="text-sm">
-          Bulan ini: <span className="font-semibold tabular-nums">{formatRupiah(totalBulanIni)}</span>
-        </p>
-      </header>
+      <PageHeader
+        icon={HandCoins}
+        eyebrow="Keuangan"
+        title="Pengeluaran"
+        description="Catat biaya operasional sekolah beserta vendor dan kategorinya."
+        actions={
+          <div className="app-card px-4 py-2 text-right">
+            <p className="text-[11px] font-medium text-[var(--muted-foreground)]">Total bulan ini</p>
+            <p className="font-heading text-lg font-bold tabular-nums">{formatRupiah(totalBulanIni)}</p>
+          </div>
+        }
+      />
 
       <ExpenseForm />
 
       <section className="space-y-3">
-        <h2 className="text-base font-semibold">Riwayat</h2>
-        <div className="overflow-x-auto rounded-lg border bg-[var(--card)]">
-          <table className="w-full min-w-[760px] text-sm">
+        <SectionHeader title="Riwayat pengeluaran" description="100 catatan terbaru" />
+        <div className="table-card">
+          <table className="w-full min-w-[760px]">
             <thead>
-              <tr className="border-b bg-[var(--muted)] text-left">
-                <th className="px-4 py-3 font-medium">No.</th>
-                <th className="px-4 py-3 font-medium">Tanggal</th>
-                <th className="px-4 py-3 font-medium">Kategori</th>
-                <th className="px-4 py-3 font-medium">Keterangan</th>
-                <th className="px-4 py-3 font-medium">Vendor</th>
-                <th className="px-4 py-3 font-medium text-right">Nominal</th>
-                <th className="px-4 py-3 font-medium">Status</th>
+              <tr className="text-left">
+                <th className="px-4 py-3">No.</th>
+                <th className="px-4 py-3">Tanggal</th>
+                <th className="px-4 py-3">Kategori</th>
+                <th className="px-4 py-3">Keterangan</th>
+                <th className="px-4 py-3">Vendor</th>
+                <th className="px-4 py-3 text-right">Nominal</th>
+                <th className="px-4 py-3">Status</th>
               </tr>
             </thead>
             <tbody>
               {expenses.map((e) => (
-                <tr key={e.id} className={`border-b last:border-0 ${e.status === 'VOID' ? 'opacity-50' : ''}`}>
-                  <td className="px-4 py-3 font-mono text-xs">{e.expenseNo}</td>
+                <tr key={e.id} className={e.status === 'VOID' ? 'opacity-55' : ''}>
+                  <td className="px-4 py-3 font-mono text-xs text-[var(--muted-foreground)]">{e.expenseNo}</td>
                   <td className="px-4 py-3">{formatTanggalSingkat(e.expenseDate)}</td>
-                  <td className="px-4 py-3">{e.category}</td>
-                  <td className="px-4 py-3">{e.description}</td>
+                  <td className="px-4 py-3"><Pill tone="brand">{e.category}</Pill></td>
+                  <td className="min-w-56 whitespace-normal px-4 py-3">{e.description}</td>
                   <td className="px-4 py-3">{e.vendor ?? '—'}</td>
-                  <td className="px-4 py-3 text-right tabular-nums">{formatRupiah(e.amount)}</td>
+                  <td className="px-4 py-3 text-right font-semibold tabular-nums">{formatRupiah(e.amount)}</td>
                   <td className="px-4 py-3">
-                    <span className={`rounded-full px-2 py-0.5 text-xs ${e.status === 'POSTED' ? 'bg-[var(--secondary)] text-[var(--primary)]' : 'bg-[var(--destructive)]/15 text-[var(--destructive)]'}`}>
-                      {e.status === 'POSTED' ? 'Tercatat' : 'Void'}
-                    </span>
+                    <StatusPill map={LEDGER_STATUS} status={e.status} />
                     {user?.role === 'ADMIN' && e.status === 'POSTED' && (
                       <form action={voidExpenseAction} className="mt-1 flex items-center gap-1">
                         <input type="hidden" name="id" value={e.id} />
                         <input name="reason" required minLength={5} placeholder="Alasan" aria-label={`Alasan void ${e.expenseNo}`}
-                          className="h-7 w-24 rounded border border-[var(--input)] px-1.5 text-xs" />
-                        <button type="submit" className="text-xs underline underline-offset-4 opacity-70 hover:opacity-100">Void</button>
+                          className="field-mini w-28" />
+                        <button type="submit" className="link-danger">Batalkan</button>
                       </form>
                     )}
                   </td>

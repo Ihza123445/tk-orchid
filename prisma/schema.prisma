@@ -1,5 +1,7 @@
 // TK Orchid — Prisma schema (SQLite)
 // Semantik mengikuti DDL PRD §28. Money = INTEGER rupiah.
+// Nama tabel & kolom di database memakai bahasa Indonesia (@@map / @map);
+// nama model & field Prisma di kode tetap bahasa Inggris agar kode aplikasi tidak berubah.
 
 generator client {
   provider = "prisma-client-js"
@@ -10,122 +12,130 @@ datasource db {
 }
 
 model User {
-  id            Int      @id @default(autoincrement())
-  name          String
-  email         String   @unique
-  username      String?  @unique
-  passwordHash  String
-  role          String // ADMIN | STAFF | TEACHER | PARENT
-  isActive      Boolean  @default(true)
-  lastLoginAt   DateTime?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id           Int       @id @default(autoincrement()) @map("id_pengguna")
+  name         String    @map("nama")
+  email        String    @unique
+  username     String?   @unique @map("nama_pengguna")
+  passwordHash String    @map("kata_sandi_hash")
+  role         String    @map("peran") // ADMIN | STAFF | TEACHER | PARENT
+  isActive     Boolean   @default(true) @map("aktif")
+  lastLoginAt  DateTime? @map("terakhir_masuk")
+  createdAt    DateTime  @default(now()) @map("dibuat_pada")
+  updatedAt    DateTime  @updatedAt @map("diperbarui_pada")
 
-  guardian       Guardian?
-  teacher        Teacher?
-  attendances    Attendance[]     @relation("AttendanceRecorder")
-  assessments    Assessment[]     @relation("AssessmentCreator")
-  devReports     DevelopmentReport[] @relation("ReportCreator")
-  publishedReports DevelopmentReport[] @relation("ReportPublisher")
-  activities     Activity[]       @relation("ActivityCreator")
-  announcements  Announcement[]   @relation("AnnouncementCreator")
-  reviewedAdmissions Admission[]  @relation("AdmissionReviewer")
-  payments       Payment[]        @relation("PaymentRecorder")
-  expenses       Expense[]        @relation("ExpenseCreator")
-  documents      StudentDocument[] @relation("DocumentUploader")
-  invoices       Invoice[]
-  auditLogs      AuditLog[]
-  announcementReads AnnouncementRead[]
+  guardian            Guardian?
+  teacher             Teacher?
+  attendances         Attendance[]         @relation("AttendanceRecorder")
+  assessments         Assessment[]         @relation("AssessmentCreator")
+  devReports          DevelopmentReport[]  @relation("ReportCreator")
+  publishedReports    DevelopmentReport[]  @relation("ReportPublisher")
+  activities          Activity[]           @relation("ActivityCreator")
+  announcements       Announcement[]       @relation("AnnouncementCreator")
+  reviewedAdmissions  Admission[]          @relation("AdmissionReviewer")
+  payments            Payment[]            @relation("PaymentRecorder")
+  expenses            Expense[]            @relation("ExpenseCreator")
+  documents           StudentDocument[]    @relation("DocumentUploader")
+  invoices            Invoice[]
+  auditLogs           AuditLog[]
+  announcementReads   AnnouncementRead[]
   passwordResetTokens PasswordResetToken[]
+
+  @@map("pengguna")
 }
 
 model Guardian {
-  id           Int       @id @default(autoincrement())
-  userId       Int?      @unique
-  fullName     String
-  relationship String // AYAH | IBU | WALI | LAINNYA
+  id           Int      @id @default(autoincrement()) @map("id_wali")
+  userId       Int?     @unique @map("id_pengguna")
+  fullName     String   @map("nama_lengkap")
+  relationship String   @map("hubungan") // AYAH | IBU | WALI | LAINNYA
   nik          String?
-  occupation   String?
-  companyName  String?
-  education    String?
-  phone        String
+  occupation   String?  @map("pekerjaan")
+  companyName  String?  @map("nama_perusahaan")
+  education    String?  @map("pendidikan")
+  phone        String   @map("telepon")
   email        String?
-  address      String?
-  notes        String?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  address      String?  @map("alamat")
+  notes        String?  @map("catatan")
+  createdAt    DateTime @default(now()) @map("dibuat_pada")
+  updatedAt    DateTime @updatedAt @map("diperbarui_pada")
 
-  user             User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user             User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
   studentGuardians StudentGuardian[]
+
+  @@map("wali")
 }
 
 model Teacher {
-  id             Int       @id @default(autoincrement())
-  userId         Int       @unique
-  employeeCode   String?   @unique
-  fullName       String
-  phone          String?
+  id             Int       @id @default(autoincrement()) @map("id_guru")
+  userId         Int       @unique @map("id_pengguna")
+  employeeCode   String?   @unique @map("kode_pegawai")
+  fullName       String    @map("nama_lengkap")
+  phone          String?   @map("telepon")
   email          String?
-  education      String?
-  specialization String?
-  joinDate       DateTime?
-  isActive       Boolean   @default(true)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  education      String?   @map("pendidikan")
+  specialization String?   @map("spesialisasi")
+  joinDate       DateTime? @map("tanggal_bergabung")
+  isActive       Boolean   @default(true) @map("aktif")
+  createdAt      DateTime  @default(now()) @map("dibuat_pada")
+  updatedAt      DateTime  @updatedAt @map("diperbarui_pada")
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  classes   Class[]  @relation("ClassHomeroom")
+  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  classes   Class[]             @relation("ClassHomeroom")
   schedules Schedule[]
   reports   DevelopmentReport[] @relation("ReportWriter")
+
+  @@map("guru")
 }
 
 model AcademicYear {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique
-  startDate DateTime
-  endDate   DateTime
+  id        Int      @id @default(autoincrement()) @map("id_tahun_ajaran")
+  name      String   @unique @map("nama")
+  startDate DateTime @map("tanggal_mulai")
+  endDate   DateTime @map("tanggal_selesai")
   status    String // PLANNED | ACTIVE | CLOSED
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @map("dibuat_pada")
+  updatedAt DateTime @updatedAt @map("diperbarui_pada")
 
-  classes    Class[]
+  classes     Class[]
   enrollments Enrollment[]
   assessments Assessment[]
-  devReports DevelopmentReport[]
-  invoices   Invoice[]
+  devReports  DevelopmentReport[]
+  invoices    Invoice[]
+
+  @@map("tahun_ajaran")
 }
 
 model Student {
-  id               Int       @id @default(autoincrement())
-  studentCode      String    @unique
+  id               Int       @id @default(autoincrement()) @map("id_siswa")
+  studentCode      String    @unique @map("kode_siswa")
   nis              String?   @unique
   nisn             String?   @unique
   nik              String?
-  fullName         String
-  nickname         String?
-  gender           String // L | P
-  birthPlace       String?
-  birthDate        DateTime
-  religion         String?
-  address          String?
+  fullName         String    @map("nama_lengkap")
+  nickname         String?   @map("nama_panggilan")
+  gender           String    @map("jenis_kelamin") // L | P
+  birthPlace       String?   @map("tempat_lahir")
+  birthDate        DateTime  @map("tanggal_lahir")
+  religion         String?   @map("agama")
+  address          String?   @map("alamat")
   rt               String?
   rw               String?
-  village          String?
-  district         String?
-  city             String?
-  province         String?
-  postalCode       String?
-  childOrder       Int?
-  siblingsCount    Int?
-  residenceStatus  String?
-  admissionDate    DateTime?
-  withdrawalDate   DateTime?
-  withdrawalReason String?
+  village          String?   @map("kelurahan")
+  district         String?   @map("kecamatan")
+  city             String?   @map("kota")
+  province         String?   @map("provinsi")
+  postalCode       String?   @map("kode_pos")
+  childOrder       Int?      @map("anak_ke")
+  siblingsCount    Int?      @map("jumlah_saudara")
+  residenceStatus  String?   @map("status_tempat_tinggal")
+  admissionDate    DateTime? @map("tanggal_masuk")
+  withdrawalDate   DateTime? @map("tanggal_keluar")
+  withdrawalReason String?   @map("alasan_keluar")
   status           String    @default("ACTIVE") // CANDIDATE | ACTIVE | INACTIVE | GRADUATED | TRANSFERRED | WITHDRAWN
-  photoPath        String?
-  notes            String?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  photoPath        String?   @map("lokasi_foto")
+  notes            String?   @map("catatan")
+  createdAt        DateTime  @default(now()) @map("dibuat_pada")
+  updatedAt        DateTime  @updatedAt @map("diperbarui_pada")
 
   enrollments      Enrollment[]
   studentGuardians StudentGuardian[]
@@ -135,162 +145,177 @@ model Student {
   invoices         Invoice[]
   payments         Payment[]
   documents        StudentDocument[]
-  admissions       Admission[]  @relation("AdmissionConvertsTo")
+  admissions       Admission[]         @relation("AdmissionConvertsTo")
+
+  @@map("siswa")
 }
 
 model StudentGuardian {
-  studentId  Int
-  guardianId Int
-  isPrimary  Boolean  @default(false)
-  canPickup  Boolean  @default(false)
-  createdAt  DateTime @default(now())
+  studentId  Int      @map("id_siswa")
+  guardianId Int      @map("id_wali")
+  isPrimary  Boolean  @default(false) @map("wali_utama")
+  canPickup  Boolean  @default(false) @map("boleh_menjemput")
+  createdAt  DateTime @default(now()) @map("dibuat_pada")
 
   student  Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
   guardian Guardian @relation(fields: [guardianId], references: [id], onDelete: Cascade)
 
   @@id([studentId, guardianId])
+  @@map("siswa_wali")
 }
 
 model Class {
-  id             Int      @id @default(autoincrement())
-  academicYearId Int
-  code           String
-  name           String
-  level          String
-  room           String?
-  teacherId      Int?
-  capacity       Int      @default(20)
+  id             Int      @id @default(autoincrement()) @map("id_kelas")
+  academicYearId Int      @map("id_tahun_ajaran")
+  code           String   @map("kode")
+  name           String   @map("nama")
+  level          String   @map("jenjang")
+  room           String?  @map("ruang")
+  teacherId      Int?     @map("id_guru")
+  capacity       Int      @default(20) @map("kapasitas")
   status         String   @default("ACTIVE") // ACTIVE | INACTIVE
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime @default(now()) @map("dibuat_pada")
+  updatedAt      DateTime @updatedAt @map("diperbarui_pada")
 
-  academicYear AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Restrict)
-  teacher      Teacher?     @relation("ClassHomeroom", fields: [teacherId], references: [id], onDelete: SetNull)
-  enrollments  Enrollment[]
-  attendances  Attendance[]
-  schedules    Schedule[]
-  assessments  Assessment[]
-  devReports   DevelopmentReport[]
+  academicYear  AcademicYear        @relation(fields: [academicYearId], references: [id], onDelete: Restrict)
+  teacher       Teacher?            @relation("ClassHomeroom", fields: [teacherId], references: [id], onDelete: SetNull)
+  enrollments   Enrollment[]
+  attendances   Attendance[]
+  schedules     Schedule[]
+  assessments   Assessment[]
+  devReports    DevelopmentReport[]
   announcements Announcement[]
 
   @@unique([academicYearId, code])
+  @@map("kelas")
 }
 
 model Enrollment {
-  id             Int      @id @default(autoincrement())
-  studentId      Int
-  academicYearId Int
-  classId        Int
-  enrollmentDate DateTime
-  status         String   @default("ACTIVE") // ACTIVE | INACTIVE | COMPLETED
-  notes          String?
-  createdAt      DateTime @default(now())
-  enrollmentUpdatedAt DateTime @updatedAt
+  id                  Int      @id @default(autoincrement()) @map("id_penempatan")
+  studentId           Int      @map("id_siswa")
+  academicYearId      Int      @map("id_tahun_ajaran")
+  classId             Int      @map("id_kelas")
+  enrollmentDate      DateTime @map("tanggal_penempatan")
+  status              String   @default("ACTIVE") // ACTIVE | INACTIVE | COMPLETED
+  notes               String?  @map("catatan")
+  createdAt           DateTime @default(now()) @map("dibuat_pada")
+  enrollmentUpdatedAt DateTime @updatedAt @map("diperbarui_pada")
 
   student      Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
   academicYear AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Restrict)
   klass        Class        @relation(fields: [classId], references: [id], onDelete: Restrict)
 
   @@unique([studentId, academicYearId])
+  @@map("penempatan_kelas")
 }
 
 model AdmissionPeriod {
-  id               Int      @id @default(autoincrement())
-  name             String
-  startDate        DateTime
-  endDate          DateTime
-  isActive         Boolean  @default(false)
-  requirementsText String?
-  notes            String?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id               Int      @id @default(autoincrement()) @map("id_periode_ppdb")
+  name             String   @map("nama")
+  startDate        DateTime @map("tanggal_mulai")
+  endDate          DateTime @map("tanggal_selesai")
+  isActive         Boolean  @default(false) @map("aktif")
+  requirementsText String?  @map("persyaratan")
+  notes            String?  @map("catatan")
+  createdAt        DateTime @default(now()) @map("dibuat_pada")
+  updatedAt        DateTime @updatedAt @map("diperbarui_pada")
 
   admissions Admission[]
+
+  @@map("periode_ppdb")
 }
 
 model Admission {
-  id                  Int       @id @default(autoincrement())
-  applicationNo       String    @unique
-  admissionPeriodId   Int
-  studentId           Int?      @unique
-  studentFullName     String
-  studentGender       String // L | P
-  studentBirthPlace   String?
-  studentBirthDate    DateTime
-  guardianName        String
-  guardianRelationship String
-  guardianPhone       String
-  guardianEmail       String?
-  guardianAddress     String?
-  preferredLevel      String?
-  previousSchool      String?
-  notes               String?
-  status              String    @default("SUBMITTED") // DRAFT|SUBMITTED|REVISION_REQUIRED|REVIEW|ACCEPTED|REJECTED|ENROLLED
-  rejectionReason     String?
-  reviewedBy          Int?
-  reviewedAt          DateTime?
-  submittedAt         DateTime?
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
+  id                   Int       @id @default(autoincrement()) @map("id_pendaftaran")
+  applicationNo        String    @unique @map("no_pendaftaran")
+  admissionPeriodId    Int       @map("id_periode_ppdb")
+  studentId            Int?      @unique @map("id_siswa")
+  studentFullName      String    @map("nama_calon_siswa")
+  studentGender        String    @map("jenis_kelamin_calon") // L | P
+  studentBirthPlace    String?   @map("tempat_lahir_calon")
+  studentBirthDate     DateTime  @map("tanggal_lahir_calon")
+  guardianName         String    @map("nama_wali")
+  guardianRelationship String    @map("hubungan_wali")
+  guardianPhone        String    @map("telepon_wali")
+  guardianEmail        String?   @map("email_wali")
+  guardianAddress      String?   @map("alamat_wali")
+  preferredLevel       String?   @map("jenjang_pilihan")
+  previousSchool       String?   @map("sekolah_asal")
+  notes                String?   @map("catatan")
+  status               String    @default("SUBMITTED") // DRAFT|SUBMITTED|REVISION_REQUIRED|REVIEW|ACCEPTED|REJECTED|ENROLLED
+  rejectionReason      String?   @map("alasan_penolakan")
+  reviewedBy           Int?      @map("ditinjau_oleh")
+  reviewedAt           DateTime? @map("ditinjau_pada")
+  submittedAt          DateTime? @map("dikirim_pada")
+  createdAt            DateTime  @default(now()) @map("dibuat_pada")
+  updatedAt            DateTime  @updatedAt @map("diperbarui_pada")
 
-  period    AdmissionPeriod @relation(fields: [admissionPeriodId], references: [id], onDelete: Restrict)
-  student   Student?        @relation("AdmissionConvertsTo", fields: [studentId], references: [id], onDelete: SetNull)
-  reviewer  User?           @relation("AdmissionReviewer", fields: [reviewedBy], references: [id], onDelete: SetNull)
+  period    AdmissionPeriod     @relation(fields: [admissionPeriodId], references: [id], onDelete: Restrict)
+  student   Student?            @relation("AdmissionConvertsTo", fields: [studentId], references: [id], onDelete: SetNull)
+  reviewer  User?               @relation("AdmissionReviewer", fields: [reviewedBy], references: [id], onDelete: SetNull)
   documents AdmissionDocument[]
+
+  @@map("pendaftaran_ppdb")
 }
 
 model AdmissionDocument {
-  id           Int      @id @default(autoincrement())
-  admissionId  Int
-  documentType String
-  originalName String
-  storagePath  String
-  mimeType     String
-  sizeBytes    Int
-  createdAt    DateTime @default(now())
+  id           Int      @id @default(autoincrement()) @map("id_dokumen_pendaftaran")
+  admissionId  Int      @map("id_pendaftaran")
+  documentType String   @map("jenis_dokumen")
+  originalName String   @map("nama_file_asli")
+  storagePath  String   @map("lokasi_file")
+  mimeType     String   @map("tipe_mime")
+  sizeBytes    Int      @map("ukuran_byte")
+  createdAt    DateTime @default(now()) @map("dibuat_pada")
 
   admission Admission @relation(fields: [admissionId], references: [id], onDelete: Cascade)
+
+  @@map("dokumen_pendaftaran")
 }
 
 model AssessmentDomain {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique
-  description String?
-  sortOrder   Int      @default(0)
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id          Int      @id @default(autoincrement()) @map("id_domain")
+  name        String   @unique @map("nama")
+  description String?  @map("deskripsi")
+  sortOrder   Int      @default(0) @map("urutan")
+  isActive    Boolean  @default(true) @map("aktif")
+  createdAt   DateTime @default(now()) @map("dibuat_pada")
+  updatedAt   DateTime @updatedAt @map("diperbarui_pada")
 
   assessments Assessment[]
   items       DevelopmentItem[]
+
+  @@map("domain_penilaian")
 }
 
 model AssessmentScale {
-  id          Int      @id @default(autoincrement())
-  code        String   @unique
+  id          Int      @id @default(autoincrement()) @map("id_skala")
+  code        String   @unique @map("kode")
   label       String
-  description String?
-  sortOrder   Int      @default(0)
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
+  description String?  @map("deskripsi")
+  sortOrder   Int      @default(0) @map("urutan")
+  isActive    Boolean  @default(true) @map("aktif")
+  createdAt   DateTime @default(now()) @map("dibuat_pada")
 
   assessments Assessment[]
   items       DevelopmentItem[]
+
+  @@map("skala_penilaian")
 }
 
 model Assessment {
-  id             Int      @id @default(autoincrement())
-  studentId      Int
-  academicYearId Int
-  classId        Int
-  domainId       Int
-  scaleId        Int
-  period         String
-  narrative      String?
-  teacherNote    String?
-  createdBy      Int
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id             Int      @id @default(autoincrement()) @map("id_penilaian")
+  studentId      Int      @map("id_siswa")
+  academicYearId Int      @map("id_tahun_ajaran")
+  classId        Int      @map("id_kelas")
+  domainId       Int      @map("id_domain")
+  scaleId        Int      @map("id_skala")
+  period         String   @map("periode")
+  narrative      String?  @map("narasi")
+  teacherNote    String?  @map("catatan_guru")
+  createdBy      Int      @map("dibuat_oleh")
+  createdAt      DateTime @default(now()) @map("dibuat_pada")
+  updatedAt      DateTime @updatedAt @map("diperbarui_pada")
 
   student      Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
   academicYear AcademicYear     @relation(fields: [academicYearId], references: [id], onDelete: Restrict)
@@ -300,361 +325,401 @@ model Assessment {
   creator      User             @relation("AssessmentCreator", fields: [createdBy], references: [id], onDelete: Restrict)
 
   @@unique([studentId, academicYearId, period, domainId])
+  @@map("penilaian")
 }
 
 model DevelopmentReport {
-  id                 Int       @id @default(autoincrement())
-  reportNo           String    @unique
-  studentId          Int
-  academicYearId     Int
-  classId            Int
-  period             String
-  summary            String?
-  homeRecommendation String?
-  attendanceSummary  String?
+  id                 Int       @id @default(autoincrement()) @map("id_laporan")
+  reportNo           String    @unique @map("no_laporan")
+  studentId          Int       @map("id_siswa")
+  academicYearId     Int       @map("id_tahun_ajaran")
+  classId            Int       @map("id_kelas")
+  period             String    @map("periode")
+  summary            String?   @map("ringkasan")
+  homeRecommendation String?   @map("rekomendasi_rumah")
+  attendanceSummary  String?   @map("ringkasan_kehadiran")
   status             String    @default("DRAFT") // DRAFT | REVIEW | PUBLISHED
-  createdBy          Int
-  teacherId          Int?
-  publishedBy        Int?
-  publishedAt        DateTime?
-  createdAt          DateTime  @default(now())
-  reportUpdatedAt    DateTime  @updatedAt
+  createdBy          Int       @map("dibuat_oleh")
+  teacherId          Int?      @map("id_guru")
+  publishedBy        Int?      @map("diterbitkan_oleh")
+  publishedAt        DateTime? @map("diterbitkan_pada")
+  createdAt          DateTime  @default(now()) @map("dibuat_pada")
+  reportUpdatedAt    DateTime  @updatedAt @map("diperbarui_pada")
 
-  student      Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  academicYear AcademicYear     @relation(fields: [academicYearId], references: [id], onDelete: Restrict)
-  klass        Class            @relation(fields: [classId], references: [id], onDelete: Restrict)
-  creator      User             @relation("ReportCreator", fields: [createdBy], references: [id], onDelete: Restrict)
-  publisher    User?            @relation("ReportPublisher", fields: [publishedBy], references: [id], onDelete: SetNull)
-  writer       Teacher?         @relation("ReportWriter", fields: [teacherId], references: [id], onDelete: SetNull)
+  student      Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  academicYear AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Restrict)
+  klass        Class        @relation(fields: [classId], references: [id], onDelete: Restrict)
+  creator      User         @relation("ReportCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  publisher    User?        @relation("ReportPublisher", fields: [publishedBy], references: [id], onDelete: SetNull)
+  writer       Teacher?     @relation("ReportWriter", fields: [teacherId], references: [id], onDelete: SetNull)
 
   items DevelopmentItem[]
 
   @@unique([studentId, academicYearId, period])
+  @@map("laporan_perkembangan")
 }
 
 model DevelopmentItem {
-  id        Int      @id @default(autoincrement())
-  reportId  Int
-  domainId  Int
-  scaleId   Int
-  narrative String?
-  sortOrder Int      @default(0)
+  id        Int     @id @default(autoincrement()) @map("id_detail_laporan")
+  reportId  Int     @map("id_laporan")
+  domainId  Int     @map("id_domain")
+  scaleId   Int     @map("id_skala")
+  narrative String? @map("narasi")
+  sortOrder Int     @default(0) @map("urutan")
 
   report DevelopmentReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
   domain AssessmentDomain  @relation(fields: [domainId], references: [id], onDelete: Restrict)
   scale  AssessmentScale   @relation(fields: [scaleId], references: [id], onDelete: Restrict)
 
   @@unique([reportId, domainId])
+  @@map("detail_laporan")
 }
 
 model Attendance {
-  id             Int      @id @default(autoincrement())
-  studentId      Int
-  classId        Int
-  attendanceDate DateTime
+  id             Int      @id @default(autoincrement()) @map("id_presensi")
+  studentId      Int      @map("id_siswa")
+  classId        Int      @map("id_kelas")
+  attendanceDate DateTime @map("tanggal")
   status         String // PRESENT | SICK | PERMISSION | ABSENT
-  note           String?
-  recordedBy     Int
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  note           String?  @map("catatan")
+  recordedBy     Int      @map("dicatat_oleh")
+  createdAt      DateTime @default(now()) @map("dibuat_pada")
+  updatedAt      DateTime @updatedAt @map("diperbarui_pada")
 
-  student    Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  klass      Class   @relation(fields: [classId], references: [id], onDelete: Restrict)
-  recorder   User    @relation("AttendanceRecorder", fields: [recordedBy], references: [id], onDelete: Restrict)
+  student  Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  klass    Class   @relation(fields: [classId], references: [id], onDelete: Restrict)
+  recorder User    @relation("AttendanceRecorder", fields: [recordedBy], references: [id], onDelete: Restrict)
 
   @@unique([studentId, attendanceDate])
   @@index([attendanceDate])
   @@index([studentId, attendanceDate])
+  @@map("presensi")
 }
 
 model Schedule {
-  id         Int      @id @default(autoincrement())
-  classId    Int
-  teacherId  Int?
-  dayOfWeek  Int // 1=Senin ... 7=Minggu
-  startTime  String
-  endTime    String
-  activity   String
-  room       String?
-  notes      String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id        Int      @id @default(autoincrement()) @map("id_jadwal")
+  classId   Int      @map("id_kelas")
+  teacherId Int?     @map("id_guru")
+  dayOfWeek Int      @map("hari") // 1=Senin ... 7=Minggu
+  startTime String   @map("jam_mulai")
+  endTime   String   @map("jam_selesai")
+  activity  String   @map("kegiatan")
+  room      String?  @map("ruang")
+  notes     String?  @map("catatan")
+  createdAt DateTime @default(now()) @map("dibuat_pada")
+  updatedAt DateTime @updatedAt @map("diperbarui_pada")
 
   klass   Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
   teacher Teacher? @relation(fields: [teacherId], references: [id], onDelete: SetNull)
+
+  @@map("jadwal")
 }
 
 model Activity {
-  id            Int       @id @default(autoincrement())
-  title         String
+  id            Int       @id @default(autoincrement()) @map("id_kegiatan")
+  title         String    @map("judul")
   slug          String    @unique
-  description   String
-  startDatetime DateTime?
-  endDatetime   DateTime?
-  location      String?
-  coverImage    String?
-  visibility    String    @default("PUBLIC") // PUBLIC | PARENT_ONLY | INTERNAL
+  description   String    @map("deskripsi")
+  startDatetime DateTime? @map("waktu_mulai")
+  endDatetime   DateTime? @map("waktu_selesai")
+  location      String?   @map("lokasi")
+  coverImage    String?   @map("gambar_sampul")
+  visibility    String    @default("PUBLIC") @map("visibilitas") // PUBLIC | PARENT_ONLY | INTERNAL
   status        String    @default("DRAFT") // DRAFT | PUBLISHED | ARCHIVED
-  createdBy     Int
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdBy     Int       @map("dibuat_oleh")
+  createdAt     DateTime  @default(now()) @map("dibuat_pada")
+  updatedAt     DateTime  @updatedAt @map("diperbarui_pada")
 
   creator User            @relation("ActivityCreator", fields: [createdBy], references: [id], onDelete: Restrict)
   media   ActivityMedia[]
+
+  @@map("kegiatan")
 }
 
 model ActivityMedia {
-  id           Int      @id @default(autoincrement())
-  activityId   Int
-  filePath     String
-  originalName String
-  sortOrder    Int      @default(0)
-  createdAt    DateTime @default(now())
+  id           Int      @id @default(autoincrement()) @map("id_media")
+  activityId   Int      @map("id_kegiatan")
+  filePath     String   @map("lokasi_file")
+  originalName String   @map("nama_file_asli")
+  sortOrder    Int      @default(0) @map("urutan")
+  createdAt    DateTime @default(now()) @map("dibuat_pada")
 
   activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  @@map("media_kegiatan")
 }
 
 model Announcement {
-  id             Int       @id @default(autoincrement())
-  title          String
+  id             Int       @id @default(autoincrement()) @map("id_pengumuman")
+  title          String    @map("judul")
   slug           String    @unique
-  content        String
-  audience       String // PUBLIC | ALL_PARENTS | TEACHERS | STAFF | CLASS_SPECIFIC
-  classId        Int?
-  publishAt      DateTime?
-  expireAt       DateTime?
+  content        String    @map("isi")
+  audience       String    @map("sasaran") // PUBLIC | ALL_PARENTS | TEACHERS | STAFF | CLASS_SPECIFIC
+  classId        Int?      @map("id_kelas")
+  publishAt      DateTime? @map("terbit_pada")
+  expireAt       DateTime? @map("kedaluwarsa_pada")
   status         String    @default("DRAFT") // DRAFT | PUBLISHED | ARCHIVED
-  attachmentPath String?
-  createdBy      Int
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  attachmentPath String?   @map("lokasi_lampiran")
+  createdBy      Int       @map("dibuat_oleh")
+  createdAt      DateTime  @default(now()) @map("dibuat_pada")
+  updatedAt      DateTime  @updatedAt @map("diperbarui_pada")
 
-  klass Class?   @relation(fields: [classId], references: [id], onDelete: SetNull)
-  creator User   @relation("AnnouncementCreator", fields: [createdBy], references: [id], onDelete: Restrict)
-  reads AnnouncementRead[]
+  klass   Class?             @relation(fields: [classId], references: [id], onDelete: SetNull)
+  creator User               @relation("AnnouncementCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  reads   AnnouncementRead[]
+
+  @@map("pengumuman")
 }
 
 model AnnouncementRead {
-  announcementId Int
-  userId         Int
-  readAt         DateTime @default(now())
+  announcementId Int      @map("id_pengumuman")
+  userId         Int      @map("id_pengguna")
+  readAt         DateTime @default(now()) @map("dibaca_pada")
 
   announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([announcementId, userId])
+  @@map("pengumuman_dibaca")
 }
 
 model FeeType {
-  id            Int      @id @default(autoincrement())
-  code          String   @unique
-  name          String
-  description   String?
-  defaultAmount Int      @default(0)
-  recurring     Boolean  @default(false)
-  isActive      Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id            Int      @id @default(autoincrement()) @map("id_jenis_biaya")
+  code          String   @unique @map("kode")
+  name          String   @map("nama")
+  description   String?  @map("deskripsi")
+  defaultAmount Int      @default(0) @map("nominal_default")
+  recurring     Boolean  @default(false) @map("berulang")
+  isActive      Boolean  @default(true) @map("aktif")
+  createdAt     DateTime @default(now()) @map("dibuat_pada")
+  updatedAt     DateTime @updatedAt @map("diperbarui_pada")
 
   items InvoiceItem[]
+
+  @@map("jenis_biaya")
 }
 
 model Invoice {
-  id             Int       @id @default(autoincrement())
-  invoiceNo      String    @unique
-  studentId      Int
-  academicYearId Int?
-  issueDate      DateTime
-  dueDate        DateTime
-  status         String    @default("ISSUED") // DRAFT | ISSUED | PARTIAL | PAID | VOID | OVERDUE
-  notes          String?
-  createdBy      Int
-  createdAt      DateTime  @default(now())
-  invoiceUpdatedAt DateTime @updatedAt
+  id               Int      @id @default(autoincrement()) @map("id_tagihan")
+  invoiceNo        String   @unique @map("no_tagihan")
+  studentId        Int      @map("id_siswa")
+  academicYearId   Int?     @map("id_tahun_ajaran")
+  issueDate        DateTime @map("tanggal_terbit")
+  dueDate          DateTime @map("jatuh_tempo")
+  status           String   @default("ISSUED") // DRAFT | ISSUED | PARTIAL | PAID | VOID | OVERDUE
+  notes            String?  @map("catatan")
+  createdBy        Int      @map("dibuat_oleh")
+  createdAt        DateTime @default(now()) @map("dibuat_pada")
+  invoiceUpdatedAt DateTime @updatedAt @map("diperbarui_pada")
 
-  student      Student      @relation(fields: [studentId], references: [id], onDelete: Restrict)
-  academicYear AcademicYear? @relation(fields: [academicYearId], references: [id], onDelete: SetNull)
-  creator      User         @relation(fields: [createdBy], references: [id], onDelete: Restrict)
+  student      Student             @relation(fields: [studentId], references: [id], onDelete: Restrict)
+  academicYear AcademicYear?       @relation(fields: [academicYearId], references: [id], onDelete: SetNull)
+  creator      User                @relation(fields: [createdBy], references: [id], onDelete: Restrict)
   items        InvoiceItem[]
   allocations  PaymentAllocation[]
 
   @@index([studentId, status])
   @@index([dueDate])
+  @@map("tagihan")
 }
 
 model InvoiceItem {
-  id         Int     @id @default(autoincrement())
-  invoiceId  Int
-  feeTypeId  Int
-  description String
-  quantity   Int     @default(1)
-  unitAmount Int
-  subtotal   Int
+  id          Int    @id @default(autoincrement()) @map("id_detail_tagihan")
+  invoiceId   Int    @map("id_tagihan")
+  feeTypeId   Int    @map("id_jenis_biaya")
+  description String @map("keterangan")
+  quantity    Int    @default(1) @map("jumlah")
+  unitAmount  Int    @map("harga_satuan")
+  subtotal    Int
 
-  invoice  Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
-  feeType  FeeType  @relation(fields: [feeTypeId], references: [id], onDelete: Restrict)
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  feeType FeeType @relation(fields: [feeTypeId], references: [id], onDelete: Restrict)
+
+  @@map("detail_tagihan")
 }
 
 model Payment {
-  id           Int       @id @default(autoincrement())
-  receiptNo    String    @unique
-  studentId    Int
-  paymentDate  DateTime
-  amount       Int
-  method       String // CASH | TRANSFER | QRIS | OTHER
-  referenceNo  String?
-  note         String?
-  proofPath    String?
-  status       String    @default("POSTED") // POSTED | VOID
-  voidReason   String?
-  recordedBy   Int
-  createdAt    DateTime  @default(now())
-  paymentUpdatedAt DateTime @updatedAt
+  id               Int      @id @default(autoincrement()) @map("id_pembayaran")
+  receiptNo        String   @unique @map("no_kwitansi")
+  studentId        Int      @map("id_siswa")
+  paymentDate      DateTime @map("tanggal_bayar")
+  amount           Int      @map("nominal")
+  method           String   @map("metode") // CASH | TRANSFER | QRIS | OTHER
+  referenceNo      String?  @map("no_referensi")
+  note             String?  @map("catatan")
+  proofPath        String?  @map("lokasi_bukti")
+  status           String   @default("POSTED") // POSTED | VOID
+  voidReason       String?  @map("alasan_batal")
+  recordedBy       Int      @map("dicatat_oleh")
+  createdAt        DateTime @default(now()) @map("dibuat_pada")
+  paymentUpdatedAt DateTime @updatedAt @map("diperbarui_pada")
 
   student     Student             @relation(fields: [studentId], references: [id], onDelete: Restrict)
   recorder    User                @relation("PaymentRecorder", fields: [recordedBy], references: [id], onDelete: Restrict)
   allocations PaymentAllocation[]
+
+  @@map("pembayaran")
 }
 
 model PaymentAllocation {
-  id        Int      @id @default(autoincrement())
-  paymentId Int
-  invoiceId Int
-  amount    Int
-  createdAt DateTime @default(now())
+  id        Int      @id @default(autoincrement()) @map("id_alokasi")
+  paymentId Int      @map("id_pembayaran")
+  invoiceId Int      @map("id_tagihan")
+  amount    Int      @map("nominal")
+  createdAt DateTime @default(now()) @map("dibuat_pada")
 
   payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
   invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Restrict)
 
   @@unique([paymentId, invoiceId])
+  @@map("alokasi_pembayaran")
 }
 
 model Expense {
-  id            Int       @id @default(autoincrement())
-  expenseNo     String    @unique
-  expenseDate   DateTime
-  category      String
-  description   String
-  amount        Int
-  vendor        String?
-  paymentMethod String // CASH | TRANSFER | OTHER
-  proofPath     String?
-  status        String    @default("POSTED") // DRAFT | POSTED | VOID
-  voidReason    String?
-  createdBy     Int
-  createdAt     DateTime  @default(now())
-  expenseUpdatedAt DateTime @updatedAt
+  id               Int      @id @default(autoincrement()) @map("id_pengeluaran")
+  expenseNo        String   @unique @map("no_pengeluaran")
+  expenseDate      DateTime @map("tanggal")
+  category         String   @map("kategori")
+  description      String   @map("deskripsi")
+  amount           Int      @map("nominal")
+  vendor           String?  @map("pemasok")
+  paymentMethod    String   @map("metode_bayar") // CASH | TRANSFER | OTHER
+  proofPath        String?  @map("lokasi_bukti")
+  status           String   @default("POSTED") // DRAFT | POSTED | VOID
+  voidReason       String?  @map("alasan_batal")
+  createdBy        Int      @map("dibuat_oleh")
+  createdAt        DateTime @default(now()) @map("dibuat_pada")
+  expenseUpdatedAt DateTime @updatedAt @map("diperbarui_pada")
 
   creator User @relation("ExpenseCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+
+  @@map("pengeluaran")
 }
 
 model StudentDocument {
-  id           Int      @id @default(autoincrement())
-  studentId    Int
-  documentType String
-  originalName String
-  storagePath  String
-  mimeType     String
-  sizeBytes    Int
-  visibility   String   @default("STAFF_ONLY") // STAFF_ONLY | TEACHER | PARENT
-  uploadedBy   Int
-  createdAt    DateTime @default(now())
+  id           Int      @id @default(autoincrement()) @map("id_dokumen_siswa")
+  studentId    Int      @map("id_siswa")
+  documentType String   @map("jenis_dokumen")
+  originalName String   @map("nama_file_asli")
+  storagePath  String   @map("lokasi_file")
+  mimeType     String   @map("tipe_mime")
+  sizeBytes    Int      @map("ukuran_byte")
+  visibility   String   @default("STAFF_ONLY") @map("visibilitas") // STAFF_ONLY | TEACHER | PARENT
+  uploadedBy   Int      @map("diunggah_oleh")
+  createdAt    DateTime @default(now()) @map("dibuat_pada")
 
-  student    Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  uploader   User    @relation("DocumentUploader", fields: [uploadedBy], references: [id], onDelete: Restrict)
+  student  Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  uploader User    @relation("DocumentUploader", fields: [uploadedBy], references: [id], onDelete: Restrict)
+
+  @@map("dokumen_siswa")
 }
 
 model AuditLog {
-  id         Int      @id @default(autoincrement())
-  userId     Int?
-  action     String
-  entityType String
-  entityId   Int?
-  beforeJson String?
-  afterJson  String?
-  ipAddress  String?
-  userAgent  String?
-  createdAt  DateTime @default(now())
+  id         Int      @id @default(autoincrement()) @map("id_log")
+  userId     Int?     @map("id_pengguna")
+  action     String   @map("aksi")
+  entityType String   @map("jenis_entitas")
+  entityId   Int?     @map("id_entitas")
+  beforeJson String?  @map("data_sebelum")
+  afterJson  String?  @map("data_sesudah")
+  ipAddress  String?  @map("alamat_ip")
+  userAgent  String?  @map("agen_pengguna")
+  createdAt  DateTime @default(now()) @map("dibuat_pada")
 
   user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([entityType, entityId])
   @@index([createdAt])
+  @@map("log_audit")
 }
 
 model PasswordResetToken {
-  id        Int       @id @default(autoincrement())
-  userId    Int
-  tokenHash String    @unique
-  expiresAt DateTime
-  usedAt    DateTime?
-  createdAt DateTime  @default(now())
+  id        Int       @id @default(autoincrement()) @map("id_token")
+  userId    Int       @map("id_pengguna")
+  tokenHash String    @unique @map("hash_token")
+  expiresAt DateTime  @map("kedaluwarsa_pada")
+  usedAt    DateTime? @map("dipakai_pada")
+  createdAt DateTime  @default(now()) @map("dibuat_pada")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("token_reset_sandi")
 }
 
 // ===== Konten website publik (dikelola dari admin › Website) =====
 
 model SiteSetting {
-  key       String   @id
-  value     String
-  updatedAt DateTime @updatedAt
+  key       String   @id @map("kunci")
+  value     String   @map("nilai")
+  updatedAt DateTime @updatedAt @map("diperbarui_pada")
+
+  @@map("pengaturan_situs")
 }
 
 model HeroSlide {
-  id          Int      @id @default(autoincrement())
-  eyebrow     String
-  title       String
-  accent      String?
-  description String
-  image       String
-  imageAlt    String?
-  sortOrder   Int      @default(0)
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id          Int      @id @default(autoincrement()) @map("id_slide")
+  eyebrow     String   @map("label_atas")
+  title       String   @map("judul")
+  accent      String?  @map("aksen")
+  description String   @map("deskripsi")
+  image       String   @map("gambar")
+  imageAlt    String?  @map("teks_alt_gambar")
+  sortOrder   Int      @default(0) @map("urutan")
+  isActive    Boolean  @default(true) @map("aktif")
+  createdAt   DateTime @default(now()) @map("dibuat_pada")
+  updatedAt   DateTime @updatedAt @map("diperbarui_pada")
+
+  @@map("slide_beranda")
 }
 
 model GalleryItem {
-  id        Int      @id @default(autoincrement())
-  title     String
-  category  String
-  image     String
-  sortOrder Int      @default(0)
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        Int      @id @default(autoincrement()) @map("id_galeri")
+  title     String   @map("judul")
+  category  String   @map("kategori")
+  image     String   @map("gambar")
+  sortOrder Int      @default(0) @map("urutan")
+  isActive  Boolean  @default(true) @map("aktif")
+  createdAt DateTime @default(now()) @map("dibuat_pada")
+  updatedAt DateTime @updatedAt @map("diperbarui_pada")
+
+  @@map("galeri")
 }
 
 model Facility {
-  id          Int      @id @default(autoincrement())
-  title       String
-  description String
-  image       String
-  sortOrder   Int      @default(0)
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id          Int      @id @default(autoincrement()) @map("id_fasilitas")
+  title       String   @map("judul")
+  description String   @map("deskripsi")
+  image       String   @map("gambar")
+  sortOrder   Int      @default(0) @map("urutan")
+  isActive    Boolean  @default(true) @map("aktif")
+  createdAt   DateTime @default(now()) @map("dibuat_pada")
+  updatedAt   DateTime @updatedAt @map("diperbarui_pada")
+
+  @@map("fasilitas")
 }
 
 model Testimonial {
-  id        Int      @id @default(autoincrement())
-  name      String
-  relation  String
-  quote     String
-  sortOrder Int      @default(0)
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        Int      @id @default(autoincrement()) @map("id_testimoni")
+  name      String   @map("nama")
+  relation  String   @map("hubungan")
+  quote     String   @map("kutipan")
+  sortOrder Int      @default(0) @map("urutan")
+  isActive  Boolean  @default(true) @map("aktif")
+  createdAt DateTime @default(now()) @map("dibuat_pada")
+  updatedAt DateTime @updatedAt @map("diperbarui_pada")
+
+  @@map("testimoni")
 }
 
 model Faq {
-  id        Int      @id @default(autoincrement())
-  question  String
-  answer    String
-  category  String
-  sortOrder Int      @default(0)
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        Int      @id @default(autoincrement()) @map("id_tanya_jawab")
+  question  String   @map("pertanyaan")
+  answer    String   @map("jawaban")
+  category  String   @map("kategori")
+  sortOrder Int      @default(0) @map("urutan")
+  isActive  Boolean  @default(true) @map("aktif")
+  createdAt DateTime @default(now()) @map("dibuat_pada")
+  updatedAt DateTime @updatedAt @map("diperbarui_pada")
+
+  @@map("tanya_jawab")
 }

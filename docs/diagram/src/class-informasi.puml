@@ -1,0 +1,184 @@
+' Dibuat otomatis oleh scripts/generate-docs.ts — jangan diedit manual.
+@startuml class-informasi
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "DejaVu Sans"
+skinparam roundCorner 8
+skinparam linetype ortho
+skinparam ArrowColor #7a3f86
+skinparam class {
+  BackgroundColor #FDF8FD
+  BorderColor #A64CA6
+  HeaderBackgroundColor #F3E3F3
+  FontColor #1f1a2e
+}
+hide circle
+title Class Diagram — Informasi & Konten Website
+
+class Kegiatan {
+  - id_kegiatan : int
+  - judul : string
+  - slug : string
+  - deskripsi : string
+  - waktu_mulai : datetime [0..1]
+  - waktu_selesai : datetime [0..1]
+  - lokasi : string [0..1]
+  - gambar_sampul : string [0..1]
+  - visibilitas : string
+  - status : string
+  - dibuat_oleh : int
+  - dibuat_pada : datetime
+  - diperbarui_pada : datetime
+  --
+  + simpan()
+  + terbitkan()
+  + arsipkan()
+}
+
+class Pengguna #EEEEEE
+
+class MediaKegiatan {
+  - id_media : int
+  - id_kegiatan : int
+  - lokasi_file : string
+  - nama_file_asli : string
+  - urutan : int
+  - dibuat_pada : datetime
+  --
+  + unggah()
+}
+
+class Pengumuman {
+  - id_pengumuman : int
+  - judul : string
+  - slug : string
+  - isi : string
+  - sasaran : string
+  - id_kelas : int [0..1]
+  - terbit_pada : datetime [0..1]
+  - kedaluwarsa_pada : datetime [0..1]
+  - status : string
+  - lokasi_lampiran : string [0..1]
+  - dibuat_oleh : int
+  - dibuat_pada : datetime
+  - diperbarui_pada : datetime
+  --
+  + simpan()
+  + terbitkan()
+  + tandaiDibaca(pengguna)
+}
+
+class Kelas #EEEEEE
+
+class PengumumanDibaca {
+  - id_pengumuman : int
+  - id_pengguna : int
+  - dibaca_pada : datetime
+  --
+
+}
+
+class PengaturanSitus {
+  - kunci : string
+  - nilai : string
+  - diperbarui_pada : datetime
+  --
+  + simpan(kunci, nilai)
+}
+
+class SlideBeranda {
+  - id_slide : int
+  - label_atas : string
+  - judul : string
+  - aksen : string [0..1]
+  - deskripsi : string
+  - gambar : string
+  - teks_alt_gambar : string [0..1]
+  - urutan : int
+  - aktif : boolean
+  - dibuat_pada : datetime
+  - diperbarui_pada : datetime
+  --
+  + simpan()
+  + ubahUrutan(arah)
+  + tampilkan()
+  + sembunyikan()
+}
+
+class Galeri {
+  - id_galeri : int
+  - judul : string
+  - kategori : string
+  - gambar : string
+  - urutan : int
+  - aktif : boolean
+  - dibuat_pada : datetime
+  - diperbarui_pada : datetime
+  --
+  + simpan()
+  + ubahUrutan(arah)
+  + tampilkan()
+  + sembunyikan()
+}
+
+class Fasilitas {
+  - id_fasilitas : int
+  - judul : string
+  - deskripsi : string
+  - gambar : string
+  - urutan : int
+  - aktif : boolean
+  - dibuat_pada : datetime
+  - diperbarui_pada : datetime
+  --
+  + simpan()
+  + ubahUrutan(arah)
+  + tampilkan()
+  + sembunyikan()
+}
+
+class Testimoni {
+  - id_testimoni : int
+  - nama : string
+  - hubungan : string
+  - kutipan : string
+  - urutan : int
+  - aktif : boolean
+  - dibuat_pada : datetime
+  - diperbarui_pada : datetime
+  --
+  + simpan()
+  + ubahUrutan(arah)
+  + tampilkan()
+  + sembunyikan()
+}
+
+class TanyaJawab {
+  - id_tanya_jawab : int
+  - pertanyaan : string
+  - jawaban : string
+  - kategori : string
+  - urutan : int
+  - aktif : boolean
+  - dibuat_pada : datetime
+  - diperbarui_pada : datetime
+  --
+  + simpan()
+  + ubahUrutan(arah)
+  + tampilkan()
+  + sembunyikan()
+}
+
+Pengguna "1" -- "0..*" Kegiatan
+Kegiatan "1" *-- "0..*" MediaKegiatan
+Kelas "0..1" -- "0..*" Pengumuman
+Pengguna "1" -- "0..*" Pengumuman
+Pengumuman "1" *-- "0..*" PengumumanDibaca
+Pengguna "1" *-- "0..*" PengumumanDibaca
+
+legend right
+  Belah ketupat hitam = komposisi (data anak ikut terhapus)
+  Garis biasa = asosiasi
+  Abu-abu = kelas dari modul lain
+endlegend
+@enduml

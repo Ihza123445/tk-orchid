@@ -1,8 +1,12 @@
 import Link from 'next/link'
+import { Search, UserPlus, UsersRound } from 'lucide-react'
 import { requireAdminStaff } from '@/lib/auth/guard'
 import { listGuardians } from '@/actions/guardians'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { Avatar, EmptyState, HeaderButton, PageHeader, Pagination, Pill, Toolbar } from '@/components/dashboard/primitives'
+
+export const metadata = { title: 'Data Wali' }
 
 interface PageProps {
   searchParams: Promise<{ page?: string; q?: string }>
@@ -18,55 +22,63 @@ export default async function WaliPage({ searchParams }: PageProps) {
 
   const { total, rows, pageSize } = await listGuardians({ page, search })
   const totalPages = Math.max(1, Math.ceil(total / pageSize))
+  const hrefFor = (target: number) => `/wali?page=${target}${search ? `&q=${encodeURIComponent(search)}` : ''}`
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Data Wali</h1>
-          <p className="text-sm text-[var(--muted-foreground)]">Total {total} wali terdaftar.</p>
-        </div>
-        <Link href="/wali/tambah"><Button>Tambah Wali</Button></Link>
-      </header>
+      <PageHeader
+        icon={UsersRound}
+        eyebrow="Siswa & Wali"
+        title="Data Wali"
+        description={`Total ${total} wali terdaftar.`}
+        actions={<HeaderButton href="/wali/tambah" primary><UserPlus /> Tambah wali</HeaderButton>}
+      />
 
-      <form className="flex flex-wrap items-center gap-2" action="/wali">
-        <Input name="q" placeholder="Cari nama / telepon…" defaultValue={search ?? ''} className="max-w-xs" />
+      <Toolbar action="/wali">
+        <div className="relative min-w-[220px] flex-1 sm:max-w-sm">
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--muted-foreground)]" aria-hidden="true" />
+          <Input name="q" placeholder="Cari nama / telepon…" defaultValue={search ?? ''} className="pl-9" aria-label="Cari wali" />
+        </div>
         <Button type="submit" variant="outline">Cari</Button>
-      </form>
+        {search && <Link href="/wali" className="link-action">Reset</Link>}
+      </Toolbar>
 
       {rows.length === 0 ? (
-        <div className="rounded-lg border border-dashed p-10 text-center">
-          <p className="text-sm text-[var(--muted-foreground)]">Belum ada data wali untuk pencarian ini.</p>
-          <Link href="/wali/tambah" className="mt-3 inline-block"><Button variant="outline">Tambah Wali</Button></Link>
-        </div>
+        <EmptyState
+          icon={UsersRound}
+          title="Belum ada data wali"
+          description={search ? 'Tidak ada wali yang cocok dengan pencarian ini.' : 'Tambahkan data orang tua/wali siswa.'}
+          action={<HeaderButton href="/wali/tambah" primary><UserPlus /> Tambah wali</HeaderButton>}
+        />
       ) : (
-        <div className="overflow-x-auto rounded-lg border bg-[var(--card)]">
-          <table className="w-full min-w-[680px] text-sm">
+        <div className="table-card">
+          <table className="w-full min-w-[720px]">
             <thead>
-              <tr className="border-b bg-[var(--muted)] text-left">
-                <th className="px-4 py-3 font-medium">Nama</th>
-                <th className="px-4 py-3 font-medium">Hubungan</th>
-                <th className="px-4 py-3 font-medium">Telepon</th>
-                <th className="px-4 py-3 font-medium">Anak Terhubung</th>
-                <th className="px-4 py-3 font-medium">Akun Portal</th>
+              <tr className="text-left">
+                <th className="px-4 py-3">Nama</th>
+                <th className="px-4 py-3">Hubungan</th>
+                <th className="px-4 py-3">Telepon</th>
+                <th className="px-4 py-3">Anak terhubung</th>
+                <th className="px-4 py-3">Akun portal</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((g) => (
-                <tr key={g.id} className="border-b last:border-0 hover:bg-[var(--muted)]/50 transition-colors duration-150">
+                <tr key={g.id}>
                   <td className="px-4 py-3">
-                    <Link href={`/wali/${g.id}`} className="font-medium underline-offset-4 hover:underline">{g.fullName}</Link>
-                    {g.occupation && <span className="block text-xs text-[var(--muted-foreground)]">{g.occupation}</span>}
+                    <Link href={`/wali/${g.id}`} className="flex items-center gap-3">
+                      <Avatar name={g.fullName} />
+                      <span className="min-w-0">
+                        <span className="block truncate font-medium hover:text-[var(--primary)]">{g.fullName}</span>
+                        {g.occupation && <span className="block text-xs font-normal text-[var(--muted-foreground)]">{g.occupation}</span>}
+                      </span>
+                    </Link>
                   </td>
                   <td className="px-4 py-3">{REL[g.relationship] ?? g.relationship}</td>
                   <td className="px-4 py-3 tabular-nums">{g.phone}</td>
                   <td className="px-4 py-3">{g.studentGuardians.length} anak</td>
                   <td className="px-4 py-3">
-                    {g.user ? (
-                      <span className="rounded-full bg-[var(--secondary)] px-2 py-0.5 text-xs text-[var(--primary)]">{g.user.email}</span>
-                    ) : (
-                      <span className="text-xs text-[var(--muted-foreground)]">belum ada</span>
-                    )}
+                    {g.user ? <Pill tone="success" dot>{g.user.email}</Pill> : <Pill>Belum ada</Pill>}
                   </td>
                 </tr>
               ))}
@@ -75,15 +87,7 @@ export default async function WaliPage({ searchParams }: PageProps) {
         </div>
       )}
 
-      {totalPages > 1 && (
-        <nav className="flex items-center justify-between" aria-label="Navigasi halaman">
-          <p className="text-sm text-[var(--muted-foreground)]">Halaman {page} dari {totalPages}</p>
-          <div className="flex gap-2">
-            {page > 1 && <Link href={`/wali?page=${page - 1}`}><Button variant="outline" size="sm">Sebelumnya</Button></Link>}
-            {page < totalPages && <Link href={`/wali?page=${page + 1}`}><Button variant="outline" size="sm">Berikutnya</Button></Link>}
-          </div>
-        </nav>
-      )}
+      <Pagination page={page} totalPages={totalPages} total={total} hrefFor={hrefFor} />
     </div>
   )
 }

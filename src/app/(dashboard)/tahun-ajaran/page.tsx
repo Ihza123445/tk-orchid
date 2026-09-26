@@ -2,8 +2,10 @@ import { requireAdminStaff } from '@/lib/auth/guard'
 import { listAcademicYears, activateAcademicYearAction } from '@/actions/academic-years'
 import { TahunAjaranForm } from '@/components/academic-years/year-form'
 import { formatTanggalSingkat } from '@/lib/formatting/format'
+import { CalendarDays } from 'lucide-react'
+import { EmptyState, PageHeader, SectionHeader, StatusPill, YEAR_STATUS } from '@/components/dashboard/primitives'
 
-const STATUS_LABEL: Record<string, string> = { PLANNED: 'Perencanaan', ACTIVE: 'Aktif', CLOSED: 'Selesai' }
+export const metadata = { title: 'Tahun Ajaran' }
 
 export default async function TahunAjaranPage() {
   await requireAdminStaff()
@@ -11,40 +13,37 @@ export default async function TahunAjaranPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold tracking-tight">Tahun Ajaran</h1>
-        <p className="text-sm text-[var(--muted-foreground)]">Hanya satu tahun ajaran yang dapat aktif pada satu waktu.</p>
-      </header>
+      <PageHeader icon={CalendarDays} eyebrow="Akademik" title="Tahun Ajaran" description="Hanya satu tahun ajaran yang dapat aktif pada satu waktu." />
 
       <TahunAjaranForm />
 
-      <div className="overflow-x-auto rounded-lg border bg-[var(--card)]">
-        <table className="w-full min-w-[640px] text-sm">
+      <SectionHeader title="Daftar tahun ajaran" description={`${years.length} tahun ajaran`} />
+      {years.length === 0 ? <EmptyState icon={CalendarDays} title="Belum ada tahun ajaran" description="Tambahkan tahun ajaran pertama melalui formulir di atas." /> : (
+      <div className="table-card">
+        <table className="w-full min-w-[640px]">
           <thead>
-            <tr className="border-b bg-[var(--muted)] text-left">
-              <th className="px-4 py-3 font-medium">Nama</th>
-              <th className="px-4 py-3 font-medium">Periode</th>
-              <th className="px-4 py-3 font-medium">Status</th>
-              <th className="px-4 py-3 font-medium">Kelas / Siswa</th>
-              <th className="px-4 py-3 font-medium">Aksi</th>
+            <tr className="text-left">
+              <th className="px-4 py-3">Nama</th>
+              <th className="px-4 py-3">Periode</th>
+              <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3">Kelas / Siswa</th>
+              <th className="px-4 py-3">Aksi</th>
             </tr>
           </thead>
           <tbody>
             {years.map((y) => (
-              <tr key={y.id} className="border-b last:border-0">
-                <td className="px-4 py-3 font-medium">{y.name}</td>
+              <tr key={y.id}>
+                <td className="px-4 py-3 font-semibold">{y.name}</td>
                 <td className="px-4 py-3">{formatTanggalSingkat(y.startDate)} – {formatTanggalSingkat(y.endDate)}</td>
                 <td className="px-4 py-3">
-                  <span className={`rounded-full px-2 py-0.5 text-xs ${y.status === 'ACTIVE' ? 'bg-[var(--secondary)] text-[var(--primary)]' : 'bg-[var(--muted)] text-[var(--muted-foreground)]'}`}>
-                    {STATUS_LABEL[y.status] ?? y.status}
-                  </span>
+                  <StatusPill map={YEAR_STATUS} status={y.status} />
                 </td>
                 <td className="px-4 py-3">{y._count.classes} kelas · {y._count.enrollments} siswa</td>
                 <td className="px-4 py-3">
                   {y.status === 'PLANNED' && (
                     <form action={activateAcademicYearAction}>
                       <input type="hidden" name="id" value={y.id} />
-                      <button type="submit" className="text-sm underline underline-offset-4 hover:opacity-80">Aktifkan</button>
+                      <button type="submit" className="link-action">Aktifkan</button>
                     </form>
                   )}
                 </td>
@@ -53,6 +52,7 @@ export default async function TahunAjaranPage() {
           </tbody>
         </table>
       </div>
+      )}
     </div>
   )
 }

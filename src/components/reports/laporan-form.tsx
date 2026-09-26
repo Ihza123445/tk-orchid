@@ -82,15 +82,15 @@ export function LaporanForm({
   )
 
   return (
-    <form action={formAction} className="space-y-4 rounded-lg border bg-[var(--card)] p-6">
-      <h2 className="text-base font-semibold">Buat / Perbarui Laporan</h2>
+    <form action={formAction} className="form-card space-y-4">
+      <h2>Buat / Perbarui Laporan</h2>
       <p className="text-xs text-[var(--muted-foreground)]">Laporan tersimpan sebagai DRAFT. Submit untuk review, lalu admin mempublikasi ke orang tua.</p>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="space-y-2">
           <Label htmlFor="lk-kelas">Kelas *</Label>
           <select id="lk-kelas" required value={classId} onChange={(e) => { setClassId(e.target.value); setStudentId(''); loadExisting('', period) }}
-            className="h-9 w-full rounded-md border border-[var(--input)] bg-transparent px-3 text-sm">
+            className="field-select">
             <option value="" disabled>Pilih kelas…</option>
             {classes.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
           </select>
@@ -98,7 +98,7 @@ export function LaporanForm({
         <div className="space-y-2">
           <Label htmlFor="lk-siswa">Siswa *</Label>
           <select id="lk-siswa" required value={studentId} onChange={(e) => { setStudentId(e.target.value); loadExisting(e.target.value, period) }} disabled={!classId}
-            className="h-9 w-full rounded-md border border-[var(--input)] bg-transparent px-3 text-sm disabled:opacity-50">
+            className="field-select disabled:opacity-50">
             <option value="" disabled>{classId ? 'Pilih siswa…' : 'Pilih kelas dulu'}</option>
             {students.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
           </select>
@@ -106,7 +106,7 @@ export function LaporanForm({
         <div className="space-y-2">
           <Label htmlFor="lk-periode">Periode *</Label>
           <select id="lk-periode" value={period} onChange={(e) => { setPeriod(e.target.value); loadExisting(studentId, e.target.value) }}
-            className="h-9 w-full rounded-md border border-[var(--input)] bg-transparent px-3 text-sm">
+            className="field-select">
             {periods.map((p) => <option key={p} value={p}>{p}</option>)}
           </select>
         </div>
@@ -124,18 +124,18 @@ export function LaporanForm({
         </p>
       )}
 
-      <div className="overflow-x-auto rounded-lg border">
-        <table className="w-full min-w-[640px] text-sm">
+      <div className="table-card">
+        <table className="w-full min-w-[640px]">
           <thead>
-            <tr className="border-b bg-[var(--muted)] text-left">
-              <th className="px-4 py-2 font-medium">Domain</th>
-              <th className="px-4 py-2 font-medium">Capaian</th>
-              <th className="px-4 py-2 font-medium">Narasi</th>
+            <tr className="text-left">
+              <th className="px-4 py-2">Domain</th>
+              <th className="px-4 py-2">Capaian</th>
+              <th className="px-4 py-2">Narasi</th>
             </tr>
           </thead>
           <tbody>
             {items.map((item, idx) => (
-              <tr key={item.domainId} className="border-b last:border-0">
+              <tr key={item.domainId}>
                 <td className="px-4 py-2 font-medium">{domains.find((d) => d.id === item.domainId)?.label}</td>
                 <td className="px-4 py-2">
                   <select
@@ -145,7 +145,7 @@ export function LaporanForm({
                       const v = e.target.value ? Number(e.target.value) : null
                       setItems((prev) => prev.map((it, i) => (i === idx ? { ...it, scaleId: v } : it)))
                     }}
-                    className="h-9 rounded-md border border-[var(--input)] bg-transparent px-2 text-sm"
+                    className="field-select w-auto"
                   >
                     {scales.map((s) => (
                       <option key={s.id} value={s.id}>{s.label}{s.description ? ` · ${s.description}` : ''}</option>
@@ -173,19 +173,19 @@ export function LaporanForm({
         <div className="space-y-2">
           <Label htmlFor="ringkasan">Ringkasan Guru</Label>
           <textarea id="ringkasan" name="summary" rows={3} maxLength={2000} value={summary} onChange={(e) => setSummary(e.target.value)}
-            className="w-full rounded-md border border-[var(--input)] bg-transparent px-3 py-2 text-sm"
+            className="field-textarea"
             placeholder="Ringkasan perkembangan anak selama periode…" />
         </div>
         <div className="space-y-2">
           <Label htmlFor="rekomendasi">Rekomendasi di Rumah</Label>
           <textarea id="rekomendasi" name="homeRecommendation" rows={3} maxLength={2000} value={homeRecommendation} onChange={(e) => setHomeRecommendation(e.target.value)}
-            className="w-full rounded-md border border-[var(--input)] bg-transparent px-3 py-2 text-sm"
+            className="field-textarea"
             placeholder="Kegiatan pendampingan di rumah…" />
         </div>
       </div>
 
-      {state.error && <p className="rounded-md border border-[var(--danger)] bg-[var(--destructive)]/10 p-3 text-sm text-[var(--danger)]">{state.error}</p>}
-      {state.success && <p className="rounded-md bg-[var(--secondary)] p-3 text-sm text-[var(--primary)]">Laporan tersimpan sebagai DRAFT.</p>}
+      {state.error && <p className="alert-error">{state.error}</p>}
+      {state.success && <p className="alert-success">Laporan tersimpan sebagai DRAFT.</p>}
 
       <Button type="submit" disabled={pending || !studentId || !classId || (selectedReport != null && selectedReport.status !== 'DRAFT')}>
         {pending ? 'Menyimpan…' : 'Simpan Laporan'}

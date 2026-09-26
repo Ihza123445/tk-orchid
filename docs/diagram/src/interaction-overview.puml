@@ -1,0 +1,27 @@
+' Ditulis manual. Interaction overview — siklus satu tahun ajaran.
+@startuml interaction-overview
+!include _gaya.iuml
+title Interaction Overview Diagram — Siklus Satu Tahun Ajaran
+
+start
+:ref: **Pendaftaran PPDB** (seq-ppdb);
+if (Pendaftar diterima?) then (ya)
+  :ref: **Tambah siswa & wali,\ntempatkan ke kelas** (act-kelola-siswa);
+else (tidak)
+  stop
+endif
+fork
+  repeat
+    :ref: **Presensi harian** (seq-presensi);
+  repeat while (Hari sekolah berikutnya?) is (ya)
+fork again
+  repeat
+    :ref: **Tagihan bulanan & pembayaran** (seq-pembayaran);
+  repeat while (Bulan berikutnya?) is (ya)
+fork again
+  :ref: **Penilaian per domain** (act-rapor);
+  :ref: **Susun & terbitkan rapor** (seq-rapor);
+end fork
+:ref: **Orang tua memantau di portal**\n(seq-ortu-tagihan);
+stop
+@enduml

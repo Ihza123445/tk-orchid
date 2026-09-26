@@ -1,0 +1,41 @@
+' Ditulis manual. Sequence diagram pendaftaran PPDB online.
+@startuml seq-ppdb
+!include _gaya.iuml
+title Sequence Diagram — Pendaftaran PPDB Online
+autonumber
+
+actor Pengunjung
+boundary "Halaman Pendaftaran\n(PpdbForm)" as UI
+control "submitAdmissionAction" as Act
+entity "periode_ppdb" as P
+entity "pendaftaran_ppdb" as A
+entity "log_audit" as Log
+actor "Admin/Staf" as Admin
+control "reviewAdmissionAction" as Rev
+
+Pengunjung -> UI : isi & kirim formulir
+UI -> Act : data formulir
+Act -> Act : validasi (zod), normalisasi no. HP
+Act -> P : cari periode aktif
+P --> Act : periode
+alt tidak ada periode / di luar tanggal
+  Act --> UI : "Pendaftaran ditutup"
+else periode berlaku
+  Act -> A : cek pendaftar ganda (nama + tgl lahir + periode)
+  alt sudah terdaftar
+    A --> Act : no_pendaftaran lama
+    Act --> UI : tolak + tampilkan nomor lama
+  else baru
+    Act -> A : simpan (status SUBMITTED, no_pendaftaran)
+    Act -> Log : simpan CREATE (Admission)
+    Act --> UI : nomor pendaftaran
+    UI --> Pengunjung : tampilkan nomor
+  end
+end
+== Peninjauan oleh sekolah ==
+Admin -> Rev : pilih status (REVIEW/REVISION_REQUIRED/ACCEPTED/REJECTED) + alasan
+Rev -> A : cek status saat ini (bukan ENROLLED)
+Rev -> A : perbarui status, alasan_penolakan,\nditinjau_oleh, ditinjau_pada
+Rev -> Log : simpan ADMISSION_REVIEW
+Rev --> Admin : "Status diperbarui"
+@enduml

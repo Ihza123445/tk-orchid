@@ -3,6 +3,8 @@ import { db } from '@/lib/db/db'
 import { toggleFeeTypeAction } from '@/actions/fees'
 import { FeeTypeForm } from '@/components/finance/fee-type-form'
 import { formatRupiah } from '@/lib/formatting/format'
+import { WalletCards } from 'lucide-react'
+import { EmptyState, PageHeader, Pill, SectionHeader } from '@/components/dashboard/primitives'
 
 export const metadata = { title: 'Jenis Biaya' }
 
@@ -15,41 +17,38 @@ export default async function JenisBiayaPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold tracking-tight">Jenis Biaya</h1>
-        <p className="text-sm text-[var(--muted-foreground)]">Master komponen biaya (SPP, uang pangkal, seragam, dll).</p>
-      </header>
+      <PageHeader icon={WalletCards} eyebrow="Keuangan" title="Jenis Biaya" description="Master komponen biaya: SPP, uang pangkal, seragam, dan lainnya." />
 
       <FeeTypeForm />
 
-      <div className="overflow-x-auto rounded-lg border bg-[var(--card)]">
-        <table className="w-full min-w-[640px] text-sm">
+      <SectionHeader title="Daftar jenis biaya" description={`${feeTypes.length} komponen · ${feeTypes.filter((ft) => ft.isActive).length} aktif`} />
+      {feeTypes.length === 0 ? <EmptyState icon={WalletCards} title="Belum ada jenis biaya" description="Tambahkan komponen biaya pertama melalui formulir di atas." /> : (
+      <div className="table-card">
+        <table className="w-full min-w-[640px]">
           <thead>
-            <tr className="border-b bg-[var(--muted)] text-left">
-              <th className="px-4 py-3 font-medium">Kode</th>
-              <th className="px-4 py-3 font-medium">Nama</th>
-              <th className="px-4 py-3 font-medium">Default</th>
-              <th className="px-4 py-3 font-medium">Tipe</th>
-              <th className="px-4 py-3 font-medium">Dipakai</th>
-              <th className="px-4 py-3 font-medium">Status</th>
+            <tr className="text-left">
+              <th className="px-4 py-3">Kode</th>
+              <th className="px-4 py-3">Nama</th>
+              <th className="px-4 py-3">Default</th>
+              <th className="px-4 py-3">Tipe</th>
+              <th className="px-4 py-3">Dipakai</th>
+              <th className="px-4 py-3">Status</th>
             </tr>
           </thead>
           <tbody>
             {feeTypes.map((ft) => (
-              <tr key={ft.id} className="border-b last:border-0">
-                <td className="px-4 py-3 font-mono text-xs">{ft.code}</td>
+              <tr key={ft.id}>
+                <td className="px-4 py-3"><span className="rounded-md bg-[var(--muted)] px-1.5 py-0.5 font-mono text-xs">{ft.code}</span></td>
                 <td className="px-4 py-3 font-medium">{ft.name}</td>
                 <td className="px-4 py-3 tabular-nums">{formatRupiah(ft.defaultAmount)}</td>
-                <td className="px-4 py-3">{ft.recurring ? 'Berulang' : 'Sekali'}</td>
+                <td className="px-4 py-3">{ft.recurring ? <Pill tone="info">Berulang</Pill> : <Pill>Sekali bayar</Pill>}</td>
                 <td className="px-4 py-3 tabular-nums">{ft._count.items}×</td>
                 <td className="px-4 py-3">
-                  <span className={`rounded-full px-2 py-0.5 text-xs ${ft.isActive ? 'bg-[var(--secondary)] text-[var(--primary)]' : 'bg-[var(--muted)] text-[var(--muted-foreground)]'}`}>
-                    {ft.isActive ? 'Aktif' : 'Nonaktif'}
-                  </span>
+                  {ft.isActive ? <Pill tone="success" dot>Aktif</Pill> : <Pill dot>Nonaktif</Pill>}
                   {(!ft.isActive || ft._count.items === 0) && (
                     <form action={toggleFeeTypeAction} className="mt-1">
                       <input type="hidden" name="id" value={ft.id} />
-                      <button type="submit" className="text-xs underline underline-offset-4 opacity-70 hover:opacity-100">
+                      <button type="submit" className={ft.isActive ? 'link-danger' : 'link-action'}>
                         {ft.isActive ? 'Nonaktifkan' : 'Aktifkan'}
                       </button>
                     </form>
@@ -63,6 +62,7 @@ export default async function JenisBiayaPage() {
           </tbody>
         </table>
       </div>
+      )}
     </div>
   )
 }

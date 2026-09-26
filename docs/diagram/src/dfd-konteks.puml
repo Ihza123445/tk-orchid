@@ -1,0 +1,28 @@
+' Ditulis manual. DFD Level 0 (diagram konteks).
+@startuml dfd-konteks
+!include _gaya.iuml
+left to right direction
+skinparam usecase {
+  BackgroundColor #F3E3F3
+  BorderColor #7a3f86
+}
+title DFD Level 0 — Diagram Konteks Sistem Informasi TK Orchid
+
+rectangle "Pengunjung" as Pengunjung
+rectangle "Orang Tua" as Ortu
+rectangle "Guru" as Guru
+rectangle "Admin / Staf TU" as Admin
+usecase "0\nSistem Informasi\nTK Orchid" as SIS
+
+Pengunjung --> SIS : data pendaftaran PPDB
+SIS --> Pengunjung : informasi sekolah,\nnomor pendaftaran
+
+Ortu --> SIS : login
+SIS --> Ortu : data anak, presensi, rapor terbit,\ntagihan, riwayat pembayaran, pengumuman
+
+Guru --> SIS : presensi, penilaian,\nlaporan perkembangan
+SIS --> Guru : jadwal, daftar siswa, rekap,\nstatus laporan
+
+Admin --> SIS : data siswa/wali/kelas, keputusan PPDB,\ntagihan, pembayaran, pengeluaran,\nkonten website, penerbitan rapor
+SIS --> Admin : dashboard ringkasan, daftar pendaftar,\nstatus tagihan, laporan keuangan
+@enduml
