@@ -399,6 +399,78 @@ Atribut diambil dari kolom tabel; operasi mengikuti fitur yang tersedia di aplik
 
 <sub>Sumber: [`diagram/src/flowchart-status-tagihan.puml`](diagram/src/flowchart-status-tagihan.puml) · Vektor: [`diagram/svg/flowchart-status-tagihan.svg`](diagram/svg/flowchart-status-tagihan.svg)</sub>
 
+### 11. Wireframe perancangan antarmuka
+
+Rancangan kasar (*low-fidelity*) form input dan output. Sumber: [`diagram/wireframe/wireframe.html`](diagram/wireframe/wireframe.html) (HTML/CSS); render ulang ke PNG dengan `node docs/diagram/wireframe/render.mjs` (butuh paket `playwright`).
+
+#### Form login
+
+![Form login](diagram/png/ui-login.png)
+
+#### Form pendaftaran PPDB
+
+![Form pendaftaran PPDB](diagram/png/ui-ppdb.png)
+
+#### Form tambah siswa
+
+![Form tambah siswa](diagram/png/ui-tambah-siswa.png)
+
+#### Form tambah wali
+
+![Form tambah wali](diagram/png/ui-tambah-wali.png)
+
+#### Form presensi kelas
+
+![Form presensi kelas](diagram/png/ui-presensi.png)
+
+#### Form input penilaian
+
+![Form input penilaian](diagram/png/ui-penilaian.png)
+
+#### Form laporan perkembangan
+
+![Form laporan perkembangan](diagram/png/ui-laporan.png)
+
+#### Form buat tagihan
+
+![Form buat tagihan](diagram/png/ui-tagihan.png)
+
+#### Form catat pembayaran
+
+![Form catat pembayaran](diagram/png/ui-pembayaran.png)
+
+#### Form catat pengeluaran
+
+![Form catat pengeluaran](diagram/png/ui-pengeluaran.png)
+
+#### Form konten website
+
+![Form konten website](diagram/png/ui-konten.png)
+
+#### Output: dasbor administrasi
+
+![Output: dasbor administrasi](diagram/png/ui-dashboard-admin.png)
+
+#### Output: daftar siswa
+
+![Output: daftar siswa](diagram/png/ui-daftar-siswa.png)
+
+#### Output: beranda portal orang tua
+
+![Output: beranda portal orang tua](diagram/png/ui-portal-ortu.png)
+
+#### Output: tagihan & riwayat pembayaran orang tua
+
+![Output: tagihan & riwayat pembayaran orang tua](diagram/png/ui-tagihan-ortu.png)
+
+#### Output: rapor perkembangan orang tua
+
+![Output: rapor perkembangan orang tua](diagram/png/ui-rapor-ortu.png)
+
+
+## Laporan Kerja Praktek
+
+[`laporan/BAB_IV_PEMBAHASAN.docx`](laporan/BAB_IV_PEMBAHASAN.docx) — BAB IV Pembahasan sesuai format Buku Panduan KP Prodi Sistem Informasi (A4, margin 4-4-3-3 cm, Times New Roman 12 pt spasi 1,5), berisi definisi masalah & penyelesaian, use case + skenario, activity, sequence, class diagram, ERD, LRS, spesifikasi tabel, rancangan antarmuka, tampilan layar, serta kelebihan & kekurangan sistem.
 
 ## Memperbarui dokumentasi
 

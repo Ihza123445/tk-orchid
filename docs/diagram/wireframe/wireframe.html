@@ -1,0 +1,401 @@
+<!doctype html>
+<!-- Wireframe (low-fidelity) perancangan antarmuka TK Orchid.
+     Setiap <section class="wf" id="ui-..."> di-screenshot menjadi docs/diagram/png/ui-*.png
+     lewat: node docs/diagram/wireframe/render.mjs -->
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Wireframe TK Orchid</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 24px; background: #fff; font: 13px/1.4 "DejaVu Sans", Arial, sans-serif; color: #222; }
+  .wf { width: 920px; margin: 0 0 40px; }
+  .wf.narrow { width: 560px; }
+  .cap { font-weight: bold; font-size: 14px; margin: 0 0 8px; text-align: center; }
+  .win { border: 2px solid #444; border-radius: 6px; overflow: hidden; background: #fff; }
+  .bar { display: flex; align-items: center; gap: 6px; background: #e6e6e6; border-bottom: 2px solid #444; padding: 6px 10px; }
+  .bar i { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid #444; display: inline-block; }
+  .bar .url { flex: 1; margin-left: 10px; border: 1.5px solid #888; border-radius: 4px; background: #fff; padding: 2px 8px; color: #666; font-size: 11px; }
+  .app { display: flex; min-height: 100px; }
+  .side { width: 170px; border-right: 2px solid #444; padding: 12px; background: #f4f4f4; }
+  .side .logo { display: flex; align-items: center; gap: 8px; font-weight: bold; margin-bottom: 14px; }
+  .side .logo b { width: 26px; height: 26px; border: 2px solid #444; border-radius: 6px; display: inline-block; }
+  .side .m { padding: 5px 8px; border-radius: 4px; margin: 2px 0; color: #444; }
+  .side .m.on { border: 1.5px solid #444; background: #fff; font-weight: bold; }
+  .side .g { font-size: 10px; letter-spacing: .08em; color: #777; margin: 10px 0 2px; text-transform: uppercase; }
+  .main { flex: 1; padding: 14px 18px; }
+  .top { display: flex; align-items: center; justify-content: space-between; border-bottom: 1.5px dashed #999; padding-bottom: 8px; margin-bottom: 12px; color: #555; font-size: 12px; }
+  .ava { width: 26px; height: 26px; border-radius: 50%; border: 2px solid #444; display: inline-block; vertical-align: middle; }
+  h2 { margin: 0 0 2px; font-size: 18px; }
+  .sub { color: #666; font-size: 12px; margin-bottom: 12px; }
+  .row { display: flex; gap: 12px; margin-bottom: 10px; }
+  .row > * { flex: 1; }
+  .fld label { display: block; font-size: 11px; font-weight: bold; margin-bottom: 3px; }
+  .box { border: 1.5px solid #555; border-radius: 4px; height: 28px; padding: 5px 8px; color: #888; font-size: 12px; background: #fff; white-space: nowrap; overflow: hidden; }
+  .box.sel::after { content: "▾"; float: right; color: #444; }
+  .box.area { height: 56px; white-space: normal; }
+  .btn { display: inline-block; border: 2px solid #333; border-radius: 5px; padding: 5px 14px; font-weight: bold; background: #ddd; font-size: 12px; }
+  .btn.o { background: #fff; }
+  .btn.full { display: block; text-align: center; }
+  .card { border: 1.5px solid #555; border-radius: 6px; padding: 10px; background: #fff; }
+  .card h4 { margin: 0 0 6px; font-size: 13px; }
+  .muted { color: #777; font-size: 11px; }
+  .big { font-size: 20px; font-weight: bold; }
+  .img { border: 1.5px solid #555; border-radius: 4px; background:
+    linear-gradient(to top right, transparent calc(50% - 1px), #999 50%, transparent calc(50% + 1px)),
+    linear-gradient(to bottom right, transparent calc(50% - 1px), #999 50%, transparent calc(50% + 1px)); }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th, td { border: 1.5px solid #555; padding: 5px 7px; text-align: left; }
+  th { background: #e6e6e6; }
+  .pill { border: 1.5px solid #555; border-radius: 10px; padding: 0 7px; font-size: 11px; }
+  .radio { display: inline-flex; align-items: center; gap: 4px; margin-right: 10px; font-size: 12px; }
+  .radio b { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid #444; display: inline-block; }
+  .radio b.on { background: radial-gradient(#333 45%, #fff 50%); }
+  .seg { display: inline-block; border: 1.5px solid #555; border-radius: 12px; padding: 1px 9px; margin-right: 4px; font-size: 11px; }
+  .seg.on { background: #333; color: #fff; }
+  .note { border-left: 4px solid #444; padding: 6px 10px; background: #f4f4f4; }
+  .lines { height: 8px; background: repeating-linear-gradient(#bbb 0 2px, transparent 2px 8px); margin: 4px 0; }
+  .chk { display: inline-block; width: 12px; height: 12px; border: 1.5px solid #444; vertical-align: middle; margin-right: 5px; text-align: center; line-height: 9px; font-size: 10px; }
+  .tabs { display: flex; gap: 6px; }
+  .tabs span { border: 1.5px solid #555; border-radius: 12px; padding: 2px 10px; font-size: 12px; }
+  .tabs span.on { background: #333; color: #fff; }
+  .hdr { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #444; padding: 8px 14px; background: #f4f4f4; }
+</style>
+</head>
+<body>
+
+<!-- ====================== FORM INPUT ====================== -->
+
+<section class="wf narrow" id="ui-login">
+  <div class="win"><div class="bar"><i></i><i></i><i></i><span class="url">/login</span></div>
+    <div style="display:flex">
+      <div style="width:45%;border-right:2px solid #444;padding:18px;background:#f4f4f4">
+        <div style="font-weight:bold;margin-bottom:60px">▢ TK Orchid</div>
+        <div class="big">Tumbuh bersama,<br>terhubung setiap hari.</div>
+        <div class="lines"></div><div class="lines" style="width:70%"></div>
+      </div>
+      <div style="flex:1;padding:22px">
+        <div class="muted">SELAMAT DATANG KEMBALI</div>
+        <h2>Masuk ke portal</h2>
+        <div class="card" style="margin-top:10px">
+          <div class="fld" style="margin-bottom:8px"><label>Email</label><div class="box">nama@orchid.local</div></div>
+          <div class="fld" style="margin-bottom:10px"><label>Password</label><div class="box">••••••••</div></div>
+          <span class="btn full">Masuk</span>
+          <div class="muted" style="text-align:center;margin-top:6px"><u>Lupa password?</u></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="wf" id="ui-ppdb">
+  <div class="win"><div class="bar"><i></i><i></i><i></i><span class="url">/pendaftaran</span></div>
+    <div class="hdr"><b>▢ TK Orchid</b><span class="tabs"><span>Beranda</span><span>Profil</span><span>Program</span><span>Kegiatan</span><span class="on">Pendaftaran</span></span></div>
+    <div class="main">
+      <h2>Formulir Pendaftaran Siswa Baru</h2>
+      <div class="sub">Periode aktif: PPDB 2027/2028 Gelombang 1 · Kolom bertanda * wajib diisi</div>
+      <div class="card" style="margin-bottom:10px"><h4>Data Anak</h4>
+        <div class="row"><div class="fld"><label>Nama Lengkap Anak *</label><div class="box"></div></div><div class="fld"><label>Jenis Kelamin *</label><div style="padding-top:5px"><span class="radio"><b class="on"></b>Laki-laki</span><span class="radio"><b></b>Perempuan</span></div></div></div>
+        <div class="row"><div class="fld"><label>Tempat Lahir *</label><div class="box"></div></div><div class="fld"><label>Tanggal Lahir *</label><div class="box">hh/bb/tttt</div></div><div class="fld"><label>Jenjang yang Dituju *</label><div class="box sel">Pilih jenjang</div></div></div>
+        <div class="row"><div class="fld"><label>Asal PAUD / Sekolah Sebelumnya</label><div class="box"></div></div></div>
+      </div>
+      <div class="card"><h4>Data Orang Tua / Wali</h4>
+        <div class="row"><div class="fld"><label>Nama Orang Tua/Wali *</label><div class="box"></div></div><div class="fld"><label>Hubungan *</label><div class="box sel">Ayah / Ibu / Wali</div></div></div>
+        <div class="row"><div class="fld"><label>No. HP / WhatsApp *</label><div class="box">08xxxxxxxxxx</div></div><div class="fld"><label>Email</label><div class="box"></div></div></div>
+        <div class="row"><div class="fld"><label>Alamat *</label><div class="box area"></div></div><div class="fld"><label>Catatan</label><div class="box area"></div></div></div>
+        <span class="btn">Kirim Pendaftaran</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="wf" id="ui-tambah-siswa">
+  <div class="win"><div class="bar"><i></i><i></i><i></i><span class="url">/siswa/tambah</span></div>
+    <div class="app">
+      <div class="side"><div class="logo"><b></b>TK Orchid</div><div class="m">Dashboard</div><div class="g">Siswa &amp; Wali</div><div class="m on">Data Siswa</div><div class="m">Data Wali</div><div class="g">Akademik</div><div class="g">Keuangan</div><div class="g">Website</div></div>
+      <div class="main">
+        <div class="top"><span>Administrasi › Siswa &amp; Wali › Data Siswa › Tambah</span><span class="ava"></span></div>
+        <div class="muted">← Data Siswa</div><h2>Tambah Siswa</h2><div class="sub">Lengkapi data siswa baru. Kolom bertanda * wajib diisi.</div>
+        <div class="card" style="margin-bottom:10px"><h4>Identitas</h4>
+          <div class="row"><div class="fld"><label>Nama Lengkap *</label><div class="box"></div></div></div>
+          <div class="row"><div class="fld"><label>Nama Panggilan</label><div class="box"></div></div><div class="fld"><label>Jenis Kelamin *</label><div class="box sel">Pilih...</div></div></div>
+          <div class="row"><div class="fld"><label>Tempat Lahir</label><div class="box"></div></div><div class="fld"><label>Tanggal Lahir *</label><div class="box">hh/bb/tttt</div></div></div>
+          <div class="row"><div class="fld"><label>Agama</label><div class="box">Opsional</div></div><div class="fld"><label>NIS</label><div class="box">Opsional</div></div></div>
+        </div>
+        <div class="card" style="margin-bottom:10px"><h4>Alamat</h4>
+          <div class="row"><div class="fld"><label>Alamat</label><div class="box"></div></div></div>
+          <div class="row"><div class="fld"><label>Kota/Kabupaten</label><div class="box"></div></div><div class="fld"><label>Provinsi</label><div class="box"></div></div></div>
+        </div>
+        <div class="card"><h4>Catatan</h4><div class="fld"><label>Catatan Administrasi</label><div class="box area"></div></div></div>
+        <div style="text-align:right;margin-top:10px"><span class="btn o">Batal</span> <span class="btn">Simpan</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="wf" id="ui-tambah-wali">
+  <div class="win"><div class="bar"><i></i><i></i><i></i><span class="url">/wali/tambah</span></div>
+    <div class="app">
+      <div class="side"><div class="logo"><b></b>TK Orchid</div><div class="m">Dashboard</div><div class="g">Siswa &amp; Wali</div><div class="m">Data Siswa</div><div class="m on">Data Wali</div><div class="g">Akademik</div><div class="g">Keuangan</div></div>
+      <div class="main">
+        <div class="top"><span>Administrasi › Siswa &amp; Wali › Data Wali › Tambah</span><span class="ava"></span></div>
+        <h2>Tambah Wali</h2><div class="sub">Data orang tua/wali siswa. Kolom bertanda * wajib diisi.</div>
+        <div class="card" style="margin-bottom:10px"><h4>Data Wali</h4>
+          <div class="row"><div class="fld"><label>Nama Lengkap *</label><div class="box"></div></div><div class="fld"><label>Hubungan *</label><div class="box sel">Ayah</div></div></div>
+          <div class="row"><div class="fld"><label>Nomor Telepon *</label><div class="box">08xxxxxxxxxx</div></div><div class="fld"><label>Email</label><div class="box"></div></div></div>
+          <div class="row"><div class="fld"><label>Pekerjaan</label><div class="box"></div></div><div class="fld"><label>Alamat</label><div class="box"></div></div></div>
+          <div class="row"><div class="fld"><label>Hubungkan ke siswa</label><div class="box sel">Pilih siswa...</div></div></div>
+        </div>
+        <div class="card"><h4>Akun Portal Orang Tua</h4><span class="chk">✓</span> Buatkan akun portal (email wajib diisi; orang tua mengatur kata sandi lewat "Lupa password")</div>
+        <div style="text-align:right;margin-top:10px"><span class="btn o">Batal</span> <span class="btn">Simpan</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="wf" id="ui-presensi">
+  <div class="win"><div class="bar"><i></i><i></i><i></i><span class="url">/guru/presensi</span></div>
+    <div class="app">
+      <div class="side"><div class="logo"><b></b>TK Orchid</div><div class="m">Dashboard</div><div class="g">Kelas Saya</div><div class="m on">Presensi</div><div class="m">Penilaian</div><div class="m">Perkembangan</div><div class="m">Jadwal</div><div class="m">Kegiatan</div></div>
+      <div class="main">
+        <div class="top"><span>Portal Guru › Kelas Saya › Presensi</span><span class="ava"></span></div>
+        <h2>Presensi Kelas</h2><div class="sub">Tandai kehadiran siswa, lalu simpan.</div>
+        <div class="card row" style="align-items:flex-end"><div class="fld"><label>Kelas</label><div class="box sel">Kelompok A</div></div><div class="fld"><label>Tanggal</label><div class="box">24/09/2026</div></div><div><span class="btn o">Tandai Hadir Semua</span></div></div>
+        <table>
+          <tr><th>Siswa</th><th>Status</th><th>Catatan</th></tr>
+          <tr><td><b>Adinda Putri</b><br><span class="muted">STD-2026-001 · Perempuan</span></td><td><span class="seg on">Hadir</span><span class="seg">Sakit</span><span class="seg">Izin</span><span class="seg">Alpa</span></td><td><div class="box">Catatan (opsional)</div></td></tr>
+          <tr><td><b>Bagas Pratama</b><br><span class="muted">STD-2026-002 · Laki-laki</span></td><td><span class="seg">Hadir</span><span class="seg on">Sakit</span><span class="seg">Izin</span><span class="seg">Alpa</span></td><td><div class="box">demam</div></td></tr>
+          <tr><td><b>Citra Lestari</b><br><span class="muted">STD-2026-003 · Perempuan</span></td><td><span class="seg">Hadir</span><span class="seg">Sakit</span><span class="seg">Izin</span><span class="seg">Alpa</span></td><td><div class="box">Catatan (opsional)</div></td></tr>
+        </table>
+        <div class="card" style="display:flex;justify-content:space-between;align-items:center;margin-top:10px"><span class="muted">2/3 siswa sudah diberi status</span><span class="btn">Simpan Presensi</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="wf" id="ui-penilaian">
+  <div class="win"><div class="bar"><i></i><i></i><i></i><span class="url">/guru/penilaian</span></div>
+    <div class="app">
+      <div class="side"><div class="logo"><b></b>TK Orchid</div><div class="m">Dashboard</div><div class="g">Kelas Saya</div><div class="m">Presensi</div><div class="m on">Penilaian</div><div class="m">Perkembangan</div></div>
+      <div class="main">
+        <div class="top"><span>Portal Guru › Kelas Saya › Penilaian</span><span class="ava"></span></div>
+        <h2>Penilaian Kelas</h2><div class="sub">Input capaian per domain untuk siswa di kelas Anda.</div>
+        <div class="card" style="margin-bottom:10px"><h4>Input Penilaian Per Domain</h4>
+          <div class="row"><div class="fld"><label>Kelas *</label><div class="box sel">Kelompok A</div></div><div class="fld"><label>Siswa *</label><div class="box sel">Adinda Putri</div></div><div class="fld"><label>Periode *</label><div class="box sel">Semester 1</div></div><div class="fld"><label>Domain *</label><div class="box sel">Kognitif</div></div></div>
+          <div class="fld" style="margin-bottom:8px"><label>Capaian</label><span class="seg">Belum Berkembang</span><span class="seg">Mulai Berkembang</span><span class="seg on">Berkembang Sesuai Harapan</span><span class="seg">Berkembang Sangat Baik</span></div>
+          <div class="fld" style="margin-bottom:8px"><label>Narasi</label><div class="box area">Catatan capaian anak...</div></div>
+          <span class="btn">Simpan Penilaian</span>
+        </div>
+        <b>Rekap periode</b>
+        <table style="margin-top:4px"><tr><th>Siswa</th><th>Periode</th><th>Agama &amp; Moral</th><th>Fisik Motorik</th><th>Kognitif</th><th>Bahasa</th><th>…</th></tr>
+          <tr><td>Adinda Putri</td><td>Semester 1</td><td><span class="pill">BB</span></td><td><span class="pill">MB</span></td><td><span class="pill">BSH</span></td><td><span class="pill">BSB</span></td><td>…</td></tr></table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="wf" id="ui-laporan">
+  <div class="win"><div class="bar"><i></i><i></i><i></i><span class="url">/guru/perkembangan</span></div>
+    <div class="app">
+      <div class="side"><div class="logo"><b></b>TK Orchid</div><div class="m">Dashboard</div><div class="g">Kelas Saya</div><div class="m">Presensi</div><div class="m">Penilaian</div><div class="m on">Perkembangan</div></div>
+      <div class="main">
+        <div class="top"><span>Portal Guru › Kelas Saya › Perkembangan</span><span class="ava"></span></div>
+        <h2>Laporan Perkembangan</h2><div class="sub">Susun rapor naratif per siswa per periode.</div>
+        <div class="card" style="margin-bottom:10px"><h4>Buat / Perbarui Laporan</h4>
+          <div class="row"><div class="fld"><label>Kelas *</label><div class="box sel">Kelompok A</div></div><div class="fld"><label>Siswa *</label><div class="box sel">Adinda Putri</div></div><div class="fld"><label>Periode *</label><div class="box sel">Semester 1</div></div></div>
+          <table style="margin-bottom:8px"><tr><th>Domain</th><th>Capaian</th><th>Narasi</th></tr>
+            <tr><td>Nilai Agama dan Moral</td><td><div class="box sel">BSH</div></td><td><div class="box"></div></td></tr>
+            <tr><td>Fisik Motorik</td><td><div class="box sel">MB</div></td><td><div class="box"></div></td></tr>
+            <tr><td>Kognitif … Kemandirian</td><td><div class="box sel">…</div></td><td><div class="box"></div></td></tr></table>
+          <div class="row"><div class="fld"><label>Ringkasan Guru</label><div class="box area"></div></div><div class="fld"><label>Rekomendasi di Rumah</label><div class="box area"></div></div></div>
+          <span class="btn">Simpan Laporan (Draf)</span>
+        </div>
+        <b>Daftar laporan</b>
+        <table style="margin-top:4px"><tr><th>Siswa</th><th>Periode</th><th>Status</th><th>Domain terisi</th><th>Aksi</th></tr>
+          <tr><td>Citra Lestari</td><td>Semester 1</td><td><span class="pill">Draf</span></td><td>7/7</td><td><u>Kirim untuk review</u></td></tr></table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="wf" id="ui-tagihan">
+  <div class="win"><div class="bar"><i></i><i></i><i></i><span class="url">/keuangan/tagihan</span></div>
+    <div class="app">
+      <div class="side"><div class="logo"><b></b>TK Orchid</div><div class="m">Dashboard</div><div class="g">Keuangan</div><div class="m">Jenis Biaya</div><div class="m on">Tagihan</div><div class="m">Pembayaran</div><div class="m">Pengeluaran</div></div>
+      <div class="main">
+        <div class="top"><span>Administrasi › Keuangan › Tagihan</span><span class="ava"></span></div>
+        <h2>Tagihan</h2><div class="sub">Buat invoice per siswa dan pantau status pelunasannya.</div>
+        <div class="card"><h4>Buat Tagihan</h4>
+          <div class="row"><div class="fld" style="flex:2"><label>Siswa *</label><div class="box sel">Pilih siswa...</div></div><div class="fld"><label>Terbit *</label><div class="box">24/09/2026</div></div><div class="fld"><label>Jatuh Tempo *</label><div class="box">24/10/2026</div></div></div>
+          <table style="margin-bottom:8px"><tr><th>Jenis Biaya</th><th>Keterangan</th><th style="width:60px">Qty</th><th style="width:110px">Nominal</th></tr>
+            <tr><td><div class="box sel">SPP</div></td><td><div class="box">SPP Oktober</div></td><td><div class="box">1</div></td><td><div class="box">350000</div></td></tr>
+            <tr><td><div class="box sel">Uang Kegiatan</div></td><td><div class="box"></div></td><td><div class="box">1</div></td><td><div class="box">50000</div></td></tr>
+            <tr><td colspan="3" style="text-align:right"><b>Total</b></td><td><b>400.000</b></td></tr></table>
+          <span class="btn o">+ Tambah baris</span>
+          <div class="fld" style="margin:8px 0"><label>Catatan</label><div class="box">Catatan tagihan (opsional)</div></div>
+          <span class="btn">Buat Tagihan</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="wf" id="ui-pembayaran">
+  <div class="win"><div class="bar"><i></i><i></i><i></i><span class="url">/keuangan/pembayaran</span></div>
+    <div class="app">
+      <div class="side"><div class="logo"><b></b>TK Orchid</div><div class="m">Dashboard</div><div class="g">Keuangan</div><div class="m">Jenis Biaya</div><div class="m">Tagihan</div><div class="m on">Pembayaran</div><div class="m">Pengeluaran</div></div>
+      <div class="main">
+        <div class="top"><span>Administrasi › Keuangan › Pembayaran</span><span class="ava"></span></div>
+        <h2>Pembayaran</h2><div class="sub">Catat kwitansi pembayaran dan alokasikan ke tagihan siswa.</div>
+        <div class="card"><h4>Catat Pembayaran</h4>
+          <div class="row"><div class="fld" style="flex:2"><label>Siswa *</label><div class="box sel">Elsa Maharani</div></div><div class="fld"><label>Tanggal *</label><div class="box">24/09/2026</div></div><div class="fld"><label>Metode *</label><div class="box sel">Transfer</div></div></div>
+          <div class="row"><div class="fld"><label>No. Referensi</label><div class="box"></div></div><div class="fld"><label>Catatan</label><div class="box"></div></div></div>
+          <b>Alokasi ke tagihan terbuka</b>
+          <table style="margin:4px 0 8px"><tr><th>No. Tagihan</th><th>Jatuh Tempo</th><th>Sisa</th><th style="width:130px">Dibayar</th></tr>
+            <tr><td>INV/ORCHID/2026/07/0005</td><td>26 Jul 2026</td><td>Rp150.000</td><td><div class="box">150000</div></td></tr></table>
+          <div style="display:flex;justify-content:space-between;align-items:center"><b>Total pembayaran: Rp150.000</b><span class="btn">Catat Pembayaran</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="wf" id="ui-pengeluaran">
+  <div class="win"><div class="bar"><i></i><i></i><i></i><span class="url">/keuangan/pengeluaran</span></div>
+    <div class="app">
+      <div class="side"><div class="logo"><b></b>TK Orchid</div><div class="m">Dashboard</div><div class="g">Keuangan</div><div class="m">Tagihan</div><div class="m">Pembayaran</div><div class="m on">Pengeluaran</div></div>
+      <div class="main">
+        <div class="top"><span>Administrasi › Keuangan › Pengeluaran</span><span class="ava"></span></div>
+        <div style="display:flex;justify-content:space-between"><div><h2>Pengeluaran</h2><div class="sub">Catat biaya operasional sekolah.</div></div><div class="card" style="flex:0 0 160px;text-align:right"><span class="muted">Total bulan ini</span><div class="big">Rp250.000</div></div></div>
+        <div class="card"><h4>Catat Pengeluaran</h4>
+          <div class="row"><div class="fld"><label>Tanggal *</label><div class="box">24/09/2026</div></div><div class="fld"><label>Kategori *</label><div class="box">ATK</div></div><div class="fld"><label>Nominal (Rp) *</label><div class="box">250000</div></div></div>
+          <div class="row"><div class="fld" style="flex:2"><label>Keterangan *</label><div class="box">Pembelian kertas &amp; krayon</div></div><div class="fld"><label>Vendor</label><div class="box"></div></div><div class="fld"><label>Metode Bayar *</label><div class="box sel">Tunai</div></div></div>
+          <span class="btn">Catat Pengeluaran</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="wf" id="ui-konten">
+  <div class="win"><div class="bar"><i></i><i></i><i></i><span class="url">/website/kegiatan</span></div>
+    <div style="padding:18px;background:#e9e9e9">
+      <div class="card" style="max-width:640px;margin:auto;padding:0">
+        <div style="display:flex;justify-content:space-between;border-bottom:1.5px solid #555;padding:10px 14px"><b>Tambah Kegiatan</b><span>✕</span></div>
+        <div style="padding:12px 14px">
+          <div class="row"><div class="fld"><label>Judul *</label><div class="box"></div></div></div>
+          <div class="row"><div class="fld"><label>Waktu mulai</label><div class="box">hh/bb/tttt</div></div><div class="fld"><label>Lokasi</label><div class="box"></div></div></div>
+          <div class="row"><div class="fld"><label>Deskripsi *</label><div class="box area"></div></div></div>
+          <div class="row"><div class="fld"><label>Visibilitas</label><div class="box sel">Publik</div></div><div class="fld"><label>Status</label><div class="box sel">Terbit</div></div></div>
+          <label style="font-size:11px;font-weight:bold">Foto sampul</label>
+          <div class="img" style="height:90px;margin:4px 0"></div>
+          <span class="btn">Unggah foto</span> <span class="btn o">Pakai link</span> <span class="muted">JPG, PNG, WEBP, GIF · maks. 5 MB</span>
+        </div>
+        <div style="text-align:right;border-top:1.5px solid #555;padding:10px 14px"><span class="btn o">Batal</span> <span class="btn">Simpan</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== OUTPUT ====================== -->
+
+<section class="wf" id="ui-dashboard-admin">
+  <div class="win"><div class="bar"><i></i><i></i><i></i><span class="url">/dashboard</span></div>
+    <div class="app">
+      <div class="side"><div class="logo"><b></b>TK Orchid</div><div class="box" style="margin-bottom:8px">Cari menu…</div><div class="m on">Dashboard</div><div class="g">Penerimaan</div><div class="g">Siswa &amp; Wali</div><div class="g">Akademik</div><div class="g">Keuangan</div><div class="g">Website</div><div style="margin-top:40px" class="card"><span class="ava"></span> Admin</div></div>
+      <div class="main">
+        <div class="top"><span>Administrasi › Dashboard</span><span>Kamis, 24 September &nbsp;<span class="ava"></span></span></div>
+        <div class="card" style="display:flex;gap:14px;align-items:center;margin-bottom:10px">
+          <div class="card" style="width:80px;text-align:center"><span class="muted">KAMIS</span><div class="big">24</div><span class="muted">Sep 2026</span></div>
+          <div style="flex:1"><i>Selamat malam,</i><div class="big">Admin</div><div class="lines"></div><span class="btn">Tambah siswa</span> <span class="btn o">Catat pembayaran</span></div>
+          <div class="img" style="width:190px;height:100px"></div>
+        </div>
+        <div class="row">
+          <div class="card"><span class="muted">Siswa aktif</span><div class="big">10</div></div>
+          <div class="card"><span class="muted">Kehadiran hari ini</span><div class="big">92%</div></div>
+          <div class="card"><span class="muted">Pendaftar menunggu</span><div class="big">2</div></div>
+          <div class="card"><span class="muted">Tagihan belum dibayar</span><div class="big">Rp1,1 jt</div></div>
+        </div>
+        <div class="row">
+          <div class="card" style="flex:2"><h4>Kehadiran 14 hari terakhir</h4><div style="display:flex;align-items:flex-end;gap:6px;height:80px">
+            <b style="flex:1;height:70%;background:#bbb"></b><b style="flex:1;height:85%;background:#bbb"></b><b style="flex:1;height:60%;background:#bbb"></b><b style="flex:1;height:90%;background:#bbb"></b><b style="flex:1;height:75%;background:#bbb"></b><b style="flex:1;height:95%;background:#bbb"></b><b style="flex:1;height:80%;background:#bbb"></b></div></div>
+          <div class="card"><h4>Perlu tindakan</h4>• 2 pendaftar PPDB<br>• 2 kelas belum presensi<br>• 4 tagihan lewat tempo</div>
+        </div>
+        <div class="row"><div class="card"><h4>Pendaftaran terbaru</h4><div class="lines"></div><div class="lines"></div></div><div class="card"><h4>Pembayaran terbaru</h4><div class="lines"></div><div class="lines"></div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="wf" id="ui-daftar-siswa">
+  <div class="win"><div class="bar"><i></i><i></i><i></i><span class="url">/siswa</span></div>
+    <div class="app">
+      <div class="side"><div class="logo"><b></b>TK Orchid</div><div class="m">Dashboard</div><div class="g">Siswa &amp; Wali</div><div class="m on">Data Siswa</div><div class="m">Data Wali</div><div class="g">Akademik</div><div class="g">Keuangan</div></div>
+      <div class="main">
+        <div class="top"><span>Administrasi › Siswa &amp; Wali › Data Siswa</span><span class="ava"></span></div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end"><div><h2>Data Siswa</h2><div class="sub">Total 10 siswa terdaftar.</div></div><span class="btn">+ Tambah siswa</span></div>
+        <div class="card row" style="align-items:center"><div class="box" style="flex:2">🔍 Cari nama / NIS / kode…</div><div class="box sel">Semua status</div><div style="flex:0"><span class="btn o">Terapkan</span></div></div>
+        <table>
+          <tr><th>Siswa</th><th>NIS</th><th>Jenis kelamin</th><th>Kelas</th><th>Wali</th><th>Status</th><th>Aksi</th></tr>
+          <tr><td><span class="ava"></span> Adinda Putri</td><td>260001</td><td>Perempuan</td><td>Kelompok A</td><td>Orang Tua Demo</td><td><span class="pill">Aktif</span></td><td><u>Detail</u> <u>Ubah</u></td></tr>
+          <tr><td><span class="ava"></span> Bagas Pratama</td><td>260002</td><td>Laki-laki</td><td>Kelompok A</td><td>Wali Demo 2</td><td><span class="pill">Aktif</span></td><td><u>Detail</u> <u>Ubah</u></td></tr>
+          <tr><td><span class="ava"></span> Citra Lestari</td><td>260003</td><td>Perempuan</td><td>Kelompok A</td><td>Wali Demo 3</td><td><span class="pill">Aktif</span></td><td><u>Detail</u> <u>Ubah</u></td></tr>
+        </table>
+        <div style="display:flex;justify-content:space-between;margin-top:8px"><span class="muted">Halaman 1 dari 1 · 10 data</span><span><span class="btn o">‹ Sebelumnya</span> <span class="btn o">Berikutnya ›</span></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="wf" id="ui-portal-ortu">
+  <div class="win"><div class="bar"><i></i><i></i><i></i><span class="url">/portal</span></div>
+    <div class="hdr"><b>▢ TK Orchid · Portal Orang Tua</b><span class="tabs"><span class="on">Beranda</span><span>Tagihan</span><span>Presensi</span><span>Rapor</span><span>Info</span></span><span class="btn o">Keluar</span></div>
+    <div class="main">
+      <div class="card" style="display:flex;gap:14px;margin-bottom:10px;background:repeating-linear-gradient(#fff 0 22px,#ddd 22px 23px)">
+        <div style="flex:1"><i>Kamis, 24 September 2026</i><div class="big"><i>Halo, Ayah &amp; Bunda Adinda!</i></div><i>Catatan hari ini:</i><br>✿ Adinda hadir 18 dari 20 hari<br>✿ Semua tagihan sudah lunas<br>✿ Info terbaru: PPDB Gelombang II<br><span class="btn">Lihat perkembangan</span> <span class="btn o">Pengumuman</span></div>
+        <div class="card" style="width:130px;text-align:center;transform:rotate(3deg)"><div class="img" style="height:90px"></div><i>Adinda</i></div>
+      </div>
+      <div class="row">
+        <div class="card"><h4>Anak saya</h4><span class="ava"></span> <b>Adinda Putri</b> · Kelompok A<div class="row" style="margin-top:6px"><div class="card"><span class="muted">Hadir bulan ini</span><div class="big">90%</div></div><div class="card"><span class="muted">Sisa tagihan</span><div class="big">Lunas</div></div></div></div>
+        <div class="card"><h4>Menu cepat</h4><div class="row"><span class="btn o">Tagihan</span><span class="btn o">Presensi</span></div><div class="row"><span class="btn o">Rapor</span><span class="btn o">Pengumuman</span></div></div>
+      </div>
+      <div class="row"><div class="card" style="flex:2"><h4>Pengumuman terbaru</h4><div class="lines"></div><div class="lines"></div></div><div class="card"><h4>Kegiatan sekolah</h4><div class="lines"></div></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="wf" id="ui-tagihan-ortu">
+  <div class="win"><div class="bar"><i></i><i></i><i></i><span class="url">/portal/tagihan</span></div>
+    <div class="hdr"><b>▢ TK Orchid · Portal Orang Tua</b><span class="tabs"><span>Beranda</span><span class="on">Tagihan</span><span>Presensi</span><span>Rapor</span><span>Info</span></span><span class="btn o">Keluar</span></div>
+    <div class="main">
+      <h2>Tagihan &amp; Pembayaran</h2><div class="sub">Rincian tagihan dan riwayat pembayaran untuk setiap anak.</div>
+      <div class="row"><div class="card"><span class="muted">Total tagihan</span><div class="big">Rp400.000</div></div><div class="card"><span class="muted">Sudah dibayar</span><div class="big">Rp400.000</div></div><div class="card"><span class="muted">Sisa tagihan</span><div class="big">Rp0</div></div></div>
+      <b>Daftar tagihan</b>
+      <div class="card" style="margin:4px 0 10px"><div style="display:flex;justify-content:space-between"><span><span class="muted">INV/ORCHID/2026/07/0001</span><br><b>Adinda Putri</b></span><span class="pill">Lunas</span></div>
+        <table style="margin:6px 0"><tr><td>SPP Juli ×1</td><td style="text-align:right">Rp350.000</td></tr><tr><td>Uang Kegiatan Juli ×1</td><td style="text-align:right">Rp50.000</td></tr></table>
+        Total Rp400.000 · Dibayar Rp400.000 · <b>Sisa Rp0</b></div>
+      <b>Riwayat pembayaran</b>
+      <table style="margin-top:4px"><tr><th>Tanggal</th><th>No. kwitansi</th><th>Anak</th><th>Metode</th><th>Untuk tagihan</th><th>Jumlah</th><th>Status</th></tr>
+        <tr><td>22 Jul 2026</td><td>RCT/ORCHID/2026/0001</td><td>Adinda Putri</td><td>Transfer</td><td>INV/…/0001</td><td>Rp400.000</td><td><span class="pill">Tercatat</span></td></tr></table>
+    </div>
+  </div>
+</section>
+
+<section class="wf" id="ui-rapor-ortu">
+  <div class="win"><div class="bar"><i></i><i></i><i></i><span class="url">/portal/perkembangan</span></div>
+    <div class="hdr"><b>▢ TK Orchid · Portal Orang Tua</b><span class="tabs"><span>Beranda</span><span>Tagihan</span><span>Presensi</span><span class="on">Rapor</span><span>Info</span></span><span class="btn o">Keluar</span></div>
+    <div class="main">
+      <h2>Rapor Perkembangan</h2><div class="sub">Laporan perkembangan anak yang telah diterbitkan sekolah.</div>
+      <div class="card" style="margin-bottom:8px">Skala: <span class="pill">BB</span> Belum Berkembang &nbsp;<span class="pill">MB</span> Mulai Berkembang &nbsp;<span class="pill">BSH</span> Berkembang Sesuai Harapan &nbsp;<span class="pill">BSB</span> Berkembang Sangat Baik</div>
+      <div class="card"><h4>Semester 1 <span class="muted">· Terbit 24 Agu 2026</span></h4>
+        <div class="row"><div class="card">Nilai Agama dan Moral <span class="pill" style="float:right">BSH</span><div class="lines"></div></div><div class="card">Fisik Motorik <span class="pill" style="float:right">MB</span><div class="lines"></div></div></div>
+        <div class="row"><div class="card">Kognitif <span class="pill" style="float:right">BSH</span><div class="lines"></div></div><div class="card">Bahasa <span class="pill" style="float:right">BSB</span><div class="lines"></div></div></div>
+        <div class="row"><div class="card">Sosial Emosional <span class="pill" style="float:right">BB</span><div class="lines"></div></div><div class="card">Seni <span class="pill" style="float:right">MB</span><div class="lines"></div></div></div>
+        <div class="row"><div class="card note"><b>Catatan guru</b><div class="lines"></div></div><div class="card note"><b>Stimulasi di rumah</b><div class="lines"></div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>
