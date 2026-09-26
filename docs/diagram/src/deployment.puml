@@ -1,0 +1,38 @@
+' Ditulis manual. Deployment diagram.
+@startuml deployment
+!include _gaya.iuml
+title Deployment Diagram — TK Orchid
+
+node "Perangkat Pengguna\n(PC / laptop / HP)" as Client {
+  artifact "Peramban web\n(Chrome, Safari, Firefox)" as Browser
+}
+
+node "Server Aplikasi\n(VPS / server sekolah, 1 instance)" as Server {
+  node "Runtime Node.js 20+" {
+    artifact "Aplikasi Next.js\n(npm run build && npm run start)" as App
+    artifact "Prisma Client +\nbetter-sqlite3" as Orm
+  }
+  database "prisma/dev.db\n(SQLite)" as DB
+  folder "Folder unggahan\n(foto & dokumen)" as Up
+  file ".env\n(AUTH_SECRET)" as Env
+}
+
+node "Layanan Pihak Ketiga" as Ext {
+  artifact "WhatsApp (tautan wa.me)" as WA
+  artifact "Google Maps (embed)" as Maps
+}
+
+Browser --> App : HTTPS (port 443 → 3000)
+App --> Orm
+Orm --> DB : akses berkas lokal
+App --> Up
+App ..> Env : baca konfigurasi
+Browser ..> WA : tautan kontak
+Browser ..> Maps : peta lokasi
+
+note right of DB
+  SQLite butuh disk persisten dan cocok
+  untuk satu instance. Cadangkan berkas
+  dev.db secara berkala.
+end note
+@enduml

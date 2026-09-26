@@ -1,0 +1,167 @@
+' Dibuat otomatis oleh scripts/generate-docs.ts — jangan diedit manual.
+@startuml class-pengguna
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "DejaVu Sans"
+skinparam roundCorner 8
+skinparam linetype ortho
+skinparam ArrowColor #7a3f86
+skinparam class {
+  BackgroundColor #FDF8FD
+  BorderColor #A64CA6
+  HeaderBackgroundColor #F3E3F3
+  FontColor #1f1a2e
+}
+hide circle
+title Class Diagram — Pengguna & Hak Akses
+
+class Wali {
+  - id_wali : int
+  - id_pengguna : int [0..1]
+  - nama_lengkap : string
+  - hubungan : string
+  - nik : string [0..1]
+  - pekerjaan : string [0..1]
+  - nama_perusahaan : string [0..1]
+  - pendidikan : string [0..1]
+  - telepon : string
+  - email : string [0..1]
+  - alamat : string [0..1]
+  - catatan : string [0..1]
+  - dibuat_pada : datetime
+  - diperbarui_pada : datetime
+  --
+  + tambah()
+  + ubah()
+  + hubungkanAkunPortal()
+  + lihatAnak()
+}
+
+class Pengguna {
+  - id_pengguna : int
+  - nama : string
+  - email : string
+  - nama_pengguna : string [0..1]
+  - kata_sandi_hash : string
+  - peran : string
+  - aktif : boolean
+  - terakhir_masuk : datetime [0..1]
+  - dibuat_pada : datetime
+  - diperbarui_pada : datetime
+  --
+  + masuk(email, kataSandi)
+  + keluar()
+  + lupaKataSandi(email)
+  + aturUlangKataSandi(token, kataSandiBaru)
+}
+
+class Guru {
+  - id_guru : int
+  - id_pengguna : int
+  - kode_pegawai : string [0..1]
+  - nama_lengkap : string
+  - telepon : string [0..1]
+  - email : string [0..1]
+  - pendidikan : string [0..1]
+  - spesialisasi : string [0..1]
+  - tanggal_bergabung : datetime [0..1]
+  - aktif : boolean
+  - dibuat_pada : datetime
+  - diperbarui_pada : datetime
+  --
+  + lihatJadwal()
+  + isiPresensi()
+  + inputPenilaian()
+  + susunLaporan()
+}
+
+class SiswaWali #EEEEEE
+
+class Kelas #EEEEEE
+
+class PendaftaranPpdb #EEEEEE
+
+class Penilaian #EEEEEE
+
+class LaporanPerkembangan #EEEEEE
+
+class Presensi #EEEEEE
+
+class Jadwal #EEEEEE
+
+class Kegiatan #EEEEEE
+
+class Pengumuman #EEEEEE
+
+class PengumumanDibaca {
+  - id_pengumuman : int
+  - id_pengguna : int
+  - dibaca_pada : datetime
+  --
+
+}
+
+class Tagihan #EEEEEE
+
+class Pembayaran #EEEEEE
+
+class Pengeluaran #EEEEEE
+
+class DokumenSiswa #EEEEEE
+
+class LogAudit {
+  - id_log : int
+  - id_pengguna : int [0..1]
+  - aksi : string
+  - jenis_entitas : string
+  - id_entitas : int [0..1]
+  - data_sebelum : string [0..1]
+  - data_sesudah : string [0..1]
+  - alamat_ip : string [0..1]
+  - agen_pengguna : string [0..1]
+  - dibuat_pada : datetime
+  --
+  + catat(aksi, entitas)
+}
+
+class TokenResetSandi {
+  - id_token : int
+  - id_pengguna : int
+  - hash_token : string
+  - kedaluwarsa_pada : datetime
+  - dipakai_pada : datetime [0..1]
+  - dibuat_pada : datetime
+  --
+  + buat(pengguna)
+  + validasi(token)
+  + tandaiDipakai()
+}
+
+Pengguna "0..1" -- "0..1" Wali
+Pengguna "1" *-- "0..1" Guru
+Wali "1" *-- "0..*" SiswaWali
+Guru "0..1" -- "0..*" Kelas
+Pengguna "0..1" -- "0..*" PendaftaranPpdb
+Pengguna "1" -- "0..*" Penilaian
+Pengguna "1" -- "0..*" LaporanPerkembangan
+Pengguna "0..1" -- "0..*" LaporanPerkembangan
+Guru "0..1" -- "0..*" LaporanPerkembangan
+Pengguna "1" -- "0..*" Presensi
+Guru "0..1" -- "0..*" Jadwal
+Pengguna "1" -- "0..*" Kegiatan
+Pengguna "1" -- "0..*" Pengumuman
+Pengumuman "1" *-- "0..*" PengumumanDibaca
+Pengguna "1" *-- "0..*" PengumumanDibaca
+Pengguna "1" -- "0..*" Tagihan
+Pengguna "1" -- "0..*" Pembayaran
+Pengguna "1" -- "0..*" Pengeluaran
+Pengguna "1" -- "0..*" DokumenSiswa
+Pengguna "0..1" -- "0..*" LogAudit
+Pengguna "1" *-- "0..*" TokenResetSandi
+
+legend right
+  Belah ketupat hitam = komposisi (data anak ikut terhapus)
+  Garis biasa = asosiasi
+  Abu-abu = kelas dari modul lain
+endlegend
+@enduml

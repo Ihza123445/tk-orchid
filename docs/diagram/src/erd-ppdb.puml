@@ -1,0 +1,159 @@
+' Dibuat otomatis oleh scripts/generate-docs.ts — jangan diedit manual.
+@startuml erd-ppdb
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "DejaVu Sans"
+skinparam roundCorner 8
+skinparam linetype ortho
+skinparam ArrowColor #7a3f86
+skinparam class {
+  BackgroundColor #FDF8FD
+  BorderColor #A64CA6
+  HeaderBackgroundColor #F3E3F3
+  FontColor #1f1a2e
+}
+hide circle
+title ERD Modul Penerimaan Peserta Didik Baru (PPDB)
+
+entity "siswa_wali" as siswa_wali #EEEEEE {
+  * id_siswa : INTEGER <<PK,FK>>
+  * id_wali : INTEGER <<PK,FK>>
+}
+
+entity "siswa" as siswa {
+  * id_siswa : INTEGER <<PK>>
+  --
+  * kode_siswa : TEXT <<UK>>
+    nis : TEXT <<UK>>
+    nisn : TEXT <<UK>>
+    nik : TEXT
+  * nama_lengkap : TEXT
+    nama_panggilan : TEXT
+  * jenis_kelamin : TEXT
+    tempat_lahir : TEXT
+  * tanggal_lahir : DATETIME
+    agama : TEXT
+    alamat : TEXT
+    rt : TEXT
+    rw : TEXT
+    kelurahan : TEXT
+    kecamatan : TEXT
+    kota : TEXT
+    provinsi : TEXT
+    kode_pos : TEXT
+    anak_ke : INTEGER
+    jumlah_saudara : INTEGER
+    status_tempat_tinggal : TEXT
+    tanggal_masuk : DATETIME
+    tanggal_keluar : DATETIME
+    alasan_keluar : TEXT
+  * status : TEXT
+    lokasi_foto : TEXT
+    catatan : TEXT
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "penempatan_kelas" as penempatan_kelas #EEEEEE {
+  * id_penempatan : INTEGER <<PK>>
+}
+
+entity "pendaftaran_ppdb" as pendaftaran_ppdb {
+  * id_pendaftaran : INTEGER <<PK>>
+  --
+  * no_pendaftaran : TEXT <<UK>>
+  * id_periode_ppdb : INTEGER <<FK>>
+    id_siswa : INTEGER <<FK,UK>>
+  * nama_calon_siswa : TEXT
+  * jenis_kelamin_calon : TEXT
+    tempat_lahir_calon : TEXT
+  * tanggal_lahir_calon : DATETIME
+  * nama_wali : TEXT
+  * hubungan_wali : TEXT
+  * telepon_wali : TEXT
+    email_wali : TEXT
+    alamat_wali : TEXT
+    jenjang_pilihan : TEXT
+    sekolah_asal : TEXT
+    catatan : TEXT
+  * status : TEXT
+    alasan_penolakan : TEXT
+    ditinjau_oleh : INTEGER <<FK>>
+    ditinjau_pada : DATETIME
+    dikirim_pada : DATETIME
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "periode_ppdb" as periode_ppdb {
+  * id_periode_ppdb : INTEGER <<PK>>
+  --
+  * nama : TEXT
+  * tanggal_mulai : DATETIME
+  * tanggal_selesai : DATETIME
+  * aktif : BOOLEAN
+    persyaratan : TEXT
+    catatan : TEXT
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "pengguna" as pengguna #EEEEEE {
+  * id_pengguna : INTEGER <<PK>>
+}
+
+entity "dokumen_pendaftaran" as dokumen_pendaftaran {
+  * id_dokumen_pendaftaran : INTEGER <<PK>>
+  --
+  * id_pendaftaran : INTEGER <<FK>>
+  * jenis_dokumen : TEXT
+  * nama_file_asli : TEXT
+  * lokasi_file : TEXT
+  * tipe_mime : TEXT
+  * ukuran_byte : INTEGER
+  * dibuat_pada : DATETIME
+}
+
+entity "penilaian" as penilaian #EEEEEE {
+  * id_penilaian : INTEGER <<PK>>
+}
+
+entity "laporan_perkembangan" as laporan_perkembangan #EEEEEE {
+  * id_laporan : INTEGER <<PK>>
+}
+
+entity "presensi" as presensi #EEEEEE {
+  * id_presensi : INTEGER <<PK>>
+}
+
+entity "tagihan" as tagihan #EEEEEE {
+  * id_tagihan : INTEGER <<PK>>
+}
+
+entity "pembayaran" as pembayaran #EEEEEE {
+  * id_pembayaran : INTEGER <<PK>>
+}
+
+entity "dokumen_siswa" as dokumen_siswa #EEEEEE {
+  * id_dokumen_siswa : INTEGER <<PK>>
+}
+
+siswa ||--o{ siswa_wali : id_siswa
+siswa ||--o{ penempatan_kelas : id_siswa
+periode_ppdb ||--o{ pendaftaran_ppdb : id_periode_ppdb
+siswa |o--o| pendaftaran_ppdb : id_siswa
+pengguna |o--o{ pendaftaran_ppdb : ditinjau_oleh
+pendaftaran_ppdb ||--o{ dokumen_pendaftaran : id_pendaftaran
+siswa ||--o{ penilaian : id_siswa
+siswa ||--o{ laporan_perkembangan : id_siswa
+siswa ||--o{ presensi : id_siswa
+siswa ||--o{ tagihan : id_siswa
+siswa ||--o{ pembayaran : id_siswa
+siswa ||--o{ dokumen_siswa : id_siswa
+
+legend right
+  Abu-abu = entitas modul lain (hanya kunci)
+  PK = primary key, FK = foreign key, UK = unique
+  * = wajib diisi (NOT NULL)
+endlegend
+@enduml

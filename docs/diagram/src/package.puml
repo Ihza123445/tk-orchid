@@ -1,0 +1,50 @@
+' Ditulis manual. Package diagram struktur kode.
+@startuml package
+!include _gaya.iuml
+title Package Diagram — Struktur Kode Sumber
+
+package "src/app" as app {
+  package "(public)" as pub
+  package "(auth)" as auth
+  package "(dashboard)" as dash
+  package "guru" as guru
+  package "portal" as portal
+  package "media" as media
+}
+package "src/components" as comp {
+  package "layout" as layout
+  package "dashboard" as dashc
+  package "public" as pubc
+  package "form fitur\n(students, finance,\nattendance, reports, ...)" as forms
+}
+package "src/actions" as actions
+package "src/lib" as lib {
+  package "auth" as libauth
+  package "db" as libdb
+  package "cms" as libcms
+  package "formatting" as libfmt
+  package "ppdb" as libppdb
+}
+package "prisma" as prisma {
+  package "schema.prisma" as schema
+  package "migrations" as mig
+}
+
+pub ..> pubc
+dash ..> layout
+guru ..> layout
+portal ..> layout
+dash ..> dashc
+guru ..> dashc
+portal ..> dashc
+dash ..> forms
+guru ..> forms
+forms ..> actions
+actions ..> libauth
+actions ..> libdb
+actions ..> libcms
+actions ..> libppdb
+dashc ..> libfmt
+libdb ..> schema
+auth ..> libauth
+@enduml

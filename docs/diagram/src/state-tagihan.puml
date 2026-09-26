@@ -1,0 +1,28 @@
+' Ditulis manual. State machine status tagihan.
+@startuml state-tagihan
+!include _gaya.iuml
+title State Diagram — Status Tagihan (tagihan.status)
+
+[*] --> ISSUED : tagihan dibuat
+ISSUED : Belum dibayar
+PARTIAL : Dibayar sebagian
+PAID : Lunas
+VOID : Dibatalkan
+
+ISSUED --> PARTIAL : pembayaran < total
+ISSUED --> PAID : pembayaran ≥ total
+PARTIAL --> PAID : pelunasan
+PARTIAL --> ISSUED : pembayaran di-void\n(sisa alokasi = 0)
+PAID --> PARTIAL : sebagian pembayaran di-void
+PAID --> ISSUED : semua pembayaran di-void
+ISSUED --> VOID : dibatalkan + alasan\n(belum ada alokasi)
+VOID --> [*]
+PAID --> [*]
+
+note bottom of PARTIAL
+  "Lewat jatuh tempo" dihitung saat ditampilkan:
+  sisa > 0 dan jatuh_tempo < hari ini.
+  (Nilai OVERDUE tersedia di skema
+  tetapi tidak disimpan oleh aplikasi.)
+end note
+@enduml

@@ -1,0 +1,26 @@
+' Ditulis manual. Flowchart perhitungan status tagihan.
+@startuml flowchart-status-tagihan
+!include _gaya.iuml
+title Flowchart — Perhitungan Status Tagihan
+
+start
+:Input: tagihan;
+if (status = VOID?) then (ya)
+  :Status tetap VOID;
+  stop
+endif
+:total = Σ detail_tagihan.subtotal;
+:dibayar = Σ alokasi_pembayaran.nominal\n(hanya pembayaran berstatus POSTED);
+if (dibayar ≥ total?) then (ya)
+  :status = PAID (Lunas);
+elseif (dibayar > 0?) then (ya)
+  :status = PARTIAL (Dibayar sebagian);
+else (tidak)
+  :status = ISSUED (Belum dibayar);
+endif
+:sisa = maks(0, total − dibayar);
+if (sisa > 0 dan jatuh_tempo < hari ini?) then (ya)
+  :Tampilkan label "Lewat jatuh tempo";
+endif
+stop
+@enduml

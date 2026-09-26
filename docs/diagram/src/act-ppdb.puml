@@ -1,0 +1,60 @@
+' Ditulis manual. Activity diagram pendaftaran PPDB online.
+@startuml act-ppdb
+!include _gaya.iuml
+title Activity Diagram — Pendaftaran PPDB Online
+
+|Pengunjung|
+start
+:Membuka halaman Pendaftaran;
+|Sistem|
+if (Ada periode PPDB aktif\n& hari ini dalam rentang tanggal?) then (tidak)
+  :Tampilkan "Pendaftaran ditutup";
+  stop
+else (ya)
+  :Tampilkan formulir;
+endif
+|Pengunjung|
+:Mengisi data anak & orang tua/wali;
+:Mengirim formulir;
+|Sistem|
+:Validasi isian (nama, tanggal lahir,\njenjang, nomor HP, alamat);
+if (Valid?) then (tidak)
+  :Tampilkan pesan per kolom;
+  detach
+endif
+:Hitung usia per tanggal acuan periode;
+if (Anak yang sama sudah terdaftar\ndi periode ini?) then (ya)
+  :Tolak & tampilkan nomor pendaftaran lama;
+  stop
+endif
+:Buat no_pendaftaran & simpan\n(status = SUBMITTED);
+:Tampilkan nomor pendaftaran;
+|Admin / Staf TU|
+:Membuka menu Pendaftaran PPDB;
+:Menyaring per periode, jenjang, status;
+:Memeriksa data & peringatan usia;
+:Memilih status baru;
+|Sistem|
+switch (Status baru)
+case (REVIEW)
+  :Tandai sedang ditinjau;
+case (REVISION_REQUIRED)
+  :Tandai perlu revisi;
+case (ACCEPTED)
+  :Tandai diterima;
+case (REJECTED)
+  if (Alasan diisi (min. 5 huruf)?) then (ya)
+    :Simpan alasan penolakan;
+  else (tidak)
+    :Minta alasan;
+    detach
+  endif
+endswitch
+:Catat ditinjau_oleh, ditinjau_pada & log audit;
+|Admin / Staf TU|
+if (Diterima?) then (ya)
+  :Menambahkan data siswa, wali,\n& menempatkan ke kelas;
+else (tidak)
+endif
+stop
+@enduml

@@ -1,0 +1,249 @@
+' Dibuat otomatis oleh scripts/generate-docs.ts — jangan diedit manual.
+@startuml class-akademik
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "DejaVu Sans"
+skinparam roundCorner 8
+skinparam linetype ortho
+skinparam ArrowColor #7a3f86
+skinparam class {
+  BackgroundColor #FDF8FD
+  BorderColor #A64CA6
+  HeaderBackgroundColor #F3E3F3
+  FontColor #1f1a2e
+}
+hide circle
+title Class Diagram — Kesiswaan & Akademik
+
+class Wali {
+  - id_wali : int
+  - id_pengguna : int [0..1]
+  - nama_lengkap : string
+  - hubungan : string
+  - nik : string [0..1]
+  - pekerjaan : string [0..1]
+  - nama_perusahaan : string [0..1]
+  - pendidikan : string [0..1]
+  - telepon : string
+  - email : string [0..1]
+  - alamat : string [0..1]
+  - catatan : string [0..1]
+  - dibuat_pada : datetime
+  - diperbarui_pada : datetime
+  --
+  + tambah()
+  + ubah()
+  + hubungkanAkunPortal()
+  + lihatAnak()
+}
+
+class Pengguna #EEEEEE
+
+class Guru {
+  - id_guru : int
+  - id_pengguna : int
+  - kode_pegawai : string [0..1]
+  - nama_lengkap : string
+  - telepon : string [0..1]
+  - email : string [0..1]
+  - pendidikan : string [0..1]
+  - spesialisasi : string [0..1]
+  - tanggal_bergabung : datetime [0..1]
+  - aktif : boolean
+  - dibuat_pada : datetime
+  - diperbarui_pada : datetime
+  --
+  + lihatJadwal()
+  + isiPresensi()
+  + inputPenilaian()
+  + susunLaporan()
+}
+
+class SiswaWali {
+  - id_siswa : int
+  - id_wali : int
+  - wali_utama : boolean
+  - boleh_menjemput : boolean
+  - dibuat_pada : datetime
+  --
+  + tetapkanWaliUtama()
+}
+
+class Siswa {
+  - id_siswa : int
+  - kode_siswa : string
+  - nis : string [0..1]
+  - nisn : string [0..1]
+  - nik : string [0..1]
+  - nama_lengkap : string
+  - nama_panggilan : string [0..1]
+  - jenis_kelamin : string
+  - tempat_lahir : string [0..1]
+  - tanggal_lahir : datetime
+  - agama : string [0..1]
+  - alamat : string [0..1]
+  - rt : string [0..1]
+  - rw : string [0..1]
+  - kelurahan : string [0..1]
+  - kecamatan : string [0..1]
+  - kota : string [0..1]
+  - provinsi : string [0..1]
+  - kode_pos : string [0..1]
+  - anak_ke : int [0..1]
+  - jumlah_saudara : int [0..1]
+  - status_tempat_tinggal : string [0..1]
+  - tanggal_masuk : datetime [0..1]
+  - tanggal_keluar : datetime [0..1]
+  - alasan_keluar : string [0..1]
+  - status : string
+  - lokasi_foto : string [0..1]
+  - catatan : string [0..1]
+  - dibuat_pada : datetime
+  - diperbarui_pada : datetime
+  --
+  + tambah()
+  + ubah()
+  + lihatDetail()
+  + cari(kataKunci)
+  + hitungSisaTagihan()
+}
+
+class Kelas {
+  - id_kelas : int
+  - id_tahun_ajaran : int
+  - kode : string
+  - nama : string
+  - jenjang : string
+  - ruang : string [0..1]
+  - id_guru : int [0..1]
+  - kapasitas : int
+  - status : string
+  - dibuat_pada : datetime
+  - diperbarui_pada : datetime
+  --
+  + tambah()
+  + daftarkanSiswa(siswa)
+  + cekKapasitas()
+}
+
+class TahunAjaran {
+  - id_tahun_ajaran : int
+  - nama : string
+  - tanggal_mulai : datetime
+  - tanggal_selesai : datetime
+  - status : string
+  - dibuat_pada : datetime
+  - diperbarui_pada : datetime
+  --
+  + tambah()
+  + aktifkan()
+}
+
+class PenempatanKelas {
+  - id_penempatan : int
+  - id_siswa : int
+  - id_tahun_ajaran : int
+  - id_kelas : int
+  - tanggal_penempatan : datetime
+  - status : string
+  - catatan : string [0..1]
+  - dibuat_pada : datetime
+  - diperbarui_pada : datetime
+  --
+  + tempatkan()
+}
+
+class PendaftaranPpdb #EEEEEE
+
+class Penilaian #EEEEEE
+
+class LaporanPerkembangan #EEEEEE
+
+class Presensi {
+  - id_presensi : int
+  - id_siswa : int
+  - id_kelas : int
+  - tanggal : datetime
+  - status : string
+  - catatan : string [0..1]
+  - dicatat_oleh : int
+  - dibuat_pada : datetime
+  - diperbarui_pada : datetime
+  --
+  + simpanMassal(kelas, tanggal, daftar)
+  + rekapBulanan(siswa)
+}
+
+class Jadwal {
+  - id_jadwal : int
+  - id_kelas : int
+  - id_guru : int [0..1]
+  - hari : int
+  - jam_mulai : string
+  - jam_selesai : string
+  - kegiatan : string
+  - ruang : string [0..1]
+  - catatan : string [0..1]
+  - dibuat_pada : datetime
+  - diperbarui_pada : datetime
+  --
+  + lihatPerHari(hari)
+}
+
+class Pengumuman #EEEEEE
+
+class Tagihan #EEEEEE
+
+class Pembayaran #EEEEEE
+
+class DokumenSiswa {
+  - id_dokumen_siswa : int
+  - id_siswa : int
+  - jenis_dokumen : string
+  - nama_file_asli : string
+  - lokasi_file : string
+  - tipe_mime : string
+  - ukuran_byte : int
+  - visibilitas : string
+  - diunggah_oleh : int
+  - dibuat_pada : datetime
+  --
+  + unggah()
+  + hapus()
+}
+
+Pengguna "0..1" -- "0..1" Wali
+Pengguna "1" *-- "0..1" Guru
+Siswa "1" *-- "0..*" SiswaWali
+Wali "1" *-- "0..*" SiswaWali
+TahunAjaran "1" -- "0..*" Kelas
+Guru "0..1" -- "0..*" Kelas
+Siswa "1" *-- "0..*" PenempatanKelas
+TahunAjaran "1" -- "0..*" PenempatanKelas
+Kelas "1" -- "0..*" PenempatanKelas
+Siswa "0..1" -- "0..1" PendaftaranPpdb
+Siswa "1" *-- "0..*" Penilaian
+TahunAjaran "1" -- "0..*" Penilaian
+Kelas "1" -- "0..*" Penilaian
+Siswa "1" *-- "0..*" LaporanPerkembangan
+TahunAjaran "1" -- "0..*" LaporanPerkembangan
+Kelas "1" -- "0..*" LaporanPerkembangan
+Guru "0..1" -- "0..*" LaporanPerkembangan
+Siswa "1" *-- "0..*" Presensi
+Kelas "1" -- "0..*" Presensi
+Pengguna "1" -- "0..*" Presensi
+Kelas "1" *-- "0..*" Jadwal
+Guru "0..1" -- "0..*" Jadwal
+Kelas "0..1" -- "0..*" Pengumuman
+Siswa "1" -- "0..*" Tagihan
+TahunAjaran "0..1" -- "0..*" Tagihan
+Siswa "1" -- "0..*" Pembayaran
+Siswa "1" *-- "0..*" DokumenSiswa
+Pengguna "1" -- "0..*" DokumenSiswa
+
+legend right
+  Belah ketupat hitam = komposisi (data anak ikut terhapus)
+  Garis biasa = asosiasi
+  Abu-abu = kelas dari modul lain
+endlegend
+@enduml

@@ -1,0 +1,44 @@
+' Ditulis manual. Activity diagram kelola siswa, wali, dan penempatan kelas.
+@startuml act-kelola-siswa
+!include _gaya.iuml
+title Activity Diagram — Kelola Siswa, Wali & Penempatan Kelas
+
+|Admin / Staf TU|
+start
+:Membuka menu Data Siswa;
+:Klik "Tambah siswa";
+:Mengisi identitas, alamat, catatan;
+|Sistem|
+:Validasi isian;
+:Cek NIS unik (bila diisi);
+:Buat kode_siswa otomatis;
+:Simpan siswa (status = ACTIVE);
+|Admin / Staf TU|
+:Membuka menu Data Wali → "Tambah wali";
+:Mengisi data wali & memilih siswa;
+if (Buat akun portal orang tua?) then (ya)
+  :Mencentang "Buat akun portal"\n(email wajib diisi);
+else (tidak)
+endif
+|Sistem|
+:Simpan wali + relasi siswa_wali;
+if (Akun diminta?) then (ya)
+  :Buat pengguna berperan PARENT\ndengan kata sandi acak (bcrypt)\n& hubungkan ke wali;
+  note right: Orang tua mengatur kata sandi\nsendiri lewat "Lupa password".
+endif
+|Admin / Staf TU|
+:Membuka detail Kelas;
+:Memilih siswa yang belum punya kelas;
+:Klik "Daftarkan";
+|Sistem|
+if (Kelas penuh?) then (ya)
+  :Tolak ("Kelas penuh");
+  stop
+endif
+if (Siswa sudah punya kelas\npada tahun ajaran ini?) then (ya)
+  :Tolak (unik per siswa + tahun ajaran);
+  stop
+endif
+:Simpan penempatan_kelas;
+stop
+@enduml

@@ -1,0 +1,38 @@
+' Ditulis manual. Activity diagram kelola konten website.
+@startuml act-kelola-website
+!include _gaya.iuml
+title Activity Diagram — Kelola Konten Website
+
+|Admin / Staf TU|
+start
+:Membuka menu Kelola Website;
+:Memilih bagian konten\n(slider, kegiatan, pengumuman, galeri,\nfasilitas, testimoni, FAQ, periode PPDB);
+switch (Aksi)
+case (Tambah / Ubah)
+  :Mengisi formulir & mengunggah foto\n(atau memakai tautan gambar);
+  |Sistem|
+  :Validasi kolom wajib & berkas\n(JPG/PNG/WEBP/GIF, maks. 5 MB);
+  :Simpan data & berkas;
+case (Tampilkan / Sembunyikan)
+  |Sistem|
+  :Balik status aktif / terbit;
+case (Ubah urutan)
+  |Sistem|
+  :Tukar nilai urutan dengan item\ndi atas/bawahnya (transaksi);
+case (Hapus)
+  |Admin / Staf TU|
+  :Konfirmasi "Ya, hapus";
+  |Sistem|
+  if (Periode PPDB sudah punya pendaftar?) then (ya)
+    :Tolak — sarankan dinonaktifkan;
+    stop
+  endif
+  :Hapus data & berkas gambarnya;
+endswitch
+|Sistem|
+:Catat log audit;
+:Segarkan halaman website publik;
+|Pengunjung|
+:Melihat konten terbaru di website;
+stop
+@enduml

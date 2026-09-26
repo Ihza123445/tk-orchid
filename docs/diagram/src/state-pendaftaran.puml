@@ -1,0 +1,34 @@
+' Ditulis manual. State machine status pendaftaran PPDB.
+@startuml state-pendaftaran
+!include _gaya.iuml
+title State Diagram — Status Pendaftaran PPDB (pendaftaran_ppdb.status)
+
+[*] --> SUBMITTED : pengunjung mengirim formulir
+SUBMITTED : Diajukan
+REVIEW : Ditinjau
+REVISION_REQUIRED : Perlu revisi
+ACCEPTED : Diterima
+REJECTED : Ditolak\n(alasan wajib)
+ENROLLED : Menjadi siswa\n(terkunci)
+
+SUBMITTED --> REVIEW : admin meninjau
+SUBMITTED --> ACCEPTED
+SUBMITTED --> REJECTED
+REVIEW --> REVISION_REQUIRED : data kurang
+REVISION_REQUIRED --> REVIEW : data dilengkapi
+REVIEW --> ACCEPTED : lolos
+REVIEW --> REJECTED : tidak lolos
+ACCEPTED --> REJECTED : dibatalkan
+REJECTED --> REVIEW : ditinjau ulang
+ACCEPTED --> ENROLLED : data siswa dibuat\n& id_siswa terhubung
+ENROLLED --> [*]
+REJECTED --> [*]
+
+note right of ENROLLED
+  Setelah ENROLLED status tidak
+  dapat diubah lagi. Saat ini
+  penandaan ENROLLED dilakukan
+  lewat data/proses administrasi,
+  belum ada tombol otomatis.
+end note
+@enduml

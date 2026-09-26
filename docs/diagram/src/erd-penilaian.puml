@@ -1,0 +1,127 @@
+' Dibuat otomatis oleh scripts/generate-docs.ts — jangan diedit manual.
+@startuml erd-penilaian
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "DejaVu Sans"
+skinparam roundCorner 8
+skinparam linetype ortho
+skinparam ArrowColor #7a3f86
+skinparam class {
+  BackgroundColor #FDF8FD
+  BorderColor #A64CA6
+  HeaderBackgroundColor #F3E3F3
+  FontColor #1f1a2e
+}
+hide circle
+title ERD Modul Penilaian & Laporan Perkembangan
+
+entity "penilaian" as penilaian {
+  * id_penilaian : INTEGER <<PK>>
+  --
+  * id_siswa : INTEGER <<FK>>
+  * id_tahun_ajaran : INTEGER <<FK>>
+  * id_kelas : INTEGER <<FK>>
+  * id_domain : INTEGER <<FK>>
+  * id_skala : INTEGER <<FK>>
+  * periode : TEXT
+    narasi : TEXT
+    catatan_guru : TEXT
+  * dibuat_oleh : INTEGER <<FK>>
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "siswa" as siswa #EEEEEE {
+  * id_siswa : INTEGER <<PK>>
+}
+
+entity "tahun_ajaran" as tahun_ajaran #EEEEEE {
+  * id_tahun_ajaran : INTEGER <<PK>>
+}
+
+entity "kelas" as kelas #EEEEEE {
+  * id_kelas : INTEGER <<PK>>
+}
+
+entity "domain_penilaian" as domain_penilaian {
+  * id_domain : INTEGER <<PK>>
+  --
+  * nama : TEXT <<UK>>
+    deskripsi : TEXT
+  * urutan : INTEGER
+  * aktif : BOOLEAN
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "skala_penilaian" as skala_penilaian {
+  * id_skala : INTEGER <<PK>>
+  --
+  * kode : TEXT <<UK>>
+  * label : TEXT
+    deskripsi : TEXT
+  * urutan : INTEGER
+  * aktif : BOOLEAN
+  * dibuat_pada : DATETIME
+}
+
+entity "pengguna" as pengguna #EEEEEE {
+  * id_pengguna : INTEGER <<PK>>
+}
+
+entity "laporan_perkembangan" as laporan_perkembangan {
+  * id_laporan : INTEGER <<PK>>
+  --
+  * no_laporan : TEXT <<UK>>
+  * id_siswa : INTEGER <<FK>>
+  * id_tahun_ajaran : INTEGER <<FK>>
+  * id_kelas : INTEGER <<FK>>
+  * periode : TEXT
+    ringkasan : TEXT
+    rekomendasi_rumah : TEXT
+    ringkasan_kehadiran : TEXT
+  * status : TEXT
+  * dibuat_oleh : INTEGER <<FK>>
+    id_guru : INTEGER <<FK>>
+    diterbitkan_oleh : INTEGER <<FK>>
+    diterbitkan_pada : DATETIME
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "guru" as guru #EEEEEE {
+  * id_guru : INTEGER <<PK>>
+}
+
+entity "detail_laporan" as detail_laporan {
+  * id_detail_laporan : INTEGER <<PK>>
+  --
+  * id_laporan : INTEGER <<FK>>
+  * id_domain : INTEGER <<FK>>
+  * id_skala : INTEGER <<FK>>
+    narasi : TEXT
+  * urutan : INTEGER
+}
+
+siswa ||--o{ penilaian : id_siswa
+tahun_ajaran ||--o{ penilaian : id_tahun_ajaran
+kelas ||--o{ penilaian : id_kelas
+domain_penilaian ||--o{ penilaian : id_domain
+skala_penilaian ||--o{ penilaian : id_skala
+pengguna ||--o{ penilaian : dibuat_oleh
+siswa ||--o{ laporan_perkembangan : id_siswa
+tahun_ajaran ||--o{ laporan_perkembangan : id_tahun_ajaran
+kelas ||--o{ laporan_perkembangan : id_kelas
+pengguna ||--o{ laporan_perkembangan : dibuat_oleh
+pengguna |o--o{ laporan_perkembangan : diterbitkan_oleh
+guru |o--o{ laporan_perkembangan : id_guru
+laporan_perkembangan ||--o{ detail_laporan : id_laporan
+domain_penilaian ||--o{ detail_laporan : id_domain
+skala_penilaian ||--o{ detail_laporan : id_skala
+
+legend right
+  Abu-abu = entitas modul lain (hanya kunci)
+  PK = primary key, FK = foreign key, UK = unique
+  * = wajib diisi (NOT NULL)
+endlegend
+@enduml

@@ -1,0 +1,125 @@
+' Dibuat otomatis oleh scripts/generate-docs.ts — jangan diedit manual.
+@startuml class-penilaian
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "DejaVu Sans"
+skinparam roundCorner 8
+skinparam linetype ortho
+skinparam ArrowColor #7a3f86
+skinparam class {
+  BackgroundColor #FDF8FD
+  BorderColor #A64CA6
+  HeaderBackgroundColor #F3E3F3
+  FontColor #1f1a2e
+}
+hide circle
+title Class Diagram — Penilaian & Laporan Perkembangan
+
+class Penilaian {
+  - id_penilaian : int
+  - id_siswa : int
+  - id_tahun_ajaran : int
+  - id_kelas : int
+  - id_domain : int
+  - id_skala : int
+  - periode : string
+  - narasi : string [0..1]
+  - catatan_guru : string [0..1]
+  - dibuat_oleh : int
+  - dibuat_pada : datetime
+  - diperbarui_pada : datetime
+  --
+  + simpan()
+  + rekapPeriode()
+}
+
+class Siswa #EEEEEE
+
+class TahunAjaran #EEEEEE
+
+class Kelas #EEEEEE
+
+class DomainPenilaian {
+  - id_domain : int
+  - nama : string
+  - deskripsi : string [0..1]
+  - urutan : int
+  - aktif : boolean
+  - dibuat_pada : datetime
+  - diperbarui_pada : datetime
+  --
+  + daftarAktif()
+}
+
+class SkalaPenilaian {
+  - id_skala : int
+  - kode : string
+  - label : string
+  - deskripsi : string [0..1]
+  - urutan : int
+  - aktif : boolean
+  - dibuat_pada : datetime
+  --
+  + daftarAktif()
+}
+
+class Pengguna #EEEEEE
+
+class LaporanPerkembangan {
+  - id_laporan : int
+  - no_laporan : string
+  - id_siswa : int
+  - id_tahun_ajaran : int
+  - id_kelas : int
+  - periode : string
+  - ringkasan : string [0..1]
+  - rekomendasi_rumah : string [0..1]
+  - ringkasan_kehadiran : string [0..1]
+  - status : string
+  - dibuat_oleh : int
+  - id_guru : int [0..1]
+  - diterbitkan_oleh : int [0..1]
+  - diterbitkan_pada : datetime [0..1]
+  - dibuat_pada : datetime
+  - diperbarui_pada : datetime
+  --
+  + simpanDraf()
+  + kirimUntukReview()
+  + terbitkan()
+}
+
+class Guru #EEEEEE
+
+class DetailLaporan {
+  - id_detail_laporan : int
+  - id_laporan : int
+  - id_domain : int
+  - id_skala : int
+  - narasi : string [0..1]
+  - urutan : int
+  --
+  + isiCapaian()
+}
+
+Siswa "1" *-- "0..*" Penilaian
+TahunAjaran "1" -- "0..*" Penilaian
+Kelas "1" -- "0..*" Penilaian
+DomainPenilaian "1" -- "0..*" Penilaian
+SkalaPenilaian "1" -- "0..*" Penilaian
+Pengguna "1" -- "0..*" Penilaian
+Siswa "1" *-- "0..*" LaporanPerkembangan
+TahunAjaran "1" -- "0..*" LaporanPerkembangan
+Kelas "1" -- "0..*" LaporanPerkembangan
+Pengguna "1" -- "0..*" LaporanPerkembangan
+Pengguna "0..1" -- "0..*" LaporanPerkembangan
+Guru "0..1" -- "0..*" LaporanPerkembangan
+LaporanPerkembangan "1" *-- "0..*" DetailLaporan
+DomainPenilaian "1" -- "0..*" DetailLaporan
+SkalaPenilaian "1" -- "0..*" DetailLaporan
+
+legend right
+  Belah ketupat hitam = komposisi (data anak ikut terhapus)
+  Garis biasa = asosiasi
+  Abu-abu = kelas dari modul lain
+endlegend
+@enduml

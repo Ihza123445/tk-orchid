@@ -1,0 +1,130 @@
+' Dibuat otomatis oleh scripts/generate-docs.ts — jangan diedit manual.
+@startuml erd-keuangan
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "DejaVu Sans"
+skinparam roundCorner 8
+skinparam linetype ortho
+skinparam ArrowColor #7a3f86
+skinparam class {
+  BackgroundColor #FDF8FD
+  BorderColor #A64CA6
+  HeaderBackgroundColor #F3E3F3
+  FontColor #1f1a2e
+}
+hide circle
+title ERD Modul Keuangan
+
+entity "tagihan" as tagihan {
+  * id_tagihan : INTEGER <<PK>>
+  --
+  * no_tagihan : TEXT <<UK>>
+  * id_siswa : INTEGER <<FK>>
+    id_tahun_ajaran : INTEGER <<FK>>
+  * tanggal_terbit : DATETIME
+  * jatuh_tempo : DATETIME
+  * status : TEXT
+    catatan : TEXT
+  * dibuat_oleh : INTEGER <<FK>>
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "siswa" as siswa #EEEEEE {
+  * id_siswa : INTEGER <<PK>>
+}
+
+entity "tahun_ajaran" as tahun_ajaran #EEEEEE {
+  * id_tahun_ajaran : INTEGER <<PK>>
+}
+
+entity "pengguna" as pengguna #EEEEEE {
+  * id_pengguna : INTEGER <<PK>>
+}
+
+entity "detail_tagihan" as detail_tagihan {
+  * id_detail_tagihan : INTEGER <<PK>>
+  --
+  * id_tagihan : INTEGER <<FK>>
+  * id_jenis_biaya : INTEGER <<FK>>
+  * keterangan : TEXT
+  * jumlah : INTEGER
+  * harga_satuan : INTEGER
+  * subtotal : INTEGER
+}
+
+entity "jenis_biaya" as jenis_biaya {
+  * id_jenis_biaya : INTEGER <<PK>>
+  --
+  * kode : TEXT <<UK>>
+  * nama : TEXT
+    deskripsi : TEXT
+  * nominal_default : INTEGER
+  * berulang : BOOLEAN
+  * aktif : BOOLEAN
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "pembayaran" as pembayaran {
+  * id_pembayaran : INTEGER <<PK>>
+  --
+  * no_kwitansi : TEXT <<UK>>
+  * id_siswa : INTEGER <<FK>>
+  * tanggal_bayar : DATETIME
+  * nominal : INTEGER
+  * metode : TEXT
+    no_referensi : TEXT
+    catatan : TEXT
+    lokasi_bukti : TEXT
+  * status : TEXT
+    alasan_batal : TEXT
+  * dicatat_oleh : INTEGER <<FK>>
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "alokasi_pembayaran" as alokasi_pembayaran {
+  * id_alokasi : INTEGER <<PK>>
+  --
+  * id_pembayaran : INTEGER <<FK>>
+  * id_tagihan : INTEGER <<FK>>
+  * nominal : INTEGER
+  * dibuat_pada : DATETIME
+}
+
+entity "pengeluaran" as pengeluaran {
+  * id_pengeluaran : INTEGER <<PK>>
+  --
+  * no_pengeluaran : TEXT <<UK>>
+  * tanggal : DATETIME
+  * kategori : TEXT
+  * deskripsi : TEXT
+  * nominal : INTEGER
+    pemasok : TEXT
+  * metode_bayar : TEXT
+    lokasi_bukti : TEXT
+  * status : TEXT
+    alasan_batal : TEXT
+  * dibuat_oleh : INTEGER <<FK>>
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+siswa ||--o{ tagihan : id_siswa
+tahun_ajaran |o--o{ tagihan : id_tahun_ajaran
+pengguna ||--o{ tagihan : dibuat_oleh
+tagihan ||--o{ detail_tagihan : id_tagihan
+jenis_biaya ||--o{ detail_tagihan : id_jenis_biaya
+siswa ||--o{ pembayaran : id_siswa
+pengguna ||--o{ pembayaran : dicatat_oleh
+pembayaran ||--o{ alokasi_pembayaran : id_pembayaran
+tagihan ||--o{ alokasi_pembayaran : id_tagihan
+pengguna ||--o{ pengeluaran : dibuat_oleh
+
+legend right
+  Abu-abu = entitas modul lain (hanya kunci)
+  PK = primary key, FK = foreign key, UK = unique
+  * = wajib diisi (NOT NULL)
+endlegend
+@enduml

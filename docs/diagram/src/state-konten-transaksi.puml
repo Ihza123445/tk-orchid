@@ -1,0 +1,31 @@
+' Ditulis manual. State machine konten website dan transaksi keuangan.
+@startuml state-konten-transaksi
+!include _gaya.iuml
+title State Diagram — Konten Website & Transaksi Keuangan
+
+state "Kegiatan / Pengumuman (status)" as Konten {
+  [*] --> DRAFT
+  DRAFT : Draf
+  PUBLISHED : Terbit
+  ARCHIVED : Diarsipkan
+  DRAFT --> PUBLISHED : tampilkan
+  PUBLISHED --> DRAFT : sembunyikan
+  PUBLISHED --> ARCHIVED : arsipkan
+}
+
+state "Pembayaran / Pengeluaran (status)" as Transaksi {
+  [*] --> POSTED
+  POSTED : Tercatat
+  VOID : Dibatalkan\n(alasan wajib, hanya Administrator)
+  POSTED --> VOID : void
+  VOID --> [*]
+}
+
+state "Slider, Galeri, Fasilitas, Testimoni, FAQ, Periode PPDB (aktif)" as Tampil {
+  [*] --> Tampil_ : dibuat
+  Tampil_ : aktif = true
+  Sembunyi : aktif = false
+  Tampil_ --> Sembunyi : sembunyikan
+  Sembunyi --> Tampil_ : tampilkan
+}
+@enduml

@@ -1,0 +1,30 @@
+' Ditulis manual. Timing diagram — contoh perubahan status satu tagihan.
+@startuml timing
+!include _gaya.iuml
+title Timing Diagram — Contoh Status Tagihan & Pembayaran (Juli 2026)
+
+robust "tagihan.status" as INV
+concise "pembayaran" as PAY
+
+@0
+INV is ISSUED
+PAY is "-"
+
+@5
+INV is ISSUED
+note top of INV : 5 Jul — tagihan Rp400.000 dibuat
+
+@12
+PAY is "Rp250.000 (POSTED)"
+INV is PARTIAL
+
+@20
+PAY is "Rp150.000 (POSTED)"
+INV is PAID
+
+@25
+PAY is "-"
+
+@0 <-> @5 : persiapan
+@5 <-> @20 : masa pembayaran (jatuh tempo 25 Jul)
+@enduml

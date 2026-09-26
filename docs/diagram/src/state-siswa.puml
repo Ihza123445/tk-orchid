@@ -1,0 +1,37 @@
+' Ditulis manual. State machine status siswa & penempatan kelas.
+@startuml state-siswa
+!include _gaya.iuml
+title State Diagram — Status Siswa (siswa.status)
+
+[*] --> ACTIVE : data siswa ditambahkan
+[*] --> CANDIDATE : dicatat sebagai calon
+CANDIDATE : Calon
+ACTIVE : Aktif
+INACTIVE : Nonaktif (cuti)
+GRADUATED : Lulus
+TRANSFERRED : Pindah sekolah
+WITHDRAWN : Keluar
+
+CANDIDATE --> ACTIVE : diterima
+ACTIVE --> INACTIVE : cuti sementara
+INACTIVE --> ACTIVE : aktif kembali
+ACTIVE --> GRADUATED : lulus TK B
+ACTIVE --> TRANSFERRED : pindah
+ACTIVE --> WITHDRAWN : mengundurkan diri
+GRADUATED --> [*]
+TRANSFERRED --> [*]
+WITHDRAWN --> [*]
+
+note right of ACTIVE
+  Hanya siswa ACTIVE yang bisa
+  ditempatkan ke kelas, ditagih,
+  dan tampil di portal orang tua.
+end note
+
+legend bottom
+  Di aplikasi saat ini: tambah siswa → ACTIVE;
+  fungsi server "nonaktifkan" → INACTIVE (tanggal_keluar diisi).
+  Status lain (CANDIDATE, GRADUATED, TRANSFERRED, WITHDRAWN)
+  tersedia di skema untuk kebutuhan administrasi berikutnya.
+endlegend
+@enduml

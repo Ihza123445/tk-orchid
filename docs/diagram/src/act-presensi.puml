@@ -1,0 +1,34 @@
+' Ditulis manual. Activity diagram pengisian presensi.
+@startuml act-presensi
+!include _gaya.iuml
+title Activity Diagram — Pengisian Presensi Harian
+
+|Guru / Staf|
+start
+:Membuka menu Presensi;
+:Memilih kelas & tanggal;
+|Sistem|
+if (Pengguna berhak atas kelas ini?\n(guru = hanya kelas yang diampu)) then (tidak)
+  :Tampilkan "Kelas ini bukan assignment Anda";
+  stop
+endif
+:Muat daftar siswa kelas\n+ status presensi yang sudah ada;
+|Guru / Staf|
+if (Semua hadir?) then (ya)
+  :Klik "Tandai Hadir Semua";
+else (tidak)
+endif
+repeat
+  :Pilih status siswa\n(Hadir / Sakit / Izin / Alpa);
+  :Isi catatan (opsional);
+repeat while (Masih ada siswa tanpa status?) is (ya)
+->tidak;
+:Klik "Simpan Presensi";
+|Sistem|
+:Validasi: semua siswa sudah berstatus;
+:Simpan/perbarui per siswa\n(unik per siswa + tanggal);
+:Catat log audit ATTENDANCE_BULK_SAVE;
+:Tampilkan "berhasil disimpan (n siswa)";
+|Guru / Staf|
+stop
+@enduml

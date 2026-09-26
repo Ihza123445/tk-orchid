@@ -1,0 +1,152 @@
+' Dibuat otomatis oleh scripts/generate-docs.ts — jangan diedit manual.
+@startuml class-ppdb
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "DejaVu Sans"
+skinparam roundCorner 8
+skinparam linetype ortho
+skinparam ArrowColor #7a3f86
+skinparam class {
+  BackgroundColor #FDF8FD
+  BorderColor #A64CA6
+  HeaderBackgroundColor #F3E3F3
+  FontColor #1f1a2e
+}
+hide circle
+title Class Diagram — Penerimaan Peserta Didik Baru (PPDB)
+
+class SiswaWali #EEEEEE
+
+class Siswa {
+  - id_siswa : int
+  - kode_siswa : string
+  - nis : string [0..1]
+  - nisn : string [0..1]
+  - nik : string [0..1]
+  - nama_lengkap : string
+  - nama_panggilan : string [0..1]
+  - jenis_kelamin : string
+  - tempat_lahir : string [0..1]
+  - tanggal_lahir : datetime
+  - agama : string [0..1]
+  - alamat : string [0..1]
+  - rt : string [0..1]
+  - rw : string [0..1]
+  - kelurahan : string [0..1]
+  - kecamatan : string [0..1]
+  - kota : string [0..1]
+  - provinsi : string [0..1]
+  - kode_pos : string [0..1]
+  - anak_ke : int [0..1]
+  - jumlah_saudara : int [0..1]
+  - status_tempat_tinggal : string [0..1]
+  - tanggal_masuk : datetime [0..1]
+  - tanggal_keluar : datetime [0..1]
+  - alasan_keluar : string [0..1]
+  - status : string
+  - lokasi_foto : string [0..1]
+  - catatan : string [0..1]
+  - dibuat_pada : datetime
+  - diperbarui_pada : datetime
+  --
+  + tambah()
+  + ubah()
+  + lihatDetail()
+  + cari(kataKunci)
+  + hitungSisaTagihan()
+}
+
+class PenempatanKelas #EEEEEE
+
+class PendaftaranPpdb {
+  - id_pendaftaran : int
+  - no_pendaftaran : string
+  - id_periode_ppdb : int
+  - id_siswa : int [0..1]
+  - nama_calon_siswa : string
+  - jenis_kelamin_calon : string
+  - tempat_lahir_calon : string [0..1]
+  - tanggal_lahir_calon : datetime
+  - nama_wali : string
+  - hubungan_wali : string
+  - telepon_wali : string
+  - email_wali : string [0..1]
+  - alamat_wali : string [0..1]
+  - jenjang_pilihan : string [0..1]
+  - sekolah_asal : string [0..1]
+  - catatan : string [0..1]
+  - status : string
+  - alasan_penolakan : string [0..1]
+  - ditinjau_oleh : int [0..1]
+  - ditinjau_pada : datetime [0..1]
+  - dikirim_pada : datetime [0..1]
+  - dibuat_pada : datetime
+  - diperbarui_pada : datetime
+  --
+  + kirimFormulir()
+  + tinjau(status, alasan)
+  + jadikanSiswa()
+}
+
+class PeriodePpdb {
+  - id_periode_ppdb : int
+  - nama : string
+  - tanggal_mulai : datetime
+  - tanggal_selesai : datetime
+  - aktif : boolean
+  - persyaratan : string [0..1]
+  - catatan : string [0..1]
+  - dibuat_pada : datetime
+  - diperbarui_pada : datetime
+  --
+  + buka()
+  + tutup()
+  + sedangBerlangsung()
+}
+
+class Pengguna #EEEEEE
+
+class DokumenPendaftaran {
+  - id_dokumen_pendaftaran : int
+  - id_pendaftaran : int
+  - jenis_dokumen : string
+  - nama_file_asli : string
+  - lokasi_file : string
+  - tipe_mime : string
+  - ukuran_byte : int
+  - dibuat_pada : datetime
+  --
+  + unggah()
+}
+
+class Penilaian #EEEEEE
+
+class LaporanPerkembangan #EEEEEE
+
+class Presensi #EEEEEE
+
+class Tagihan #EEEEEE
+
+class Pembayaran #EEEEEE
+
+class DokumenSiswa #EEEEEE
+
+Siswa "1" *-- "0..*" SiswaWali
+Siswa "1" *-- "0..*" PenempatanKelas
+PeriodePpdb "1" -- "0..*" PendaftaranPpdb
+Siswa "0..1" -- "0..1" PendaftaranPpdb
+Pengguna "0..1" -- "0..*" PendaftaranPpdb
+PendaftaranPpdb "1" *-- "0..*" DokumenPendaftaran
+Siswa "1" *-- "0..*" Penilaian
+Siswa "1" *-- "0..*" LaporanPerkembangan
+Siswa "1" *-- "0..*" Presensi
+Siswa "1" -- "0..*" Tagihan
+Siswa "1" -- "0..*" Pembayaran
+Siswa "1" *-- "0..*" DokumenSiswa
+
+legend right
+  Belah ketupat hitam = komposisi (data anak ikut terhapus)
+  Garis biasa = asosiasi
+  Abu-abu = kelas dari modul lain
+endlegend
+@enduml

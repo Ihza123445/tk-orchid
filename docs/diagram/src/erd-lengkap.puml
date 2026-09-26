@@ -1,0 +1,593 @@
+' Dibuat otomatis oleh scripts/generate-docs.ts — jangan diedit manual.
+@startuml erd-lengkap
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "DejaVu Sans"
+skinparam roundCorner 8
+skinparam linetype ortho
+skinparam ArrowColor #7a3f86
+skinparam class {
+  BackgroundColor #FDF8FD
+  BorderColor #A64CA6
+  HeaderBackgroundColor #F3E3F3
+  FontColor #1f1a2e
+}
+hide circle
+title ERD Sistem Informasi TK Orchid (lengkap, notasi crow's foot)
+
+left to right direction
+entity "pengguna" as pengguna {
+  * id_pengguna : INTEGER <<PK>>
+  --
+  * nama : TEXT
+  * email : TEXT <<UK>>
+    nama_pengguna : TEXT <<UK>>
+  * kata_sandi_hash : TEXT
+  * peran : TEXT
+  * aktif : BOOLEAN
+    terakhir_masuk : DATETIME
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "wali" as wali {
+  * id_wali : INTEGER <<PK>>
+  --
+    id_pengguna : INTEGER <<FK,UK>>
+  * nama_lengkap : TEXT
+  * hubungan : TEXT
+    nik : TEXT
+    pekerjaan : TEXT
+    nama_perusahaan : TEXT
+    pendidikan : TEXT
+  * telepon : TEXT
+    email : TEXT
+    alamat : TEXT
+    catatan : TEXT
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "guru" as guru {
+  * id_guru : INTEGER <<PK>>
+  --
+  * id_pengguna : INTEGER <<FK,UK>>
+    kode_pegawai : TEXT <<UK>>
+  * nama_lengkap : TEXT
+    telepon : TEXT
+    email : TEXT
+    pendidikan : TEXT
+    spesialisasi : TEXT
+    tanggal_bergabung : DATETIME
+  * aktif : BOOLEAN
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "tahun_ajaran" as tahun_ajaran {
+  * id_tahun_ajaran : INTEGER <<PK>>
+  --
+  * nama : TEXT <<UK>>
+  * tanggal_mulai : DATETIME
+  * tanggal_selesai : DATETIME
+  * status : TEXT
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "siswa" as siswa {
+  * id_siswa : INTEGER <<PK>>
+  --
+  * kode_siswa : TEXT <<UK>>
+    nis : TEXT <<UK>>
+    nisn : TEXT <<UK>>
+    nik : TEXT
+  * nama_lengkap : TEXT
+    nama_panggilan : TEXT
+  * jenis_kelamin : TEXT
+    tempat_lahir : TEXT
+  * tanggal_lahir : DATETIME
+    agama : TEXT
+    alamat : TEXT
+    rt : TEXT
+    rw : TEXT
+    kelurahan : TEXT
+    kecamatan : TEXT
+    kota : TEXT
+    provinsi : TEXT
+    kode_pos : TEXT
+    anak_ke : INTEGER
+    jumlah_saudara : INTEGER
+    status_tempat_tinggal : TEXT
+    tanggal_masuk : DATETIME
+    tanggal_keluar : DATETIME
+    alasan_keluar : TEXT
+  * status : TEXT
+    lokasi_foto : TEXT
+    catatan : TEXT
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "siswa_wali" as siswa_wali {
+  * id_siswa : INTEGER <<PK,FK>>
+  * id_wali : INTEGER <<PK,FK>>
+  --
+  * wali_utama : BOOLEAN
+  * boleh_menjemput : BOOLEAN
+  * dibuat_pada : DATETIME
+}
+
+entity "kelas" as kelas {
+  * id_kelas : INTEGER <<PK>>
+  --
+  * id_tahun_ajaran : INTEGER <<FK>>
+  * kode : TEXT
+  * nama : TEXT
+  * jenjang : TEXT
+    ruang : TEXT
+    id_guru : INTEGER <<FK>>
+  * kapasitas : INTEGER
+  * status : TEXT
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "penempatan_kelas" as penempatan_kelas {
+  * id_penempatan : INTEGER <<PK>>
+  --
+  * id_siswa : INTEGER <<FK>>
+  * id_tahun_ajaran : INTEGER <<FK>>
+  * id_kelas : INTEGER <<FK>>
+  * tanggal_penempatan : DATETIME
+  * status : TEXT
+    catatan : TEXT
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "periode_ppdb" as periode_ppdb {
+  * id_periode_ppdb : INTEGER <<PK>>
+  --
+  * nama : TEXT
+  * tanggal_mulai : DATETIME
+  * tanggal_selesai : DATETIME
+  * aktif : BOOLEAN
+    persyaratan : TEXT
+    catatan : TEXT
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "pendaftaran_ppdb" as pendaftaran_ppdb {
+  * id_pendaftaran : INTEGER <<PK>>
+  --
+  * no_pendaftaran : TEXT <<UK>>
+  * id_periode_ppdb : INTEGER <<FK>>
+    id_siswa : INTEGER <<FK,UK>>
+  * nama_calon_siswa : TEXT
+  * jenis_kelamin_calon : TEXT
+    tempat_lahir_calon : TEXT
+  * tanggal_lahir_calon : DATETIME
+  * nama_wali : TEXT
+  * hubungan_wali : TEXT
+  * telepon_wali : TEXT
+    email_wali : TEXT
+    alamat_wali : TEXT
+    jenjang_pilihan : TEXT
+    sekolah_asal : TEXT
+    catatan : TEXT
+  * status : TEXT
+    alasan_penolakan : TEXT
+    ditinjau_oleh : INTEGER <<FK>>
+    ditinjau_pada : DATETIME
+    dikirim_pada : DATETIME
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "dokumen_pendaftaran" as dokumen_pendaftaran {
+  * id_dokumen_pendaftaran : INTEGER <<PK>>
+  --
+  * id_pendaftaran : INTEGER <<FK>>
+  * jenis_dokumen : TEXT
+  * nama_file_asli : TEXT
+  * lokasi_file : TEXT
+  * tipe_mime : TEXT
+  * ukuran_byte : INTEGER
+  * dibuat_pada : DATETIME
+}
+
+entity "domain_penilaian" as domain_penilaian {
+  * id_domain : INTEGER <<PK>>
+  --
+  * nama : TEXT <<UK>>
+    deskripsi : TEXT
+  * urutan : INTEGER
+  * aktif : BOOLEAN
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "skala_penilaian" as skala_penilaian {
+  * id_skala : INTEGER <<PK>>
+  --
+  * kode : TEXT <<UK>>
+  * label : TEXT
+    deskripsi : TEXT
+  * urutan : INTEGER
+  * aktif : BOOLEAN
+  * dibuat_pada : DATETIME
+}
+
+entity "penilaian" as penilaian {
+  * id_penilaian : INTEGER <<PK>>
+  --
+  * id_siswa : INTEGER <<FK>>
+  * id_tahun_ajaran : INTEGER <<FK>>
+  * id_kelas : INTEGER <<FK>>
+  * id_domain : INTEGER <<FK>>
+  * id_skala : INTEGER <<FK>>
+  * periode : TEXT
+    narasi : TEXT
+    catatan_guru : TEXT
+  * dibuat_oleh : INTEGER <<FK>>
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "laporan_perkembangan" as laporan_perkembangan {
+  * id_laporan : INTEGER <<PK>>
+  --
+  * no_laporan : TEXT <<UK>>
+  * id_siswa : INTEGER <<FK>>
+  * id_tahun_ajaran : INTEGER <<FK>>
+  * id_kelas : INTEGER <<FK>>
+  * periode : TEXT
+    ringkasan : TEXT
+    rekomendasi_rumah : TEXT
+    ringkasan_kehadiran : TEXT
+  * status : TEXT
+  * dibuat_oleh : INTEGER <<FK>>
+    id_guru : INTEGER <<FK>>
+    diterbitkan_oleh : INTEGER <<FK>>
+    diterbitkan_pada : DATETIME
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "detail_laporan" as detail_laporan {
+  * id_detail_laporan : INTEGER <<PK>>
+  --
+  * id_laporan : INTEGER <<FK>>
+  * id_domain : INTEGER <<FK>>
+  * id_skala : INTEGER <<FK>>
+    narasi : TEXT
+  * urutan : INTEGER
+}
+
+entity "presensi" as presensi {
+  * id_presensi : INTEGER <<PK>>
+  --
+  * id_siswa : INTEGER <<FK>>
+  * id_kelas : INTEGER <<FK>>
+  * tanggal : DATETIME
+  * status : TEXT
+    catatan : TEXT
+  * dicatat_oleh : INTEGER <<FK>>
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "jadwal" as jadwal {
+  * id_jadwal : INTEGER <<PK>>
+  --
+  * id_kelas : INTEGER <<FK>>
+    id_guru : INTEGER <<FK>>
+  * hari : INTEGER
+  * jam_mulai : TEXT
+  * jam_selesai : TEXT
+  * kegiatan : TEXT
+    ruang : TEXT
+    catatan : TEXT
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "kegiatan" as kegiatan {
+  * id_kegiatan : INTEGER <<PK>>
+  --
+  * judul : TEXT
+  * slug : TEXT <<UK>>
+  * deskripsi : TEXT
+    waktu_mulai : DATETIME
+    waktu_selesai : DATETIME
+    lokasi : TEXT
+    gambar_sampul : TEXT
+  * visibilitas : TEXT
+  * status : TEXT
+  * dibuat_oleh : INTEGER <<FK>>
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "media_kegiatan" as media_kegiatan {
+  * id_media : INTEGER <<PK>>
+  --
+  * id_kegiatan : INTEGER <<FK>>
+  * lokasi_file : TEXT
+  * nama_file_asli : TEXT
+  * urutan : INTEGER
+  * dibuat_pada : DATETIME
+}
+
+entity "pengumuman" as pengumuman {
+  * id_pengumuman : INTEGER <<PK>>
+  --
+  * judul : TEXT
+  * slug : TEXT <<UK>>
+  * isi : TEXT
+  * sasaran : TEXT
+    id_kelas : INTEGER <<FK>>
+    terbit_pada : DATETIME
+    kedaluwarsa_pada : DATETIME
+  * status : TEXT
+    lokasi_lampiran : TEXT
+  * dibuat_oleh : INTEGER <<FK>>
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "pengumuman_dibaca" as pengumuman_dibaca {
+  * id_pengumuman : INTEGER <<PK,FK>>
+  * id_pengguna : INTEGER <<PK,FK>>
+  --
+  * dibaca_pada : DATETIME
+}
+
+entity "jenis_biaya" as jenis_biaya {
+  * id_jenis_biaya : INTEGER <<PK>>
+  --
+  * kode : TEXT <<UK>>
+  * nama : TEXT
+    deskripsi : TEXT
+  * nominal_default : INTEGER
+  * berulang : BOOLEAN
+  * aktif : BOOLEAN
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "tagihan" as tagihan {
+  * id_tagihan : INTEGER <<PK>>
+  --
+  * no_tagihan : TEXT <<UK>>
+  * id_siswa : INTEGER <<FK>>
+    id_tahun_ajaran : INTEGER <<FK>>
+  * tanggal_terbit : DATETIME
+  * jatuh_tempo : DATETIME
+  * status : TEXT
+    catatan : TEXT
+  * dibuat_oleh : INTEGER <<FK>>
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "detail_tagihan" as detail_tagihan {
+  * id_detail_tagihan : INTEGER <<PK>>
+  --
+  * id_tagihan : INTEGER <<FK>>
+  * id_jenis_biaya : INTEGER <<FK>>
+  * keterangan : TEXT
+  * jumlah : INTEGER
+  * harga_satuan : INTEGER
+  * subtotal : INTEGER
+}
+
+entity "pembayaran" as pembayaran {
+  * id_pembayaran : INTEGER <<PK>>
+  --
+  * no_kwitansi : TEXT <<UK>>
+  * id_siswa : INTEGER <<FK>>
+  * tanggal_bayar : DATETIME
+  * nominal : INTEGER
+  * metode : TEXT
+    no_referensi : TEXT
+    catatan : TEXT
+    lokasi_bukti : TEXT
+  * status : TEXT
+    alasan_batal : TEXT
+  * dicatat_oleh : INTEGER <<FK>>
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "alokasi_pembayaran" as alokasi_pembayaran {
+  * id_alokasi : INTEGER <<PK>>
+  --
+  * id_pembayaran : INTEGER <<FK>>
+  * id_tagihan : INTEGER <<FK>>
+  * nominal : INTEGER
+  * dibuat_pada : DATETIME
+}
+
+entity "pengeluaran" as pengeluaran {
+  * id_pengeluaran : INTEGER <<PK>>
+  --
+  * no_pengeluaran : TEXT <<UK>>
+  * tanggal : DATETIME
+  * kategori : TEXT
+  * deskripsi : TEXT
+  * nominal : INTEGER
+    pemasok : TEXT
+  * metode_bayar : TEXT
+    lokasi_bukti : TEXT
+  * status : TEXT
+    alasan_batal : TEXT
+  * dibuat_oleh : INTEGER <<FK>>
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "dokumen_siswa" as dokumen_siswa {
+  * id_dokumen_siswa : INTEGER <<PK>>
+  --
+  * id_siswa : INTEGER <<FK>>
+  * jenis_dokumen : TEXT
+  * nama_file_asli : TEXT
+  * lokasi_file : TEXT
+  * tipe_mime : TEXT
+  * ukuran_byte : INTEGER
+  * visibilitas : TEXT
+  * diunggah_oleh : INTEGER <<FK>>
+  * dibuat_pada : DATETIME
+}
+
+entity "log_audit" as log_audit {
+  * id_log : INTEGER <<PK>>
+  --
+    id_pengguna : INTEGER <<FK>>
+  * aksi : TEXT
+  * jenis_entitas : TEXT
+    id_entitas : INTEGER
+    data_sebelum : TEXT
+    data_sesudah : TEXT
+    alamat_ip : TEXT
+    agen_pengguna : TEXT
+  * dibuat_pada : DATETIME
+}
+
+entity "token_reset_sandi" as token_reset_sandi {
+  * id_token : INTEGER <<PK>>
+  --
+  * id_pengguna : INTEGER <<FK>>
+  * hash_token : TEXT <<UK>>
+  * kedaluwarsa_pada : DATETIME
+    dipakai_pada : DATETIME
+  * dibuat_pada : DATETIME
+}
+
+entity "pengaturan_situs" as pengaturan_situs {
+  * kunci : TEXT <<PK>>
+  --
+  * nilai : TEXT
+  * diperbarui_pada : DATETIME
+}
+
+entity "slide_beranda" as slide_beranda {
+  * id_slide : INTEGER <<PK>>
+  --
+  * label_atas : TEXT
+  * judul : TEXT
+    aksen : TEXT
+  * deskripsi : TEXT
+  * gambar : TEXT
+    teks_alt_gambar : TEXT
+  * urutan : INTEGER
+  * aktif : BOOLEAN
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "galeri" as galeri {
+  * id_galeri : INTEGER <<PK>>
+  --
+  * judul : TEXT
+  * kategori : TEXT
+  * gambar : TEXT
+  * urutan : INTEGER
+  * aktif : BOOLEAN
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "fasilitas" as fasilitas {
+  * id_fasilitas : INTEGER <<PK>>
+  --
+  * judul : TEXT
+  * deskripsi : TEXT
+  * gambar : TEXT
+  * urutan : INTEGER
+  * aktif : BOOLEAN
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "testimoni" as testimoni {
+  * id_testimoni : INTEGER <<PK>>
+  --
+  * nama : TEXT
+  * hubungan : TEXT
+  * kutipan : TEXT
+  * urutan : INTEGER
+  * aktif : BOOLEAN
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+entity "tanya_jawab" as tanya_jawab {
+  * id_tanya_jawab : INTEGER <<PK>>
+  --
+  * pertanyaan : TEXT
+  * jawaban : TEXT
+  * kategori : TEXT
+  * urutan : INTEGER
+  * aktif : BOOLEAN
+  * dibuat_pada : DATETIME
+  * diperbarui_pada : DATETIME
+}
+
+pengguna |o--o| wali
+pengguna ||--o| guru
+siswa ||--o{ siswa_wali
+wali ||--o{ siswa_wali
+tahun_ajaran ||--o{ kelas
+guru |o--o{ kelas
+siswa ||--o{ penempatan_kelas
+tahun_ajaran ||--o{ penempatan_kelas
+kelas ||--o{ penempatan_kelas
+periode_ppdb ||--o{ pendaftaran_ppdb
+siswa |o--o| pendaftaran_ppdb
+pengguna |o--o{ pendaftaran_ppdb
+pendaftaran_ppdb ||--o{ dokumen_pendaftaran
+siswa ||--o{ penilaian
+tahun_ajaran ||--o{ penilaian
+kelas ||--o{ penilaian
+domain_penilaian ||--o{ penilaian
+skala_penilaian ||--o{ penilaian
+pengguna ||--o{ penilaian
+siswa ||--o{ laporan_perkembangan
+tahun_ajaran ||--o{ laporan_perkembangan
+kelas ||--o{ laporan_perkembangan
+pengguna ||--o{ laporan_perkembangan
+pengguna |o--o{ laporan_perkembangan
+guru |o--o{ laporan_perkembangan
+laporan_perkembangan ||--o{ detail_laporan
+domain_penilaian ||--o{ detail_laporan
+skala_penilaian ||--o{ detail_laporan
+siswa ||--o{ presensi
+kelas ||--o{ presensi
+pengguna ||--o{ presensi
+kelas ||--o{ jadwal
+guru |o--o{ jadwal
+pengguna ||--o{ kegiatan
+kegiatan ||--o{ media_kegiatan
+kelas |o--o{ pengumuman
+pengguna ||--o{ pengumuman
+pengumuman ||--o{ pengumuman_dibaca
+pengguna ||--o{ pengumuman_dibaca
+siswa ||--o{ tagihan
+tahun_ajaran |o--o{ tagihan
+pengguna ||--o{ tagihan
+tagihan ||--o{ detail_tagihan
+jenis_biaya ||--o{ detail_tagihan
+siswa ||--o{ pembayaran
+pengguna ||--o{ pembayaran
+pembayaran ||--o{ alokasi_pembayaran
+tagihan ||--o{ alokasi_pembayaran
+pengguna ||--o{ pengeluaran
+siswa ||--o{ dokumen_siswa
+pengguna ||--o{ dokumen_siswa
+pengguna |o--o{ log_audit
+pengguna ||--o{ token_reset_sandi
+@enduml

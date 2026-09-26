@@ -1,0 +1,38 @@
+' Ditulis manual. Sequence diagram login.
+@startuml seq-login
+!include _gaya.iuml
+title Sequence Diagram — Login
+autonumber
+
+actor Pengguna
+boundary "Halaman Login\n(LoginForm)" as UI
+control "loginAction\n(server action)" as Act
+control "Rate limiter" as RL
+entity "pengguna" as T
+entity "log_audit" as Log
+control "Proxy (middleware)" as Proxy
+
+Pengguna -> UI : isi email & kata sandi, klik Masuk
+UI -> Act : kirim formulir
+Act -> Act : validasi skema (zod)
+Act -> RL : isRateLimited(ip:email)
+RL --> Act : belum dibatasi
+Act -> T : cari berdasarkan email
+T --> Act : data pengguna (kata_sandi_hash, peran, aktif)
+Act -> Act : bcrypt.compare(kata sandi, hash)
+alt kata sandi salah / akun nonaktif
+  Act -> RL : recordFailure()
+  Act -> Log : simpan LOGIN_FAILED
+  Act --> UI : "Email atau password salah"
+  UI --> Pengguna : tampilkan pesan
+else berhasil
+  Act -> RL : clearFailures()
+  Act -> Act : buat token sesi (HMAC-SHA256)\n& set cookie httpOnly
+  Act -> T : perbarui terakhir_masuk
+  Act -> Log : simpan LOGIN_SUCCESS
+  Act --> UI : redirect sesuai peran
+  UI -> Proxy : GET /dashboard | /guru/dashboard | /portal
+  Proxy -> Proxy : verifikasi cookie & cocokkan peran
+  Proxy --> Pengguna : tampilkan dashboard
+end
+@enduml

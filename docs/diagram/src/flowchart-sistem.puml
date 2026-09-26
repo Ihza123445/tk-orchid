@@ -1,0 +1,36 @@
+' Ditulis manual. Flowchart alur umum sistem per peran.
+@startuml flowchart-sistem
+!include _gaya.iuml
+title Flowchart — Alur Umum Sistem
+
+start
+:Buka aplikasi TK Orchid;
+if (Sudah login?) then (tidak)
+  if (Ingin masuk portal?) then (tidak)
+    :Jelajahi website publik\n(profil, program, kegiatan, galeri, FAQ);
+    if (Ingin mendaftar?) then (ya)
+      :Isi formulir PPDB;
+      :Terima nomor pendaftaran;
+    endif
+    stop
+  endif
+  :Login (email & kata sandi);
+  if (Berhasil?) then (tidak)
+    :Tampilkan pesan kesalahan;
+    stop
+  endif
+endif
+switch (Peran)
+case (Admin / Staf TU)
+  :Dashboard administrasi;
+  :Kelola PPDB, siswa, wali, kelas,\npresensi, penilaian, rapor,\nkeuangan, dan website;
+case (Guru)
+  :Dashboard papan tulis\n(agenda hari ini);
+  :Isi presensi, penilaian,\nlaporan perkembangan;
+case (Orang tua)
+  :Beranda buku penghubung;
+  :Lihat anak, tagihan & riwayat bayar,\npresensi, rapor, pengumuman;
+endswitch
+:Logout;
+stop
+@enduml

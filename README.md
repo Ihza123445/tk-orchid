@@ -87,10 +87,13 @@ Semua akun demo memakai password `demo1234`.
 | `npm run db:migrate` | Menjalankan/membuat migrasi database development |
 | `npm run db:seed` | Mengisi ulang database dengan data demo |
 | `npm run db:verify` | Memeriksa relasi, saldo tagihan, dan constraint penting |
+| `npm run docs:generate` | Membuat ulang kamus data, ERD, LRS, dan class diagram dari skema |
+| `npm run docs:render` | Merender semua diagram PlantUML ke PNG & SVG (butuh Java & Graphviz) |
 
 ## Struktur utama
 
 ```text
+docs/                    # Kamus data, ERD, LRS, diagram UML, DFD, flowchart
 src/
 ├── actions/             # Server Actions dan validasi mutasi
 ├── app/
@@ -108,6 +111,11 @@ prisma/
 ├── seed.ts              # Data demo
 └── dev.db               # Database SQLite lokal
 ```
+
+## Dokumentasi & basis data
+
+- Seluruh tabel dan kolom basis data memakai **bahasa Indonesia** (mis. `siswa`, `tagihan.jatuh_tempo`). Model Prisma di kode tetap berbahasa Inggris dan dipetakan lewat `@@map`/`@map`.
+- Dokumentasi lengkap ada di [`docs/`](docs/README.md): kamus data, ERD (Chen & crow's foot), LRS, use case, activity, sequence, state machine, class, object, package, component, deployment, communication, interaction overview, timing, DFD level 0–1, dan flowchart.
 
 ## Rute penting
 

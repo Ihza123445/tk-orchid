@@ -1,0 +1,139 @@
+' Dibuat otomatis oleh scripts/generate-docs.ts — jangan diedit manual.
+@startuml class-keuangan
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "DejaVu Sans"
+skinparam roundCorner 8
+skinparam linetype ortho
+skinparam ArrowColor #7a3f86
+skinparam class {
+  BackgroundColor #FDF8FD
+  BorderColor #A64CA6
+  HeaderBackgroundColor #F3E3F3
+  FontColor #1f1a2e
+}
+hide circle
+title Class Diagram — Keuangan
+
+class Tagihan {
+  - id_tagihan : int
+  - no_tagihan : string
+  - id_siswa : int
+  - id_tahun_ajaran : int [0..1]
+  - tanggal_terbit : datetime
+  - jatuh_tempo : datetime
+  - status : string
+  - catatan : string [0..1]
+  - dibuat_oleh : int
+  - dibuat_pada : datetime
+  - diperbarui_pada : datetime
+  --
+  + buat(siswa, rincian)
+  + hitungTotal()
+  + hitungSisa()
+  + perbaruiStatus()
+  + batalkan(alasan)
+}
+
+class Siswa #EEEEEE
+
+class TahunAjaran #EEEEEE
+
+class Pengguna #EEEEEE
+
+class DetailTagihan {
+  - id_detail_tagihan : int
+  - id_tagihan : int
+  - id_jenis_biaya : int
+  - keterangan : string
+  - jumlah : int
+  - harga_satuan : int
+  - subtotal : int
+  --
+  + hitungSubtotal()
+}
+
+class JenisBiaya {
+  - id_jenis_biaya : int
+  - kode : string
+  - nama : string
+  - deskripsi : string [0..1]
+  - nominal_default : int
+  - berulang : boolean
+  - aktif : boolean
+  - dibuat_pada : datetime
+  - diperbarui_pada : datetime
+  --
+  + tambah()
+  + aktifkan()
+  + nonaktifkan()
+}
+
+class Pembayaran {
+  - id_pembayaran : int
+  - no_kwitansi : string
+  - id_siswa : int
+  - tanggal_bayar : datetime
+  - nominal : int
+  - metode : string
+  - no_referensi : string [0..1]
+  - catatan : string [0..1]
+  - lokasi_bukti : string [0..1]
+  - status : string
+  - alasan_batal : string [0..1]
+  - dicatat_oleh : int
+  - dibuat_pada : datetime
+  - diperbarui_pada : datetime
+  --
+  + catat(siswa, alokasi)
+  + batalkan(alasan)
+}
+
+class AlokasiPembayaran {
+  - id_alokasi : int
+  - id_pembayaran : int
+  - id_tagihan : int
+  - nominal : int
+  - dibuat_pada : datetime
+  --
+  + alokasikan(tagihan, nominal)
+}
+
+class Pengeluaran {
+  - id_pengeluaran : int
+  - no_pengeluaran : string
+  - tanggal : datetime
+  - kategori : string
+  - deskripsi : string
+  - nominal : int
+  - pemasok : string [0..1]
+  - metode_bayar : string
+  - lokasi_bukti : string [0..1]
+  - status : string
+  - alasan_batal : string [0..1]
+  - dibuat_oleh : int
+  - dibuat_pada : datetime
+  - diperbarui_pada : datetime
+  --
+  + catat()
+  + batalkan(alasan)
+  + totalBulanIni()
+}
+
+Siswa "1" -- "0..*" Tagihan
+TahunAjaran "0..1" -- "0..*" Tagihan
+Pengguna "1" -- "0..*" Tagihan
+Tagihan "1" *-- "0..*" DetailTagihan
+JenisBiaya "1" -- "0..*" DetailTagihan
+Siswa "1" -- "0..*" Pembayaran
+Pengguna "1" -- "0..*" Pembayaran
+Pembayaran "1" *-- "0..*" AlokasiPembayaran
+Tagihan "1" -- "0..*" AlokasiPembayaran
+Pengguna "1" -- "0..*" Pengeluaran
+
+legend right
+  Belah ketupat hitam = komposisi (data anak ikut terhapus)
+  Garis biasa = asosiasi
+  Abu-abu = kelas dari modul lain
+endlegend
+@enduml

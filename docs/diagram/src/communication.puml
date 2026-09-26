@@ -1,0 +1,20 @@
+' Ditulis manual. Communication diagram (emulasi) — mencatat pembayaran.
+@startuml communication
+!include _gaya.iuml
+title Communication Diagram — Mencatat Pembayaran
+
+actor "Admin/Staf" as Admin
+rectangle ":PaymentForm" as Form
+rectangle ":createPaymentAction" as Act
+rectangle ":tagihan" as T
+rectangle ":pembayaran" as P
+rectangle ":alokasi_pembayaran" as A
+rectangle ":log_audit" as L
+
+Admin -right- Form : 1: pilih siswa & isi alokasi →\n2: klik Catat Pembayaran →
+Form -right- Act : 3: kirim formulir →
+Act -down- T : 4: ambil sisa tagihan →\n7: perbarui status (PAID/PARTIAL) →
+Act -right- P : 5: simpan kwitansi (POSTED) →
+P -down- A : 6: simpan alokasi per tagihan →
+Act -up- L : 8: catat PAYMENT_CREATE →
+@enduml

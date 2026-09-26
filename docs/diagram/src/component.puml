@@ -1,0 +1,73 @@
+' Ditulis manual. Component diagram arsitektur aplikasi.
+@startuml component
+!include _gaya.iuml
+title Component Diagram — Arsitektur Aplikasi TK Orchid
+
+actor "Pengguna\n(peramban)" as User
+
+package "Next.js 16 (App Router)" {
+  component "Proxy / Middleware\n(src/proxy.ts)" as Proxy
+  package "Halaman (Server Components)" {
+    component "Website publik\n(app/(public))" as Public
+    component "Auth\n(app/(auth))" as AuthPages
+    component "Area Admin/Staf\n(app/(dashboard))" as Admin
+    component "Portal Guru\n(app/guru)" as Guru
+    component "Portal Orang Tua\n(app/portal)" as Portal
+  }
+  package "Komponen UI (Client)" {
+    component "Formulir & shell\n(components/*)" as UI
+  }
+  package "Server Actions (src/actions)" {
+    component "Siswa, Wali, Kelas,\nTahun Ajaran" as ActAkad
+    component "Presensi, Penilaian,\nLaporan" as ActNilai
+    component "PPDB (publik & review)" as ActPpdb
+    component "Tagihan, Pembayaran,\nPengeluaran, Jenis Biaya" as ActUang
+    component "Website (CMS)" as ActWeb
+  }
+  package "Library (src/lib)" {
+    component "Auth: sesi HMAC,\nguard peran, rate limit,\nreset sandi" as Auth
+    component "CMS: registry,\nunggah berkas" as Cms
+    component "Format & aturan PPDB" as Util
+    component "Prisma Client\n(adapter better-sqlite3)" as Prisma
+  }
+  component "Route /media\n(berkas unggahan)" as Media
+}
+
+database "SQLite\nprisma/dev.db\n(37 tabel)" as DB
+folder "Penyimpanan berkas\n(uploads)" as Files
+
+User --> Proxy : HTTPS
+Proxy --> Public
+Proxy --> AuthPages
+Proxy --> Admin
+Proxy --> Guru
+Proxy --> Portal
+Admin ..> UI
+Guru ..> UI
+Portal ..> UI
+Public ..> UI
+UI --> ActAkad
+UI --> ActNilai
+UI --> ActPpdb
+UI --> ActUang
+UI --> ActWeb
+AuthPages --> Auth
+ActAkad --> Auth
+ActNilai --> Auth
+ActUang --> Auth
+ActWeb --> Auth
+ActWeb --> Cms
+ActPpdb --> Util
+ActAkad --> Prisma
+ActNilai --> Prisma
+ActPpdb --> Prisma
+ActUang --> Prisma
+ActWeb --> Prisma
+Admin --> Prisma
+Guru --> Prisma
+Portal --> Prisma
+Public --> Prisma
+Prisma --> DB
+Cms --> Files
+Media --> Files
+@enduml
